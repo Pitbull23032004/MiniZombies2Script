@@ -1,4 +1,4 @@
--- Painel Flutuante v4.5 - Versão Apelona + Bypass & Voo Corrigido
+-- Painel Flutuante v5.0 - Versão Apelona Corrigida e Otimizada
 local Players = game:GetService("Players")
 local LocalPlayer = Players.LocalPlayer
 local RunService = game:GetService("RunService")
@@ -6,7 +6,6 @@ local UserInputService = game:GetService("UserInputService")
 local Workspace = game:GetService("Workspace")
 local Camera = Workspace.CurrentCamera
 
--- Sistema de Bypass / Ocultação básica para CoreGui / Logs
 pcall(function()
     if syn and syn.protect_gui then
         syn.protect_gui(ScreenGui)
@@ -67,7 +66,7 @@ Title.BackgroundTransparency = 1
 Title.Position = UDim2.new(0, 15, 0, 0)
 Title.Size = UDim2.new(0, 370, 1, 0)
 Title.Font = Enum.Font.GothamBold
-Title.Text = "DK PAINEL <font color='#FF0000'>APELONA v4.5 + BYPASS</font>"
+Title.Text = "DK PAINEL <font color='#FF0000'>APELONA v5.0 (FIX)</font>"
 Title.RichText = true
 Title.TextColor3 = Color3.fromRGB(255, 255, 255)
 Title.TextSize = 13
@@ -287,7 +286,7 @@ local function createToggle(parent, text, callback)
 end
 
 -- ==========================================
--- 1. SISTEMA ESP (Apenas Nome, Distância, Holograma)
+-- 1. SISTEMA ESP (Nome, Distância, Holograma)
 -- ==========================================
 local espConfig = {Name = false, Dist = false, Holo = false}
 
@@ -359,10 +358,9 @@ createToggle(TabESP, "Esp Distância", function(state) espConfig.Dist = state en
 
 
 -- ==========================================
--- 2. PLAYER & MOVIMENTAÇÃO (Speed 5x, Voo com Espaço, NoClip)
+-- 2. PLAYER & MOVIMENTAÇÃO (Speed 5x, Voo Fluido, NoClip)
 -- ==========================================
 
--- Speed 5x (80 de WalkSpeed)
 local speedActive = false
 RunService.Heartbeat:Connect(function()
     if speedActive then
@@ -379,11 +377,10 @@ createToggle(TabPlayer, "Speed Velocidade 5x", function(state)
     end
 end)
 
--- Voo com tecla Espaço (Mantém pressionado para subir / controlar)
+-- Voo Corrigido e Fluido com Tecla Espaço
 local flying = false
-local flySpeed = 50
-local bv
-RunService.Heartbeat:Connect(function()
+local flySpeed = 60
+RunService.RenderStepped:Connect(function()
     if flying then
         local char = LocalPlayer.Character
         if char and char:FindFirstChild("HumanoidRootPart") then
@@ -393,6 +390,8 @@ RunService.Heartbeat:Connect(function()
             
             if UserInputService:IsKeyDown(Enum.KeyCode.W) then moveVel = moveVel + (camVector * flySpeed) end
             if UserInputService:IsKeyDown(Enum.KeyCode.S) then moveVel = moveVel - (camVector * flySpeed) end
+            if UserInputService:IsKeyDown(Enum.KeyCode.A) then moveVel = moveVel - (Camera.CFrame.RightVector * flySpeed) end
+            if UserInputService:IsKeyDown(Enum.KeyCode.D) then moveVel = moveVel + (Camera.CFrame.RightVector * flySpeed) end
             if UserInputService:IsKeyDown(Enum.KeyCode.Space) then moveVel = moveVel + Vector3.new(0, flySpeed, 0) end
             
             hrp.Velocity = moveVel
@@ -436,10 +435,9 @@ end)
 
 
 -- ==========================================
--- 3. COMBATE & APELÃO (Auto-KILL Boss Supremo, Teleport Amigos com Seletor)
+-- 3. COMBATE & APELÃO (Auto-KILL Zumbis/Boss Aprimorado)
 -- ==========================================
 
--- Auto-KILL BOSS-SUPREMO
 local bossKillActive = false
 RunService.Heartbeat:Connect(function()
     if bossKillActive then
@@ -448,7 +446,8 @@ RunService.Heartbeat:Connect(function()
                 local hum = obj:FindFirstChildOfClass("Humanoid")
                 if hum and hum.Health > 0 then
                     local nameL = obj.Name:lower()
-                    if nameL:find("boss") or nameL:find("supremo") or nameL:find("goliath") or hum.MaxHealth > 300 then
+                    -- Destrói qualquer zumbi, boss ou monstro com vida alta ou nas pastas comuns de inimigos
+                    if nameL:find("boss") or nameL:find("supremo") or nameL:find("zombie") or nameL:find("chef") or hum.MaxHealth > 100 then
                         hum.Health = 0
                     end
                 end
@@ -460,7 +459,7 @@ createToggle(TabCombat, "Auto-KILL BOSS-SUPREMO", function(state)
     bossKillActive = state
 end)
 
--- Seletor de Amigos para Teleport
+-- Seletor de Alvo para Teleport
 local selectedFriendName = nil
 local selectorBtn = Instance.new("TextButton")
 selectorBtn.Parent = TabCombat
@@ -503,7 +502,6 @@ selectorBtn.MouseButton1Click:Connect(function()
     end
 end)
 
--- Botão de Executar Teleport no Amigo Selecionado
 local tpBtn = Instance.new("TextButton")
 tpBtn.Parent = TabCombat
 tpBtn.BackgroundColor3 = Color3.fromRGB(45, 20, 20)
