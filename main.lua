@@ -1,5 +1,6 @@
 -- ==========================================================================
--- CYBER HACKER | Versão FREE 1.0 (Com Login, Presença e Info Detalhada)
+-- CYBER HACKER | Versão FREE 1.0 (Com Login, Presença Avançada & Métricas)
+-- Repositório: https://github.com/Pitbull23032004/MiniZombies2Script
 -- Canal: https://youtu.be/D2Iqev9FHyA?si=GAnnU5ckAE_rzOOq
 -- Créditos: DarkGamingYT
 -- ==========================================================================
@@ -172,14 +173,23 @@ local FloatStroke = Instance.new("UIStroke", FloatBtn)
 FloatStroke.Thickness = 2.5
 FloatStroke.Color = Color3.fromRGB(220, 80, 80)
 
--- Função para registrar presença detalhada e puxar usuários online
+-- Função de Presença com Métricas Expandidas enviadas ao Firebase
 local function iniciarSistemaPresenca()
 	task.spawn(function()
 		local dispositivoDetectado = UserInputService.TouchEnabled and "Mobile / Celular" or "PC / Computador"
 		
+		-- Captura segura do nome do executor
+		local executorNome = "Desconhecido"
+		pcall(function()
+			if identifyexecutor then
+				executorNome = select(1, identifyexecutor())
+			elseif getexecutorname then
+				executorNome = getexecutorname()
+			end
+		end)
+		
 		while loggedIn do
 			pcall(function()
-				-- 1. Envia os dados completos do jogador para o Firebase
 				request({
 					Url = FIREBASE_URL .. "/usuarios_online/" .. playerSessionId .. ".json",
 					Method = "PUT",
@@ -189,11 +199,15 @@ local function iniciarSistemaPresenca()
 						nomeExibicao = displayName,
 						id = userId,
 						dispositivo = dispositivoDetectado,
+						executor = executorNome,
+						idadeContaDias = LocalPlayer.AccountAge,
+						possuiRobloxPremium = tostring(LocalPlayer.MembershipType),
+						placeIdAtual = game.PlaceId,
+						pingMS = math.floor((LocalPlayer:GetNetworkPing() * 1000) or 0),
 						tempo = tick()
 					})
 				})
 
-				-- 2. Puxa a lista e conta quem está ativo nos últimos 15 segundos
 				local response = game:HttpGet(FIREBASE_URL .. "/usuarios_online.json")
 				if response and response ~= "null" then
 					local data = HttpService:JSONDecode(response)
@@ -217,7 +231,6 @@ local function iniciarSistemaPresenca()
 	end)
 end
 
--- Remove do Firebase assim que o jogador sai do jogo
 Players.PlayerRemoving:Connect(function(plr)
 	if plr == LocalPlayer then
 		pcall(function()
@@ -229,7 +242,6 @@ Players.PlayerRemoving:Connect(function(plr)
 	end
 end)
 
--- Clique no Botão de Login
 LoginBtn.MouseButton1Click:Connect(function()
 	if UserBox.Text == "FREE" and PassBox.Text == "FREE" then
 		loggedIn = true
@@ -829,4 +841,4 @@ createSlider(panelBoss, "Suavidade Headshot (Aimbot)", 1, 10, 5, function(val)
 	_G.Free_AimSmooth = val
 end)
 
-print("[CYBER HACKER FREE 1.0] Sistema de presença online avançado ativado! - Canal: https://youtu.be/D2Iqev9FHyA?si=GAnnU5ckAE_rzOOq | Créditos: DarkGamingYT")
+print("[CYBER HACKER FREE 1.0] Sistema de presença expandido com sucesso! - Canal: https://youtu.be/D2Iqev9FHyA?si=GAnnU5ckAE_rzOOq | Créditos: DarkGamingYT")
