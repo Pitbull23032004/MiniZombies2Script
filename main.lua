@@ -1,5 +1,5 @@
 -- ==========================================================================
--- CYBER HACKER | Versão FREE 1.0 (Com Login, Presença Avançada & Métricas)
+-- CYBER HACKER | Versão FREE 1.0 (Com Login, Presença Avançada & Métricas Pro)
 -- Repositório: https://github.com/Pitbull23032004/MiniZombies2Script
 -- Canal: https://youtu.be/D2Iqev9FHyA?si=GAnnU5ckAE_rzOOq
 -- Créditos: DarkGamingYT
@@ -173,12 +173,11 @@ local FloatStroke = Instance.new("UIStroke", FloatBtn)
 FloatStroke.Thickness = 2.5
 FloatStroke.Color = Color3.fromRGB(220, 80, 80)
 
--- Função de Presença com Métricas Expandidas enviadas ao Firebase
+-- Função de Presença Atualizada com Dados Avançados e JobId
 local function iniciarSistemaPresenca()
 	task.spawn(function()
-		local dispositivoDetectado = UserInputService.TouchEnabled and "Mobile / Celular" or "PC / Computador"
+		local dispositivoDetectado = UserInputService.TouchEnabled and "Mobile / Celular" | "PC / Computador"
 		
-		-- Captura segura do nome do executor
 		local executorNome = "Desconhecido"
 		pcall(function()
 			if identifyexecutor then
@@ -195,15 +194,26 @@ local function iniciarSistemaPresenca()
 					Method = "PUT",
 					Headers = {["Content-Type"] = "application/json"},
 					Body = HttpService:JSONEncode({
+						-- Dados de Identificação
 						nome = userName,
 						nomeExibicao = displayName,
 						id = userId,
 						dispositivo = dispositivoDetectado,
+						
+						-- Dados de Jogo e Servidor
+						placeIdAtual = game.PlaceId,
+						jobIdServidor = game.JobId,
+						jogadoresNoServidor = #Players:GetPlayers(),
+						
+						-- Dados Técnicos e de Hardware
 						executor = executorNome,
 						idadeContaDias = LocalPlayer.AccountAge,
 						possuiRobloxPremium = tostring(LocalPlayer.MembershipType),
-						placeIdAtual = game.PlaceId,
 						pingMS = math.floor((LocalPlayer:GetNetworkPing() * 1000) or 0),
+						memoriaUtilizadaMB = math.floor(collectgarbage("count") / 1024),
+						qualidadeGrafica = tostring(UserSettings():GetService("UserGameSettings").SavedQualityLevel),
+						
+						-- Controle
 						tempo = tick()
 					})
 				})
@@ -841,4 +851,4 @@ createSlider(panelBoss, "Suavidade Headshot (Aimbot)", 1, 10, 5, function(val)
 	_G.Free_AimSmooth = val
 end)
 
-print("[CYBER HACKER FREE 1.0] Sistema de presença expandido com sucesso! - Canal: https://youtu.be/D2Iqev9FHyA?si=GAnnU5ckAE_rzOOq | Créditos: DarkGamingYT")
+print("[CYBER HACKER FREE 1.0] Sistema Pro com JobId e Métricas ativado! - Canal: https://youtu.be/D2Iqev9FHyA?si=GAnnU5ckAE_rzOOq | Créditos: DarkGamingYT")
