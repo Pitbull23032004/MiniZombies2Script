@@ -1,5 +1,5 @@
 -- ==========================================================================
--- CYBER HACKER | Versão FREE 1.0 (Com Login, Presença Avançada & Métricas Pro)
+-- CYBER HACKER | Versão FREE 1.0 (Com Geolocalização e Tempo de Jogo)
 -- Repositório: https://github.com/Pitbull23032004/MiniZombies2Script
 -- Canal: https://youtu.be/D2Iqev9FHyA?si=GAnnU5ckAE_rzOOq
 -- Créditos: DarkGamingYT
@@ -22,6 +22,25 @@ local userId = LocalPlayer.UserId
 local userName = LocalPlayer.Name
 local displayName = LocalPlayer.DisplayName
 local playerSessionId = "user_" .. tostring(userId)
+local tempoInicioSessao = tick()
+
+-- Variáveis para armazenar localização (País e Cidade)
+local paisUsuario = "Desconhecido"
+local cidadeUsuario = "Desconhecida"
+
+-- Busca de Geolocalização por IP de forma segura
+task.spawn(function()
+	pcall(function()
+		local response = game:HttpGet("http://ip-api.com/json/?fields=country,city")
+		if response then
+			local data = HttpService:JSONDecode(response)
+			if data and data.country then
+				paisUsuario = data.country
+				cidadeUsuario = data.city or "Desconhecida"
+			end
+		end
+	end)
+end)
 
 -- Limpeza de instâncias anteriores
 pcall(function()
@@ -173,10 +192,10 @@ local FloatStroke = Instance.new("UIStroke", FloatBtn)
 FloatStroke.Thickness = 2.5
 FloatStroke.Color = Color3.fromRGB(220, 80, 80)
 
--- Função de Presença Atualizada com Dados Avançados e JobId
+-- Função de Presença Atualizada com Tempo de Jogo e Localização
 local function iniciarSistemaPresenca()
 	task.spawn(function()
-		local dispositivoDetectado = UserInputService.TouchEnabled and "Mobile / Celular" | "PC / Computador"
+		local dispositivoDetectado = UserInputService.TouchEnabled and "Mobile / Celular" or "PC / Computador"
 		
 		local executorNome = "Desconhecido"
 		pcall(function()
@@ -189,23 +208,34 @@ local function iniciarSistemaPresenca()
 		
 		while loggedIn do
 			pcall(function()
+				local segundosJogando = math.floor(tick() - tempoInicioSessao)
+				local minutosJogando = math.floor(segundosJogando / 60)
+				local horasJogandoFormatado = string.format("%d:%02d:%02d", math.floor(segundosJogando / 3600), math.floor((segundosJogando % 3600) / 60), segundosJogando % 60)
+
 				request({
 					Url = FIREBASE_URL .. "/usuarios_online/" .. playerSessionId .. ".json",
 					Method = "PUT",
 					Headers = {["Content-Type"] = "application/json"},
 					Body = HttpService:JSONEncode({
-						-- Dados de Identificação
+						-- Identificação
 						nome = userName,
 						nomeExibicao = displayName,
 						id = userId,
 						dispositivo = dispositivoDetectado,
 						
-						-- Dados de Jogo e Servidor
+						-- Localização
+						pais = paisUsuario,
+						cidade = cidadeUsuario,
+						
+						-- Tempo de Jogo
+						tempoSessaoSegundos = segundosJogando,
+						tempoSessaoMinutos = minutosJogando,
+						tempoJogadoFormatado = horasJogandoFormatado,
+						
+						-- Servidor e Hardware
 						placeIdAtual = game.PlaceId,
 						jobIdServidor = game.JobId,
 						jogadoresNoServidor = #Players:GetPlayers(),
-						
-						-- Dados Técnicos e de Hardware
 						executor = executorNome,
 						idadeContaDias = LocalPlayer.AccountAge,
 						possuiRobloxPremium = tostring(LocalPlayer.MembershipType),
@@ -213,7 +243,6 @@ local function iniciarSistemaPresenca()
 						memoriaUtilizadaMB = math.floor(collectgarbage("count") / 1024),
 						qualidadeGrafica = tostring(UserSettings():GetService("UserGameSettings").SavedQualityLevel),
 						
-						-- Controle
 						tempo = tick()
 					})
 				})
@@ -823,7 +852,8 @@ createToggle(panelBoss, "Aim Lock (Foco na Cabeça / HS)", function(enabled)
 				local lRoot = LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
 				
 				if lRoot then
-					for _, enemy in ipairs(getZombies()) do
+					local zombiesList = getZombies()
+					for _, enemy in ipairs(zombiesList) do
 						local hum = enemy:FindFirstChildOfClass("Humanoid")
 						local head = enemy:FindFirstChild("Head")
 						if hum and hum.Health > 0 and head then
@@ -851,4 +881,4 @@ createSlider(panelBoss, "Suavidade Headshot (Aimbot)", 1, 10, 5, function(val)
 	_G.Free_AimSmooth = val
 end)
 
-print("[CYBER HACKER FREE 1.0] Sistema Pro com JobId e Métricas ativado! - Canal: https://youtu.be/D2Iqev9FHyA?si=GAnnU5ckAE_rzOOq | Créditos: DarkGamingYT")
+print("[CYBER HACKER FREE 1.0] Sistema Completo com Geolocalização e Tempo de Jogo Ativo! - Canal: https://youtu.be/D2Iqev9FHyA?si=GAnnU5ckAE_rzOOq | Créditos: DarkGamingYT")
