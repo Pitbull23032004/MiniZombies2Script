@@ -1,5 +1,5 @@
 -- ==========================================================================
--- CYBER HACKER | Versão 1.2 (Proteção, Camuflagem e RGB Ativos)
+-- CYBER HACKER | Versão 1.2.1 (Correção do Botão Flutuante)
 -- Repositório: https://github.com/Pitbull23032004/MiniZombies2Script
 -- Canal: https://youtu.be/D2Iqev9FHyA?si=GAnnU5ckAE_rzOOq
 -- Créditos: DarkGamingYT
@@ -17,23 +17,19 @@ local Camera = workspace.CurrentCamera
 -- URL DO SEU FIREBASE CONFIGURADA[cite: 10]
 local FIREBASE_URL = "https://darkgamingyt-1c438-default-rtdb.firebaseio.com"
 
--- Identificação única baseada no UserId do Roblox[cite: 10]
 local userId = LocalPlayer.UserId
 local userName = LocalPlayer.Name
 local displayName = LocalPlayer.DisplayName
 local playerSessionId = "user_" .. tostring(userId)
 local tempoInicioSessao = tick()
 
--- Variáveis para armazenar localização (País e Cidade)[cite: 10]
 local paisUsuario = "Desconhecido"
 local cidadeUsuario = "Desconhecida"
 
--- Variáveis de Camuflagem e Proteção v1.2
 local camuflagemAtiva = false
 local nomeOriginalDisplay = displayName
 local nomeOriginalUser = userName
 
--- Busca de Geolocalização por IP de forma segura[cite: 10]
 task.spawn(function()
 	pcall(function()
 		local response = game:HttpGet("http://ip-api.com/json/?fields=country,city")
@@ -47,7 +43,6 @@ task.spawn(function()
 	end)
 end)
 
--- Limpeza de instâncias anteriores[cite: 10]
 pcall(function()
 	if CoreGui:FindFirstChild("CyberHacker_V1_2") then
 		CoreGui.CyberHacker_V1_2:Destroy()
@@ -66,6 +61,60 @@ local successParent = pcall(function() ScreenGui.Parent = CoreGui end)
 if not successParent then ScreenGui.Parent = LocalPlayer:WaitForChild("PlayerGui") end
 
 -- ==========================================================================
+-- BOTÃO FLUTUANTE (Criado inicialmente invisível/bloqueado até o login)
+-- ==========================================================================
+local FloatBtn = Instance.new("TextButton", ScreenGui)
+FloatBtn.Size = UDim2.fromOffset(55, 55)
+FloatBtn.Position = UDim2.new(0, 35, 0.35, 0)
+FloatBtn.BackgroundColor3 = Color3.fromRGB(8, 10, 14)
+FloatBtn.BorderSizePixel = 0
+FloatBtn.Text = "LOCKED"
+FloatBtn.TextColor3 = Color3.fromRGB(220, 80, 80)
+FloatBtn.TextSize = 9
+FloatBtn.Font = Enum.Font.GothamBold
+FloatBtn.Active = true
+FloatBtn.Draggable = true
+FloatBtn.Visible = false -- Fica oculto até logar para não bugar com a tela de login
+FloatBtn.ZIndex = 30
+Instance.new("UICorner", FloatBtn).CornerRadius = UDim.new(0, 12)
+
+local FloatStroke = Instance.new("UIStroke", FloatBtn)
+FloatStroke.Thickness = 2.5
+FloatStroke.Color = Color3.fromRGB(220, 80, 80)
+
+-- ==========================================================================
+-- CONTADOR DE FPS
+-- ==========================================================================
+local FpsLabel = Instance.new("TextLabel", ScreenGui)
+FpsLabel.Size = UDim2.fromOffset(55, 20)
+FpsLabel.Position = UDim2.new(0, 35, 0.35, -22)
+FpsLabel.BackgroundTransparency = 1
+FpsLabel.Text = "FPS: 0"
+FpsLabel.TextColor3 = Color3.fromRGB(0, 255, 128)
+FpsLabel.TextSize = 11
+FpsLabel.Font = Enum.Font.GothamBold
+FpsLabel.TextXAlignment = Enum.TextXAlignment.Center
+FpsLabel.Visible = false
+FpsLabel.ZIndex = 30
+
+local fpsLastTick = tick()
+local fpsFrames = 0
+RunService.RenderStepped:Connect(function()
+	fpsFrames = fpsFrames + 1
+	local now = tick()
+	if now - fpsLastTick >= 1 then
+		local fps = math.floor(fpsFrames / (now - fpsLastTick))
+		FpsLabel.Text = "FPS: " .. tostring(fps)[cite: 10]
+		fpsFrames = 0
+		fpsLastTick = now
+	end
+end)
+
+FloatBtn:GetPropertyChangedSignal("Position"):Connect(function()
+	FpsLabel.Position = UDim2.new(FloatBtn.Position.X.Scale, FloatBtn.Position.X.Offset, FloatBtn.Position.Y.Scale, FloatBtn.Position.Y.Offset - 22)
+end)
+
+-- ==========================================================================
 -- TELA DE LOGIN CYBERPUNK COM RGB DINÂMICO (Usuário: FREE / Senha: FREE)[cite: 10]
 -- ==========================================================================
 local LoginFrame = Instance.new("Frame", ScreenGui)
@@ -73,14 +122,13 @@ LoginFrame.Size = UDim2.new(0, 320, 0, 240)
 LoginFrame.Position = UDim2.new(0.5, -160, 0.5, -120)
 LoginFrame.BackgroundColor3 = Color3.fromRGB(8, 10, 14)
 LoginFrame.BorderSizePixel = 0
-LoginFrame.ZIndex = 20
+LoginFrame.ZIndex = 40
 Instance.new("UICorner", LoginFrame).CornerRadius = UDim.new(0, 12)
 
 local LoginStroke = Instance.new("UIStroke", LoginFrame)
 LoginStroke.Thickness = 2.5
 LoginStroke.Color = Color3.fromRGB(0, 255, 128)
 
--- RGB dinâmico suave para as bordas do Login
 task.spawn(function()
 	while LoginFrame and LoginFrame.Parent do
 		for i = 0, 1, 0.005 do
@@ -99,7 +147,7 @@ LoginTitle.Text = "🔒 SEGURANÇA v1.2 (FIREBASE)"
 LoginTitle.TextColor3 = Color3.fromRGB(0, 255, 128)
 LoginTitle.TextSize = 14
 LoginTitle.Font = Enum.Font.GothamBold
-LoginTitle.ZIndex = 21
+LoginTitle.ZIndex = 41
 
 local function createTextBox(posY, placeholder)
 	local box = Instance.new("TextBox", LoginFrame)
@@ -113,7 +161,7 @@ local function createTextBox(posY, placeholder)
 	box.TextColor3 = Color3.fromRGB(0, 255, 128)
 	box.TextSize = 12
 	box.Font = Enum.Font.GothamMedium
-	box.ZIndex = 21
+	box.ZIndex = 41
 	Instance.new("UICorner", box).CornerRadius = UDim.new(0, 8)
 	local stroke = Instance.new("UIStroke", box)
 	stroke.Color = Color3.fromRGB(25, 45, 35)
@@ -133,7 +181,7 @@ LoginBtn.Text = "ENTRAR NO SISTEMA"
 LoginBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
 LoginBtn.TextSize = 12
 LoginBtn.Font = Enum.Font.GothamBold
-LoginBtn.ZIndex = 21
+LoginBtn.ZIndex = 41
 Instance.new("UICorner", LoginBtn).CornerRadius = UDim.new(0, 8)
 
 local ErrorLabel = Instance.new("TextLabel", LoginFrame)
@@ -144,7 +192,7 @@ ErrorLabel.Text = ""
 ErrorLabel.TextColor3 = Color3.fromRGB(220, 80, 80)
 ErrorLabel.TextSize = 11
 ErrorLabel.Font = Enum.Font.GothamMedium
-ErrorLabel.ZIndex = 21
+ErrorLabel.ZIndex = 41
 
 local loggedIn = false
 local statsLabelReference = nil
@@ -160,7 +208,7 @@ MainFrame.BorderSizePixel = 0
 MainFrame.Visible = false
 MainFrame.Draggable = true
 MainFrame.Active = true
-MainFrame.ZIndex = 4
+MainFrame.ZIndex = 20
 
 Instance.new("UICorner", MainFrame).CornerRadius = UDim.new(0, 12)
 local MainStroke = Instance.new("UIStroke", MainFrame)
@@ -177,32 +225,9 @@ task.spawn(function()
 	end
 end)
 
--- ==========================================================================
--- BOTÃO FLUTUANTE
--- ==========================================================================
-local FloatBtn = Instance.new("TextButton", ScreenGui)
-FloatBtn.Size = UDim2.fromOffset(55, 55)
-FloatBtn.Position = UDim2.new(0, 35, 0.35, 0)
-FloatBtn.BackgroundColor3 = Color3.fromRGB(8, 10, 14)
-FloatBtn.BorderSizePixel = 0
-FloatBtn.Text = "LOCKED"
-FloatBtn.TextColor3 = Color3.fromRGB(220, 80, 80)
-FloatBtn.TextSize = 9
-FloatBtn.Font = Enum.Font.GothamBold
-FloatBtn.Active = true
-FloatBtn.Draggable = true
-FloatBtn.ZIndex = 5
-Instance.new("UICorner", FloatBtn).CornerRadius = UDim.new(0, 12)
-
-local FloatStroke = Instance.new("UIStroke", FloatBtn)
-FloatStroke.Thickness = 2.5
-FloatStroke.Color = Color3.fromRGB(220, 80, 80)
-
--- Função de Presença Atualizada com Tempo de Jogo e Localização[cite: 10]
 local function iniciarSistemaPresenca()
 	task.spawn(function()
 		local dispositivoDetectado = UserInputService.TouchEnabled and "Mobile / Celular" or "PC / Computador"[cite: 10]
-		
 		local executorNome = "Desconhecido"[cite: 10]
 		pcall(function()
 			if identifyexecutor then
@@ -287,6 +312,9 @@ LoginBtn.MouseButton1Click:Connect(function()
 		
 		iniciarSistemaPresenca()
 		
+		-- Libera e exibe o botão flutuante e o FPS após o login com sucesso
+		FloatBtn.Visible = true
+		FpsLabel.Visible = true
 		FloatBtn.Text = "CYBER"
 		FloatBtn.TextColor3 = Color3.fromRGB(0, 255, 128)
 		FloatStroke.Color = Color3.fromRGB(0, 255, 128)
@@ -309,42 +337,19 @@ LoginBtn.MouseButton1Click:Connect(function()
 	end
 end)
 
--- ==========================================================================
--- CONTADOR DE FPS
--- ==========================================================================
-local FpsLabel = Instance.new("TextLabel", ScreenGui)
-FpsLabel.Size = UDim2.fromOffset(55, 20)
-FpsLabel.Position = UDim2.new(0, 35, 0.35, -22)
-FpsLabel.BackgroundTransparency = 1
-FpsLabel.Text = "FPS: 0"
-FpsLabel.TextColor3 = Color3.fromRGB(0, 255, 128)
-FpsLabel.TextSize = 11
-FpsLabel.Font = Enum.Font.GothamBold
-FpsLabel.TextXAlignment = Enum.TextXAlignment.Center
-FpsLabel.ZIndex = 5
-
-local fpsLastTick = tick()
-local fpsFrames = 0
-RunService.RenderStepped:Connect(function()
-	fpsFrames = fpsFrames + 1
-	local now = tick()
-	if now - fpsLastTick >= 1 then
-		local fps = math.floor(fpsFrames / (now - fpsLastTick))
-		FpsLabel.Text = "FPS: " .. tostring(fps)[cite: 10]
-		fpsFrames = 0
-		fpsLastTick = now
+FloatBtn.MouseButton1Click:Connect(function()
+	if not loggedIn then return end
+	MainFrame.Visible = not MainFrame.Visible
+	if MainFrame.Visible then
+		MainFrame.Position = UDim2.new(0, FloatBtn.AbsolutePosition.X + 65, 0, FloatBtn.AbsolutePosition.Y)
 	end
-end)
-
-FloatBtn:GetPropertyChangedSignal("Position"):Connect(function()
-	FpsLabel.Position = UDim2.new(FloatBtn.Position.X.Scale, FloatBtn.Position.X.Offset, FloatBtn.Position.Y.Scale, FloatBtn.Position.Y.Offset - 22)
 end)
 
 local TopBar = Instance.new("Frame", MainFrame)
 TopBar.Size = UDim2.new(1, 0, 0, 40)
 TopBar.BackgroundColor3 = Color3.fromRGB(14, 18, 24)
 TopBar.BorderSizePixel = 0
-TopBar.ZIndex = 4
+TopBar.ZIndex = 20
 Instance.new("UICorner", TopBar).CornerRadius = UDim.new(0, 12)
 
 local TitleLabel = Instance.new("TextLabel", TopBar)
@@ -356,15 +361,7 @@ TitleLabel.TextColor3 = Color3.fromRGB(0, 255, 128)
 TitleLabel.TextSize = 12
 TitleLabel.Font = Enum.Font.GothamBold
 TitleLabel.TextXAlignment = Enum.TextXAlignment.Left
-TitleLabel.ZIndex = 4
-
-FloatBtn.MouseButton1Click:Connect(function()
-	if not loggedIn then return end
-	MainFrame.Visible = not MainFrame.Visible
-	if MainFrame.Visible then
-		MainFrame.Position = UDim2.new(0, FloatBtn.AbsolutePosition.X + 65, 0, FloatBtn.AbsolutePosition.Y)
-	end
-end)
+TitleLabel.ZIndex = 20
 
 -- ==========================================================================
 -- SISTEMA DE ABAS (VISUAL, MOV, COMBATE, PROTEÇÃO, CANAL)
@@ -373,7 +370,7 @@ local TabHeader = Instance.new("Frame", MainFrame)
 TabHeader.Size = UDim2.new(1, -20, 0, 34)
 TabHeader.Position = UDim2.new(0, 10, 0, 48)
 TabHeader.BackgroundTransparency = 1
-TabHeader.ZIndex = 4
+TabHeader.ZIndex = 20
 
 local function createTabBtn(name, posX, active)
 	local btn = Instance.new("TextButton", TabHeader)
@@ -384,7 +381,7 @@ local function createTabBtn(name, posX, active)
 	btn.TextSize = 9
 	btn.Font = Enum.Font.GothamBold
 	btn.Text = name
-	btn.ZIndex = 4
+	btn.ZIndex = 20
 	Instance.new("UICorner", btn).CornerRadius = UDim.new(0, 6)
 	return btn
 end
@@ -399,7 +396,7 @@ local ContentContainer = Instance.new("Frame", MainFrame)
 ContentContainer.Size = UDim2.new(1, -20, 1, -95)
 ContentContainer.Position = UDim2.new(0, 10, 0, 88)
 ContentContainer.BackgroundTransparency = 1
-ContentContainer.ZIndex = 4
+ContentContainer.ZIndex = 20
 
 local function createScroll()
 	local scroll = Instance.new("ScrollingFrame", ContentContainer)
@@ -408,7 +405,7 @@ local function createScroll()
 	scroll.BorderSizePixel = 0
 	scroll.ScrollBarThickness = 4
 	scroll.Visible = false
-	scroll.ZIndex = 4
+	scroll.ZIndex = 20
 	local list = Instance.new("UIListLayout", scroll)
 	list.Padding = UDim.new(0, 8)
 	list.HorizontalAlignment = Enum.HorizontalAlignment.Center
@@ -452,7 +449,7 @@ local function createToggle(parent, name, callback)
 	local row = Instance.new("Frame", parent)
 	row.Size = UDim2.new(1, 0, 0, 38)
 	row.BackgroundColor3 = Color3.fromRGB(14, 18, 24)
-	row.ZIndex = 4
+	row.ZIndex = 20
 	Instance.new("UICorner", row).CornerRadius = UDim.new(0, 8)
 	
 	local label = Instance.new("TextLabel", row)
@@ -464,7 +461,7 @@ local function createToggle(parent, name, callback)
 	label.TextSize = 12
 	label.Font = Enum.Font.GothamMedium
 	label.TextXAlignment = Enum.TextXAlignment.Left
-	label.ZIndex = 4
+	label.ZIndex = 20
 	
 	local statusBtn = Instance.new("TextButton", row)
 	statusBtn.Size = UDim2.new(0, 56, 0, 24)
@@ -474,7 +471,7 @@ local function createToggle(parent, name, callback)
 	statusBtn.TextColor3 = Color3.fromRGB(220, 80, 80)
 	statusBtn.TextSize = 11
 	statusBtn.Font = Enum.Font.GothamBold
-	statusBtn.ZIndex = 4
+	statusBtn.ZIndex = 20
 	Instance.new("UICorner", statusBtn).CornerRadius = UDim.new(0, 6)
 	
 	local state = false
@@ -497,7 +494,7 @@ local function createSlider(parent, name, min, max, default, callback)
 	local row = Instance.new("Frame", parent)
 	row.Size = UDim2.new(1, 0, 0, 55)
 	row.BackgroundColor3 = Color3.fromRGB(14, 18, 24)
-	row.ZIndex = 4
+	row.ZIndex = 20
 	Instance.new("UICorner", row).CornerRadius = UDim.new(0, 8)
 
 	local label = Instance.new("TextLabel", row)
@@ -509,7 +506,7 @@ local function createSlider(parent, name, min, max, default, callback)
 	label.TextSize = 12
 	label.Font = Enum.Font.GothamMedium
 	label.TextXAlignment = Enum.TextXAlignment.Left
-	label.ZIndex = 4
+	label.ZIndex = 20
 
 	local valLabel = Instance.new("TextLabel", row)
 	valLabel.Size = UDim2.new(0.2, 0, 0, 24)
@@ -520,21 +517,21 @@ local function createSlider(parent, name, min, max, default, callback)
 	valLabel.TextSize = 12
 	valLabel.Font = Enum.Font.GothamBold
 	valLabel.TextXAlignment = Enum.TextXAlignment.Right
-	valLabel.ZIndex = 4
+	valLabel.ZIndex = 20
 
 	local sliderBg = Instance.new("Frame", row)
 	sliderBg.Size = UDim2.new(0.9, 0, 0, 6)
 	sliderBg.Position = UDim2.new(0.05, 0, 0, 36)
 	sliderBg.BackgroundColor3 = Color3.fromRGB(25, 32, 42)
 	sliderBg.BorderSizePixel = 0
-	sliderBg.ZIndex = 4
+	sliderBg.ZIndex = 20
 	Instance.new("UICorner", sliderBg).CornerRadius = UDim.new(1, 0)
 
 	local sliderFill = Instance.new("Frame", sliderBg)
 	sliderFill.Size = UDim2.new((default - min) / (max - min), 0, 1, 0)
 	sliderFill.BackgroundColor3 = Color3.fromRGB(0, 255, 128)
 	sliderFill.BorderSizePixel = 0
-	sliderFill.ZIndex = 4
+	sliderFill.ZIndex = 20
 	Instance.new("UICorner", sliderFill).CornerRadius = UDim.new(1, 0)
 
 	local dragging = false
@@ -566,17 +563,12 @@ local function createSlider(parent, name, min, max, default, callback)
 	end)
 end
 
--- ==========================================================================
--- ABA DE CAMUFLAGEM E PROTEÇÃO (NOVO v1.2)
--- ==========================================================================
 createToggle(panelProtect, "Camuflagem de Nome (Anti-Report)", function(enabled)
 	camuflagemAtiva = enabled
 	pcall(function()
 		local char = LocalPlayer.Character
 		if char and char:FindFirstChild("Humanoid") then
-			local hum = char:FindFirstChildOfClass("Humanoid")
 			if enabled then
-				-- Ocultar display localmente ou mascarar dados de registro
 				LocalPlayer.DisplayName = "[ANONYMOUS]"
 			else
 				LocalPlayer.DisplayName = nomeOriginalDisplay
@@ -597,15 +589,12 @@ ProtectInfo.TextColor3 = Color3.fromRGB(150, 180, 170)
 ProtectInfo.TextSize = 10
 ProtectInfo.Font = Enum.Font.GothamMedium
 ProtectInfo.TextWrapped = true
-ProtectInfo.ZIndex = 4
+ProtectInfo.ZIndex = 20
 
--- ==========================================================================
--- CONTEÚDO DA ABA CANAL & USUÁRIOS ONLINE
--- ==========================================================================
 local ChannelCard = Instance.new("Frame", panelChannel)
 ChannelCard.Size = UDim2.new(1, 0, 0, 255)
 ChannelCard.BackgroundColor3 = Color3.fromRGB(14, 18, 24)
-ChannelCard.ZIndex = 4
+ChannelCard.ZIndex = 20
 Instance.new("UICorner", ChannelCard).CornerRadius = UDim.new(0, 8)
 
 local CardTitle = Instance.new("TextLabel", ChannelCard)
@@ -616,7 +605,7 @@ CardTitle.Text = "DARK GAMING YT"
 CardTitle.TextColor3 = Color3.fromRGB(0, 255, 128)
 CardTitle.TextSize = 14
 CardTitle.Font = Enum.Font.GothamBold
-CardTitle.ZIndex = 4
+CardTitle.ZIndex = 20
 
 local CardDesc = Instance.new("TextLabel", ChannelCard)
 CardDesc.Size = UDim2.new(0.9, 0, 0, 40)
@@ -627,7 +616,7 @@ CardDesc.TextColor3 = Color3.fromRGB(180, 200, 190)
 CardDesc.TextSize = 10
 CardDesc.Font = Enum.Font.GothamMedium
 CardDesc.TextWrapped = true
-CardDesc.ZIndex = 4
+CardDesc.ZIndex = 20
 
 local CopyChannelBtn = Instance.new("TextButton", ChannelCard)
 CopyChannelBtn.Size = UDim2.new(0.9, 0, 0, 34)
@@ -637,7 +626,7 @@ CopyChannelBtn.Text = "📺 Copiar Link do Canal"
 CopyChannelBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
 CopyChannelBtn.TextSize = 11
 CopyChannelBtn.Font = Enum.Font.GothamBold
-CopyChannelBtn.ZIndex = 4
+CopyChannelBtn.ZIndex = 20
 Instance.new("UICorner", CopyChannelBtn).CornerRadius = UDim.new(0, 8)
 
 CopyChannelBtn.MouseButton1Click:Connect(function()
@@ -653,7 +642,7 @@ local StatsBox = Instance.new("Frame", ChannelCard)
 StatsBox.Size = UDim2.new(0.9, 0, 0, 34)
 StatsBox.Position = UDim2.new(0.05, 0, 0, 124)
 StatsBox.BackgroundColor3 = Color3.fromRGB(8, 10, 14)
-StatsBox.ZIndex = 4
+StatsBox.ZIndex = 20
 Instance.new("UICorner", StatsBox).CornerRadius = UDim.new(0, 8)
 local StatsStroke = Instance.new("UIStroke", StatsBox)
 StatsStroke.Color = Color3.fromRGB(0, 255, 128)
@@ -666,7 +655,7 @@ StatsLabel.Text = "👥 Pessoas Usando Agora: Conectando..."[cite: 10]
 StatsLabel.TextColor3 = Color3.fromRGB(0, 255, 128)
 StatsLabel.TextSize = 11
 StatsLabel.Font = Enum.Font.GothamBold
-StatsLabel.ZIndex = 4
+StatsLabel.ZIndex = 20
 
 statsLabelReference = StatsLabel
 
@@ -678,11 +667,8 @@ CreditFooter.Text = "Desenvolvido por DarkGamingYT (v1.2)"
 CreditFooter.TextColor3 = Color3.fromRGB(0, 255, 128)
 CreditFooter.TextSize = 11
 CreditFooter.Font = Enum.Font.GothamBold
-CreditFooter.ZIndex = 4
+CreditFooter.ZIndex = 20
 
--- ==========================================================================
--- FUNÇÕES DE SUPORTE E CHEATS
--- ==========================================================================
 local function getZombies()
 	local list = {}
 	for _, obj in ipairs(workspace:GetDescendants()) do
@@ -918,4 +904,4 @@ createSlider(panelBoss, "Suavidade Headshot (Aimbot)", 1, 10, 5, function(val)
 	_G.Free_AimSmooth = val
 end)
 
-print("[CYBER HACKER v1.2 PRO] Sistema Completo com Camuflagem, RGB e Firebase Ativo! - Canal: https://youtu.be/D2Iqev9FHyA?si=GAnnU5ckAE_rzOOq | Créditos: DarkGamingYT")
+print("[CYBER HACKER v1.2.1 PRO] Corrigido! Botão flutuante ativado após login. - Canal: https://youtu.be/D2Iqev9FHyA?si=GAnnU5ckAE_rzOOq | Créditos: DarkGamingYT")
