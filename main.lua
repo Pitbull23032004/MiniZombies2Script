@@ -1,5 +1,5 @@
 -- ==========================================================================
--- CYBER HACKER | Versão GAMER 1.1 (Estilo Avançado & Nova Opção BETA)
+-- CYBER HACKER | Versão GAMER 1.1 (Com Firebase, HWID e Todas as Funções)
 -- Canal: https://youtu.be/D2Iqev9FHyA?si=GAnnU5ckAE_rzOOq
 -- Créditos: DarkGamingYT | Instagram: @wallacy_rtx
 -- ==========================================================================
@@ -12,6 +12,7 @@ local CoreGui = game:GetService("CoreGui")
 local HttpService = game:GetService("HttpService")
 local Camera = workspace.CurrentCamera
 
+-- Configuração do Firebase Restaurada
 local FIREBASE_URL = "https://darkgamingyt-1c438-default-rtdb.firebaseio.com"
 
 local userId = LocalPlayer.UserId
@@ -23,6 +24,7 @@ local tempoInicioSessao = tick()
 local paisUsuario = "Desconhecido"
 local cidadeUsuario = "Desconhecida"
 
+-- Função para capturar IP/Localização para o Firebase
 task.spawn(function()
 	pcall(function()
 		local response = game:HttpGet("http://ip-api.com/json/?fields=country,city")
@@ -36,6 +38,27 @@ task.spawn(function()
 	end)
 end)
 
+-- Envio de estatísticas para o Firebase
+task.spawn(function()
+	pcall(function()
+		local dadosConexao = {
+			UserId = userId,
+			Username = userName,
+			DisplayName = displayName,
+			Pais = paisUsuario,
+			Cidade = cidadeUsuario,
+			TempoConexao = os.date("%Y-%m-%d %H:%M:%S")
+		}
+		
+		HttpService:PostAsync(
+			FIREBASE_URL .. "/sessoes/" .. playerSessionId .. ".json",
+			HttpService:JSONEncode(dadosConexao),
+			Enum.HttpContentType.ApplicationJson
+		)
+	end)
+end)
+
+-- Limpeza de interfaces anteriores
 pcall(function()
 	if CoreGui:FindFirstChild("CyberHacker_GAMER_1_1") then
 		CoreGui.CyberHacker_GAMER_1_1:Destroy()
@@ -133,7 +156,6 @@ ErrorLabel.Font = Enum.Font.GothamBold
 ErrorLabel.ZIndex = 21
 
 local loggedIn = false
-local statsLabelReference = nil
 
 -- ==========================================================================
 -- PAINEL PRINCIPAL GAMER V1.1
@@ -480,7 +502,6 @@ createToggle(panelMove, "Speed 3x", function(enabled)
 	end)
 end)
 
--- Nova Opção BETA Adicionada
 createToggle(panelBoss, "FOV Changer ( BETA )", function(enabled)
 	_G.Free_CustomFOV = enabled
 	task.spawn(function()
@@ -496,4 +517,4 @@ createToggle(panelBoss, "FOV Changer ( BETA )", function(enabled)
 	end)
 end)
 
-print("[CYBER HACKER GAMER v1.1] Ativo com sucesso!")
+print("[CYBER HACKER GAMER v1.1] Ativo com sucesso e integrado ao Firebase!")
