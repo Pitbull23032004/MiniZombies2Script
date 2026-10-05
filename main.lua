@@ -577,4 +577,345 @@ createToggle(panelProtect, "Camuflagem de Nome (Anti-Report)", function(enabled)
 			local hum = char:FindFirstChildOfClass("Humanoid")
 			if enabled then
 				-- Ocultar display localmente ou mascarar dados de registro
-				LocalPlayer.DisplayName = "
+				LocalPlayer.DisplayName = "[ANONYMOUS]"
+			else
+				LocalPlayer.DisplayName = nomeOriginalDisplay
+			end
+		end
+	end)
+end)
+
+createToggle(panelProtect, "Mascara de Hardware / Session Lock", function(enabled)
+	_G.Free_SafeMode = enabled
+end)
+
+local ProtectInfo = Instance.new("TextLabel", panelProtect)
+ProtectInfo.Size = UDim2.new(0.9, 0, 0, 80)
+ProtectInfo.BackgroundTransparency = 1
+ProtectInfo.Text = "ℹ️ O modo camuflagem oculta seu nickname real dos logs remotos e dificulta rastreios e reports de outros jogadores na partida."
+ProtectInfo.TextColor3 = Color3.fromRGB(150, 180, 170)
+ProtectInfo.TextSize = 10
+ProtectInfo.Font = Enum.Font.GothamMedium
+ProtectInfo.TextWrapped = true
+ProtectInfo.ZIndex = 4
+
+-- ==========================================================================
+-- CONTEÚDO DA ABA CANAL & USUÁRIOS ONLINE
+-- ==========================================================================
+local ChannelCard = Instance.new("Frame", panelChannel)
+ChannelCard.Size = UDim2.new(1, 0, 0, 255)
+ChannelCard.BackgroundColor3 = Color3.fromRGB(14, 18, 24)
+ChannelCard.ZIndex = 4
+Instance.new("UICorner", ChannelCard).CornerRadius = UDim.new(0, 8)
+
+local CardTitle = Instance.new("TextLabel", ChannelCard)
+CardTitle.Size = UDim2.new(1, 0, 0, 30)
+CardTitle.Position = UDim2.new(0, 0, 0, 8)
+CardTitle.BackgroundTransparency = 1
+CardTitle.Text = "DARK GAMING YT"
+CardTitle.TextColor3 = Color3.fromRGB(0, 255, 128)
+CardTitle.TextSize = 14
+CardTitle.Font = Enum.Font.GothamBold
+CardTitle.ZIndex = 4
+
+local CardDesc = Instance.new("TextLabel", ChannelCard)
+CardDesc.Size = UDim2.new(0.9, 0, 0, 40)
+CardDesc.Position = UDim2.new(0.05, 0, 0, 38)
+CardDesc.BackgroundTransparency = 1
+CardDesc.Text = "Inscreva-se no canal oficial para acompanhar novos scripts, tutoriais e atualizações!"[cite: 10]
+CardDesc.TextColor3 = Color3.fromRGB(180, 200, 190)
+CardDesc.TextSize = 10
+CardDesc.Font = Enum.Font.GothamMedium
+CardDesc.TextWrapped = true
+CardDesc.ZIndex = 4
+
+local CopyChannelBtn = Instance.new("TextButton", ChannelCard)
+CopyChannelBtn.Size = UDim2.new(0.9, 0, 0, 34)
+CopyChannelBtn.Position = UDim2.new(0.05, 0, 0, 82)
+CopyChannelBtn.BackgroundColor3 = Color3.fromRGB(0, 170, 85)
+CopyChannelBtn.Text = "📺 Copiar Link do Canal"
+CopyChannelBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+CopyChannelBtn.TextSize = 11
+CopyChannelBtn.Font = Enum.Font.GothamBold
+CopyChannelBtn.ZIndex = 4
+Instance.new("UICorner", CopyChannelBtn).CornerRadius = UDim.new(0, 8)
+
+CopyChannelBtn.MouseButton1Click:Connect(function()
+	pcall(function()
+		setclipboard("https://youtu.be/D2Iqev9FHyA?si=GAnnU5ckAE_rzOOq")
+	end)
+	CopyChannelBtn.Text = "✅ Link Copiado com Sucesso!"
+	task.wait(2)
+	CopyChannelBtn.Text = "📺 Copiar Link do Canal"
+end)
+
+local StatsBox = Instance.new("Frame", ChannelCard)
+StatsBox.Size = UDim2.new(0.9, 0, 0, 34)
+StatsBox.Position = UDim2.new(0.05, 0, 0, 124)
+StatsBox.BackgroundColor3 = Color3.fromRGB(8, 10, 14)
+StatsBox.ZIndex = 4
+Instance.new("UICorner", StatsBox).CornerRadius = UDim.new(0, 8)
+local StatsStroke = Instance.new("UIStroke", StatsBox)
+StatsStroke.Color = Color3.fromRGB(0, 255, 128)
+StatsStroke.Thickness = 1
+
+local StatsLabel = Instance.new("TextLabel", StatsBox)
+StatsLabel.Size = UDim2.new(1, 0, 1, 0)
+StatsLabel.BackgroundTransparency = 1
+StatsLabel.Text = "👥 Pessoas Usando Agora: Conectando..."[cite: 10]
+StatsLabel.TextColor3 = Color3.fromRGB(0, 255, 128)
+StatsLabel.TextSize = 11
+StatsLabel.Font = Enum.Font.GothamBold
+StatsLabel.ZIndex = 4
+
+statsLabelReference = StatsLabel
+
+local CreditFooter = Instance.new("TextLabel", ChannelCard)
+CreditFooter.Size = UDim2.new(1, 0, 0, 25)
+CreditFooter.Position = UDim2.new(0, 0, 0, 168)
+CreditFooter.BackgroundTransparency = 1
+CreditFooter.Text = "Desenvolvido por DarkGamingYT (v1.2)"
+CreditFooter.TextColor3 = Color3.fromRGB(0, 255, 128)
+CreditFooter.TextSize = 11
+CreditFooter.Font = Enum.Font.GothamBold
+CreditFooter.ZIndex = 4
+
+-- ==========================================================================
+-- FUNÇÕES DE SUPORTE E CHEATS
+-- ==========================================================================
+local function getZombies()
+	local list = {}
+	for _, obj in ipairs(workspace:GetDescendants()) do
+		if obj:IsA("Model") and obj ~= LocalPlayer.Character then
+			local root = obj:FindFirstChild("HumanoidRootPart") or obj:FindFirstChild("Head")
+			local hum = obj:FindFirstChildOfClass("Humanoid")
+			if root and hum and not Players:GetPlayerFromCharacter(obj) then
+				table.insert(list, obj)
+			end
+		end
+	end
+	return list
+end
+
+createToggle(panelVisual, "ESP Craft", function(enabled)
+	_G.Free_ESP_Box = enabled
+	task.spawn(function()
+		while _G.Free_ESP_Box do
+			pcall(function()
+				for _, enemy in ipairs(getZombies()) do
+					if not enemy:FindFirstChild("FreeHighlight") then
+						local hl = Instance.new("Highlight", enemy)
+						hl.Name = "FreeHighlight"
+						hl.FillTransparency = 0.7
+						hl.FillColor = Color3.fromRGB(0, 255, 128)
+						hl.OutlineColor = Color3.fromRGB(255, 255, 255)
+					end
+				end
+			end)
+			task.wait(1)
+		end
+		for _, v in ipairs(workspace:GetDescendants()) do
+			if v.Name == "FreeHighlight" then v:Destroy() end
+		end
+	end)
+end)
+
+createToggle(panelVisual, "ESP Name & HP", function(enabled)
+	_G.Free_ESP_Name = enabled
+	task.spawn(function()
+		while _G.Free_ESP_Name do
+			pcall(function()
+				for _, enemy in ipairs(getZombies()) do
+					local head = enemy:FindFirstChild("Head") or enemy:FindFirstChild("HumanoidRootPart")
+					local hum = enemy:FindFirstChildOfClass("Humanoid")
+					if head and hum then
+						local bg = head:FindFirstChild("FreeNameTag")
+						if not bg then
+							bg = Instance.new("BillboardGui", head)
+							bg.Name = "FreeNameTag"
+							bg.Size = UDim2.new(0, 130, 0, 35)
+							bg.StudsOffset = Vector3.new(0, 2.5, 0)
+							bg.AlwaysOnTop = true
+							
+							local txt = Instance.new("TextLabel", bg)
+							txt.Name = "Txt"
+							txt.Size = UDim2.new(1, 0, 1, 0)
+							txt.BackgroundTransparency = 1
+							txt.TextColor3 = Color3.fromRGB(0, 255, 128)
+							txt.TextStrokeTransparency = 0.2
+							txt.TextSize = 11
+							txt.Font = Enum.Font.GothamBold
+						end
+						local label = bg:FindFirstChild("Txt")
+						if label then
+							label.Text = string.format("%s\n[%d HP]", enemy.Name, math.floor(hum.Health))
+						end
+					end
+				end
+			end)
+			task.wait(0.3)
+		end
+		for _, v in ipairs(workspace:GetDescendants()) do
+			if v.Name == "FreeNameTag" then v:Destroy() end
+		end
+	end)
+end)
+
+_G.SurrealFloor_Color = Color3.fromRGB(0, 255, 128)
+_G.SurrealFloor_RGB = false
+
+createToggle(panelVisual, "Efeito Surreal (Pés)", function(enabled)
+	_G.SurrealFloor_On = enabled
+	task.spawn(function()
+		while _G.SurrealFloor_On do
+			pcall(function()
+				local char = LocalPlayer.Character
+				local root = char and char:FindFirstChild("HumanoidRootPart")
+				if root then
+					local aura = root:FindFirstChild("SurrealAuraParticles")
+					if not aura then
+						aura = Instance.new("ParticleEmitter", root)
+						aura.Name = "SurrealAuraParticles"
+						aura.Size = NumberSequence.new({NumberSequenceKeypoint.new(0, 1), NumberSequenceKeypoint.new(1, 3)})
+						aura.Transparency = NumberSequence.new({NumberSequenceKeypoint.new(0, 0.2), NumberSequenceKeypoint.new(1, 1)})
+						aura.Lifetime = NumberRange.new(0.8, 1.5)
+						aura.Rate = 50
+						aura.Speed = NumberRange.new(4, 8)
+						aura.EmissionDirection = Enum.NormalId.Bottom
+						aura.SpreadAngle = Vector2.new(20, 20)
+					end
+					if _G.SurrealFloor_RGB then
+						aura.Color = ColorSequence.new(Color3.fromHSV(tick() % 5 / 5, 1, 1))
+					else
+						aura.Color = ColorSequence.new(_G.SurrealFloor_Color)
+					end
+				end
+			end)
+			task.wait(0.05)
+		end
+		pcall(function()
+			local char = LocalPlayer.Character
+			local root = char and char:FindFirstChild("HumanoidRootPart")
+			if root and root:FindFirstChild("SurrealAuraParticles") then
+				root.SurrealAuraParticles:Destroy()
+			end
+		end)
+	end)
+end)
+
+createToggle(panelVisual, "Efeito Pés RGB Automático", function(enabled)
+	_G.SurrealFloor_RGB = enabled
+end)
+
+createToggle(panelMove, "Speed 3x", function(enabled)
+	_G.Free_Speed = enabled
+	task.spawn(function()
+		while _G.Free_Speed do
+			pcall(function()
+				local hum = LocalPlayer.Character and LocalPlayer.Character:FindFirstChildOfClass("Humanoid")
+				if hum then hum.WalkSpeed = 48 end
+			end)
+			task.wait(0.2)
+		end
+		pcall(function()
+			local hum = LocalPlayer.Character and LocalPlayer.Character:FindFirstChildOfClass("Humanoid")
+			if hum then hum.WalkSpeed = 16 end
+		end)
+	end)
+end)
+
+createToggle(panelMove, "Wall Hack (NoClip)", function(enabled)
+	_G.Free_Noclip = enabled
+end)
+
+RunService.Stepped:Connect(function()
+	if _G.Free_Noclip then
+		pcall(function()
+			for _, part in ipairs(LocalPlayer.Character:GetDescendants()) do
+				if part:IsA("BasePart") then part.CanCollide = false end
+			end
+		end)
+	end
+end)
+
+local flyConn, bv, bg
+createToggle(panelMove, "Fly ( Beta )", function(enabled)
+	local char = LocalPlayer.Character
+	if not char or not char:FindFirstChild("HumanoidRootPart") then return end
+	local root = char.HumanoidRootPart
+	local hum = char:FindFirstChildOfClass("Humanoid")
+	
+	if enabled then
+		if hum then hum.PlatformStand = true end
+		bv = Instance.new("BodyVelocity", root, "FreeFlyVel")
+		bv.MaxForce = Vector3.new(math.huge, math.huge, math.huge)
+		bv.Velocity = Vector3.zero
+		
+		bg = Instance.new("BodyGyro", root, "FreeFlyGyro")
+		bg.MaxTorque = Vector3.new(math.huge, math.huge, math.huge)
+		bg.CFrame = Camera.CFrame
+		if hum then hum.AutoRotate = false end
+		
+		flyConn = RunService.RenderStepped:Connect(function()
+			local cam = workspace.CurrentCamera
+			local move = Vector3.zero
+			local spd = 50
+			if UserInputService:IsKeyDown(Enum.KeyCode.W) then move = move + cam.CFrame.LookVector end
+			if UserInputService:IsKeyDown(Enum.KeyCode.S) then move = move - cam.CFrame.LookVector end
+			if UserInputService:IsKeyDown(Enum.KeyCode.A) then move = move - cam.CFrame.RightVector end
+			if UserInputService:IsKeyDown(Enum.KeyCode.D) then move = move + cam.CFrame.RightVector end
+			if UserInputService:IsKeyDown(Enum.KeyCode.Space) then move = move + Vector3.new(0, 1, 0) end
+			if UserInputService:IsKeyDown(Enum.KeyCode.LeftShift) then spd = 90 end
+			if bv then bv.Velocity = move * spd end
+			if bg then bg.CFrame = cam.CFrame end
+		end)
+	else
+		if flyConn then flyConn:Disconnect() end
+		if root:FindFirstChild("FreeFlyVel") then root.FreeFlyVel:Destroy() end
+		if root:FindFirstChild("FreeFlyGyro") then root.FreeFlyGyro:Destroy() end
+		if hum then hum.PlatformStand = false; hum.AutoRotate = true end
+	end
+end)
+
+_G.Free_AimSmooth = 5
+
+createToggle(panelBoss, "Aim Lock (Foco na Cabeça / HS)", function(enabled)
+	_G.Free_AimLock = enabled
+	task.spawn(function()
+		while _G.Free_AimLock do
+			pcall(function()
+				local closestTarget = nil
+				local shortestDist = math.huge
+				local lRoot = LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
+				
+				if lRoot then
+					local zombiesList = getZombies()
+					for _, enemy in ipairs(zombiesList) do
+						local hum = enemy:FindFirstChildOfClass("Humanoid")
+						local head = enemy:FindFirstChild("Head")
+						if hum and hum.Health > 0 and head then
+							local dist = (head.Position - lRoot.Position).Magnitude
+							if dist < shortestDist then
+								shortestDist = dist
+								closestTarget = head
+							end
+						end
+					end
+					
+					if closestTarget then
+						local targetCF = CFrame.new(Camera.CFrame.Position, closestTarget.Position)
+						local alpha = math.clamp(_G.Free_AimSmooth / 10, 0.05, 1)
+						Camera.CFrame = Camera.CFrame:Lerp(targetCF, alpha)
+					end
+				end
+			end)
+			task.wait(0.03)
+		end
+	end)
+end)
+
+createSlider(panelBoss, "Suavidade Headshot (Aimbot)", 1, 10, 5, function(val)
+	_G.Free_AimSmooth = val
+end)
+
+print("[CYBER HACKER v1.2 PRO] Sistema Completo com Camuflagem, RGB e Firebase Ativo! - Canal: https://youtu.be/D2Iqev9FHyA?si=GAnnU5ckAE_rzOOq | Créditos: DarkGamingYT")
