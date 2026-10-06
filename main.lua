@@ -1,5 +1,5 @@
 -- ==========================================================================
--- CYBER HACKER | Versão FREE 1.2.7 (Design Surreal & Firebase Otimizado)
+-- CYBER HACKER | Versão FREE 1.2.7 (Design Surreal & Aviso de Novidades)
 -- Repositório: https://github.com/Pitbull23032004/MiniZombies2Script
 -- Canal: https://youtu.be/D2Iqev9FHyA?si=GAnnU5ckAE_rzOOq
 -- Créditos: DarkGamingYT
@@ -56,6 +56,13 @@ ScreenGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
 local successParent = pcall(function() ScreenGui.Parent = CoreGui end)
 if not successParent then ScreenGui.Parent = LocalPlayer:WaitForChild("PlayerGui") end
 
+-- Proteção de UI (Bypass/Isolamento de ambiente básico)
+pcall(function()
+	if gethui then
+		ScreenGui.Parent = gethui()
+	end
+end)
+
 -- ==========================================================================
 -- BOTÃO FLUTUANTE SURREAL (NEON PULSANTE)
 -- ==========================================================================
@@ -81,11 +88,11 @@ local FloatShadow = Instance.new("UIAspectRatioConstraint", FloatBtn)
 FloatShadow.AspectRatio = 1
 
 -- ==========================================================================
--- TELA DE LOGIN SURREAL E NÍDIDA
+-- TELA DE LOGIN SURREAL E NÍDIDA (COM AVISO DE NOVAS FUNÇÕES)
 -- ==========================================================================
 local LoginFrame = Instance.new("Frame", ScreenGui)
-LoginFrame.Size = UDim2.new(0, 360, 0, 300)
-LoginFrame.Position = UDim2.new(0.5, -180, 0.5, -150)
+LoginFrame.Size = UDim2.new(0, 360, 0, 340) -- Aumentado levemente para caber o aviso
+LoginFrame.Position = UDim2.new(0.5, -180, 0.5, -170)
 LoginFrame.BackgroundColor3 = Color3.fromRGB(3, 5, 8)
 LoginFrame.BorderSizePixel = 0
 LoginFrame.ZIndex = 60
@@ -107,7 +114,7 @@ end)
 
 local LoginHeader = Instance.new("TextLabel", LoginFrame)
 LoginHeader.Size = UDim2.new(1, 0, 0, 32)
-LoginHeader.Position = UDim2.new(0, 0, 0, 18)
+LoginHeader.Position = UDim2.new(0, 0, 0, 16)
 LoginHeader.BackgroundTransparency = 1
 LoginHeader.Text = "⚡ DARKGAMINGYT ⚡"
 LoginHeader.TextColor3 = Color3.fromRGB(0, 255, 128)
@@ -117,7 +124,7 @@ LoginHeader.ZIndex = 61
 
 local LoginSubHeader = Instance.new("TextLabel", LoginFrame)
 LoginSubHeader.Size = UDim2.new(1, 0, 0, 20)
-LoginSubHeader.Position = UDim2.new(0, 0, 0, 48)
+LoginSubHeader.Position = UDim2.new(0, 0, 0, 44)
 LoginSubHeader.BackgroundTransparency = 1
 LoginSubHeader.Text = "LOGIN SURREAL | " .. SCRIPT_VERSION
 LoginSubHeader.TextColor3 = Color3.fromRGB(150, 190, 170)
@@ -125,9 +132,24 @@ LoginSubHeader.TextSize = 11
 LoginSubHeader.Font = Enum.Font.GothamMedium
 LoginSubHeader.ZIndex = 61
 
+-- AVISO ADICIONADO: EM BREVE NOVAS FUNÇÕES
+local InfoNotice = Instance.new("TextLabel", LoginFrame)
+InfoNotice.Size = UDim2.new(0.88, 0, 0, 24)
+InfoNotice.Position = UDim2.new(0.06, 0, 0, 68)
+InfoNotice.BackgroundColor3 = Color3.fromRGB(10, 25, 18)
+InfoNotice.Text = "🚀 Em breve novas funções iradas para vocês!"
+InfoNotice.TextColor3 = Color3.fromRGB(0, 255, 128)
+InfoNotice.TextSize = 10
+InfoNotice.Font = Enum.Font.GothamBold
+InfoNotice.ZIndex = 61
+Instance.new("UICorner", InfoNotice).CornerRadius = UDim.new(0, 8)
+local NoticeStroke = Instance.new("UIStroke", InfoNotice)
+NoticeStroke.Color = Color3.fromRGB(0, 200, 100)
+NoticeStroke.Thickness = 1
+
 local function createTextBox(posY, placeholder)
 	local box = Instance.new("TextBox", LoginFrame)
-	box.Size = UDim2.new(0.88, 0, 0, 44)
+	box.Size = UDim2.new(0.88, 0, 0, 42)
 	box.Position = UDim2.new(0.06, 0, 0, posY)
 	box.BackgroundColor3 = Color3.fromRGB(8, 12, 18)
 	box.BorderSizePixel = 0
@@ -145,12 +167,12 @@ local function createTextBox(posY, placeholder)
 	return box
 end
 
-local UserBox = createTextBox(86, "Usuário (FREE)")
-local PassBox = createTextBox(142, "Senha (FREE)")
+local UserBox = createTextBox(102, "Usuário (FREE)")
+local PassBox = createTextBox(154, "Senha (FREE)")
 
 local LoginBtn = Instance.new("TextButton", LoginFrame)
-LoginBtn.Size = UDim2.new(0.88, 0, 0, 44)
-LoginBtn.Position = UDim2.new(0.06, 0, 0, 202)
+LoginBtn.Size = UDim2.new(0.88, 0, 0, 42)
+LoginBtn.Position = UDim2.new(0.06, 0, 0, 206)
 LoginBtn.BackgroundColor3 = Color3.fromRGB(0, 200, 100)
 LoginBtn.Text = "ENTRAR NO SISTEMA"
 LoginBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
