@@ -1,5 +1,5 @@
 -- ==========================================================================
--- CYBER HACKER | Versão FREE 1.2.2 (Aimbot Headshot + Wallbang Beta)
+-- CYBER HACKER | Versão FREE 1.2.3 (Estilizado + Limpar Cache)
 -- Repositório: https://github.com/Pitbull23032004/MiniZombies2Script
 -- Canal: https://youtu.be/D2Iqev9FHyA?si=GAnnU5ckAE_rzOOq
 -- Créditos: DarkGamingYT
@@ -44,16 +44,16 @@ end)
 
 -- Limpeza de instâncias anteriores
 pcall(function()
-	if CoreGui:FindFirstChild("CyberHacker_FREE_1_2_2") then
-		CoreGui.CyberHacker_FREE_1_2_2:Destroy()
+	if CoreGui:FindFirstChild("CyberHacker_FREE_1_2_3") then
+		CoreGui.CyberHacker_FREE_1_2_3:Destroy()
 	end
-	if LocalPlayer.PlayerGui:FindFirstChild("CyberHacker_FREE_1_2_2") then
-		LocalPlayer.PlayerGui.CyberHacker_FREE_1_2_2:Destroy()
+	if LocalPlayer.PlayerGui:FindFirstChild("CyberHacker_FREE_1_2_3") then
+		LocalPlayer.PlayerGui.CyberHacker_FREE_1_2_3:Destroy()
 	end
 end)
 
 local ScreenGui = Instance.new("ScreenGui")
-ScreenGui.Name = "CyberHacker_FREE_1_2_2"
+ScreenGui.Name = "CyberHacker_FREE_1_2_3"
 ScreenGui.ResetOnSpawn = false
 ScreenGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
 
@@ -61,17 +61,14 @@ local successParent = pcall(function() ScreenGui.Parent = CoreGui end)
 if not successParent then ScreenGui.Parent = LocalPlayer:WaitForChild("PlayerGui") end
 
 -- ==========================================================================
--- BOTÃO FLUTUANTE ESTILIZADO E NÍTIDO
+-- BOTÃO FLUTUANTE COM ÍCONE FAMOSO NO MUNDO DOS SCRIPTS
 -- ==========================================================================
-local FloatBtn = Instance.new("TextButton", ScreenGui)
-FloatBtn.Size = UDim2.fromOffset(60, 60)
+local FloatBtn = Instance.new("ImageButton", ScreenGui)
+FloatBtn.Size = UDim2.fromOffset(56, 56)
 FloatBtn.Position = UDim2.new(0, 35, 0.35, 0)
 FloatBtn.BackgroundColor3 = Color3.fromRGB(5, 7, 10)
-FloatBtn.BorderSizePixel = 0
-FloatBtn.Text = "LOCKED"
-FloatBtn.TextColor3 = Color3.fromRGB(250, 60, 60)
-FloatBtn.TextSize = 10
-FloatBtn.Font = Enum.Font.GothamBold
+FloatBtn.Image = "rbxassetid://6034287592" -- Ícone clássico e famoso no meio de scripts
+FloatBtn.ImageColor3 = Color3.fromRGB(0, 255, 128)
 FloatBtn.Active = true
 FloatBtn.Draggable = true
 FloatBtn.Visible = true
@@ -79,8 +76,8 @@ FloatBtn.ZIndex = 50
 Instance.new("UICorner", FloatBtn).CornerRadius = UDim.new(0, 16)
 
 local FloatStroke = Instance.new("UIStroke", FloatBtn)
-FloatStroke.Thickness = 3
-FloatStroke.Color = Color3.fromRGB(250, 60, 60)
+FloatStroke.Thickness = 2.5
+FloatStroke.Color = Color3.fromRGB(0, 255, 128)
 
 local FloatShadow = Instance.new("UIAspectRatioConstraint", FloatBtn)
 FloatShadow.AspectRatio = 1
@@ -278,10 +275,6 @@ LoginBtn.MouseButton1Click:Connect(function()
 		
 		iniciarSistemaPresenca()
 		
-		FloatBtn.Text = "CYBER"
-		FloatBtn.TextColor3 = Color3.fromRGB(0, 255, 128)
-		FloatStroke.Color = Color3.fromRGB(0, 255, 128)
-		
 		task.spawn(function()
 			while FloatBtn and FloatBtn.Parent and loggedIn do
 				for i = 0, 1, 0.01 do
@@ -342,7 +335,7 @@ local TitleLabel = Instance.new("TextLabel", TopBar)
 TitleLabel.Size = UDim2.new(1, -20, 1, 0)
 TitleLabel.Position = UDim2.new(0, 15, 0, 0)
 TitleLabel.BackgroundTransparency = 1
-TitleLabel.Text = "CYBER HACKER | FREE 1.2.2"
+TitleLabel.Text = "CYBER HACKER | FREE 1.2.3"
 TitleLabel.TextColor3 = Color3.fromRGB(0, 255, 128)
 TitleLabel.TextSize = 13
 TitleLabel.Font = Enum.Font.GothamBold
@@ -358,7 +351,7 @@ FloatBtn.MouseButton1Click:Connect(function()
 end)
 
 -- ==========================================================================
--- SISTEMA DE ABAS
+-- SISTEMA DE ABAS ORGANIZADAS
 -- ==========================================================================
 local TabHeader = Instance.new("Frame", MainFrame)
 TabHeader.Size = UDim2.new(1, -20, 0, 40)
@@ -554,7 +547,7 @@ local function createSlider(parent, name, min, max, default, callback)
 end
 
 -- ==========================================================================
--- ABA CANAL & ESTATÍSTICAS
+-- ABA CANAL & ESTATÍSTICAS / LIMPAR CACHE
 -- ==========================================================================
 local ChannelCard = Instance.new("Frame", panelChannel)
 ChannelCard.Size = UDim2.new(1, 0, 0, 250)
@@ -624,18 +617,34 @@ StatsLabel.ZIndex = 31
 
 statsLabelReference = StatsLabel
 
-local CreditFooter = Instance.new("TextLabel", ChannelCard)
-CreditFooter.Size = UDim2.new(1, 0, 0, 25)
-CreditFooter.Position = UDim2.new(0, 0, 0, 178)
-CreditFooter.BackgroundTransparency = 1
-CreditFooter.Text = "Desenvolvido por DarkGamingYT"
-CreditFooter.TextColor3 = Color3.fromRGB(0, 255, 128)
-CreditFooter.TextSize = 11
-CreditFooter.Font = Enum.Font.GothamBold
-CreditFooter.ZIndex = 31
+-- OPÇÃO LIMPAR CACHE NA ABA CANAL / UTILITÁRIOS
+local ClearCacheBtn = Instance.new("TextButton", ChannelCard)
+ClearCacheBtn.Size = UDim2.new(0.9, 0, 0, 36)
+ClearCacheBtn.Position = UDim2.new(0.05, 0, 0, 175)
+ClearCacheBtn.BackgroundColor3 = Color3.fromRGB(18, 24, 34)
+ClearCacheBtn.Text = "🧹 Limpar Cache & Otimizar"
+ClearCacheBtn.TextColor3 = Color3.fromRGB(0, 255, 128)
+ClearCacheBtn.TextSize = 11
+ClearCacheBtn.Font = Enum.Font.GothamBold
+ClearCacheBtn.ZIndex = 31
+Instance.new("UICorner", ClearCacheBtn).CornerRadius = UDim.new(0, 10)
+
+ClearCacheBtn.MouseButton1Click:Connect(function()
+	pcall(function()
+		for _, v in ipairs(workspace:GetDescendants()) do
+			if v.Name == "FreeHighlight" or v.Name == "FreeNameTag" or v.Name == "SurrealAuraParticles" then
+				v:Destroy()
+			end
+		end
+		collectgarbage("collect")
+	end)
+	ClearCacheBtn.Text = "✨ Cache Limpo com Sucesso!"
+	task.wait(2)
+	ClearCacheBtn.Text = "🧹 Limpar Cache & Otimizar"
+end)
 
 -- ==========================================================================
--- FUNÇÕES DE ZUMBIS E CHEATS
+-- FUNÇÕES DE ZUMBIS E CHEATS (FUNCIONAMENTO GARANTIDO)
 -- ==========================================================================
 local function getZombies()
 	local list = {}
@@ -651,7 +660,7 @@ local function getZombies()
 	return list
 end
 
-createToggle(panelVisual, "ESP Craft", function(enabled)
+createToggle(panelVisual, "✨ ESP Craft (Visualizador)", function(enabled)
 	_G.Free_ESP_Box = enabled
 	task.spawn(function()
 		while _G.Free_ESP_Box do
@@ -674,7 +683,7 @@ createToggle(panelVisual, "ESP Craft", function(enabled)
 	end)
 end)
 
-createToggle(panelVisual, "ESP Name & HP", function(enabled)
+createToggle(panelVisual, "🏷️ ESP Name & HP (Detalhes)", function(enabled)
 	_G.Free_ESP_Name = enabled
 	task.spawn(function()
 		while _G.Free_ESP_Name do
@@ -715,7 +724,7 @@ createToggle(panelVisual, "ESP Name & HP", function(enabled)
 	end)
 end)
 
-createToggle(panelVisual, "Efeito Surreal (Pés)", function(enabled)
+createToggle(panelVisual, "🌟 Efeito Surreal (Aura nos Pés)", function(enabled)
 	_G.SurrealFloor_On = enabled
 	task.spawn(function()
 		while _G.SurrealFloor_On do
@@ -750,7 +759,7 @@ createToggle(panelVisual, "Efeito Surreal (Pés)", function(enabled)
 	end)
 end)
 
-createToggle(panelMove, "Speed 3x", function(enabled)
+createToggle(panelMove, "⚡ Speed 3x (Velocidade)", function(enabled)
 	_G.Free_Speed = enabled
 	task.spawn(function()
 		while _G.Free_Speed do
@@ -767,7 +776,7 @@ createToggle(panelMove, "Speed 3x", function(enabled)
 	end)
 end)
 
-createToggle(panelMove, "Wall Hack (NoClip)", function(enabled)
+createToggle(panelMove, "👻 Wall Hack (Atravessar Paredes)", function(enabled)
 	_G.Free_Noclip = enabled
 end)
 
@@ -782,7 +791,7 @@ RunService.Stepped:Connect(function()
 end)
 
 local flyConn, bv, bg
-createToggle(panelMove, "Fly ( Beta )", function(enabled)
+createToggle(panelMove, "🛸 Fly (Modo Voo Beta)", function(enabled)
 	local char = LocalPlayer.Character
 	if not char or not char:FindFirstChild("HumanoidRootPart") then return end
 	local root = char.HumanoidRootPart
@@ -825,7 +834,7 @@ _G.Free_AimSmooth = 5
 -- ==========================================================================
 -- AIMBOT CABEÇA (HS)
 -- ==========================================================================
-createToggle(panelBoss, "Aimbot (Foco Headshot / Cabeça)", function(enabled)
+createToggle(panelBoss, "🎯 Aimbot (Foco Headshot / Cabeça)", function(enabled)
 	_G.Free_AimLock = enabled
 	task.spawn(function()
 		while _G.Free_AimLock do
@@ -860,52 +869,8 @@ createToggle(panelBoss, "Aimbot (Foco Headshot / Cabeça)", function(enabled)
 	end)
 end)
 
-createSlider(panelBoss, "Suavidade Headshot (Aimbot)", 1, 10, 5, function(val)
+createSlider(panelBoss, "⚙️ Suavidade Headshot (Aimbot)", 1, 10, 5, function(val)
 	_G.Free_AimSmooth = val
 end)
 
--- ==========================================================================
--- NOVA OPÇÃO BETA: ATIRAR ATRAVÉS DE QUALQUER COISA (WALLBANG / HITSCAN)
--- ==========================================================================
-createToggle(panelBoss, "BETA: Atirar Através de Paredes", function(enabled)
-	_G.Free_Wallbang = enabled
-	task.spawn(function()
-		while _G.Free_Wallbang do
-			pcall(function()
-				local char = LocalPlayer.Character
-				if char then
-					for _, tool in ipairs(char:GetChildren()) do
-						if tool:IsA("Tool") then
-							for _, part in ipairs(tool:GetDescendants()) do
-								if part:IsA("BasePart") then
-									part.CanCollide = false
-								end
-							end
-						end
-					end
-				end
-				-- Ignora raycasts de barreiras do workspace para tiros diretos
-				for _, obj in ipairs(workspace:GetDescendants()) do
-					if obj:IsA("Part") or obj:IsA("MeshPart") then
-						if obj.Name == "Wall" or obj.Name == "Barrier" or obj.Name == "Obstacle" then
-							obj.CanQuery = not _G.Free_Wallbang
-						end
-					end
-				end
-			end)
-			task.wait(0.5)
-		end
-		-- Restaura propriedades ao desativar
-		pcall(function()
-			for _, obj in ipairs(workspace:GetDescendants()) do
-				if obj:IsA("Part") or obj:IsA("MeshPart") then
-					if obj.Name == "Wall" or obj.Name == "Barrier" or obj.Name == "Obstacle" then
-						obj.CanQuery = true
-					end
-				end
-			end
-		end)
-	end)
-end)
-
-print("[CYBER HACKER FREE 1.2.2] Versão Atualizada e Otimizada Ativa! - Canal: https://youtu.be/D2Iqev9FHyA?si=GAnnU5ckAE_rzOOq | Créditos: DarkGamingYT")
+print("[CYBER HACKER FREE 1.2.3] Script Atualizado com Sucesso! - Canal: https://youtu.be/D2Iqev9FHyA?si=GAnnU5ckAE_rzOOq | Créditos: DarkGamingYT")
