@@ -1,5 +1,5 @@
 -- ==========================================================================
--- CYBER HACKER | Versão FREE 1.2.3 (Estilizado + Limpar Cache)
+-- CYBER HACKER | Versão FREE 1.2.4 (Botão Ajustado + Aba Canal Estilizada)
 -- Repositório: https://github.com/Pitbull23032004/MiniZombies2Script
 -- Canal: https://youtu.be/D2Iqev9FHyA?si=GAnnU5ckAE_rzOOq
 -- Créditos: DarkGamingYT
@@ -44,16 +44,16 @@ end)
 
 -- Limpeza de instâncias anteriores
 pcall(function()
-	if CoreGui:FindFirstChild("CyberHacker_FREE_1_2_3") then
-		CoreGui.CyberHacker_FREE_1_2_3:Destroy()
+	if CoreGui:FindFirstChild("CyberHacker_FREE_1_2_4") then
+		CoreGui.CyberHacker_FREE_1_2_4:Destroy()
 	end
-	if LocalPlayer.PlayerGui:FindFirstChild("CyberHacker_FREE_1_2_3") then
-		LocalPlayer.PlayerGui.CyberHacker_FREE_1_2_3:Destroy()
+	if LocalPlayer.PlayerGui:FindFirstChild("CyberHacker_FREE_1_2_4") then
+		LocalPlayer.PlayerGui.CyberHacker_FREE_1_2_4:Destroy()
 	end
 end)
 
 local ScreenGui = Instance.new("ScreenGui")
-ScreenGui.Name = "CyberHacker_FREE_1_2_3"
+ScreenGui.Name = "CyberHacker_FREE_1_2_4"
 ScreenGui.ResetOnSpawn = false
 ScreenGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
 
@@ -61,13 +61,13 @@ local successParent = pcall(function() ScreenGui.Parent = CoreGui end)
 if not successParent then ScreenGui.Parent = LocalPlayer:WaitForChild("PlayerGui") end
 
 -- ==========================================================================
--- BOTÃO FLUTUANTE COM ÍCONE FAMOSO NO MUNDO DOS SCRIPTS
+-- BOTÃO FLUTUANTE COM ÍCONE ESTILIZADO DE TECNOLOGIA
 -- ==========================================================================
 local FloatBtn = Instance.new("ImageButton", ScreenGui)
 FloatBtn.Size = UDim2.fromOffset(56, 56)
 FloatBtn.Position = UDim2.new(0, 35, 0.35, 0)
 FloatBtn.BackgroundColor3 = Color3.fromRGB(5, 7, 10)
-FloatBtn.Image = "rbxassetid://6034287592" -- Ícone clássico e famoso no meio de scripts
+FloatBtn.Image = "rbxassetid://6031265935" -- Ícone tecnológico estilizado garantido visível
 FloatBtn.ImageColor3 = Color3.fromRGB(0, 255, 128)
 FloatBtn.Active = true
 FloatBtn.Draggable = true
@@ -335,7 +335,7 @@ local TitleLabel = Instance.new("TextLabel", TopBar)
 TitleLabel.Size = UDim2.new(1, -20, 1, 0)
 TitleLabel.Position = UDim2.new(0, 15, 0, 0)
 TitleLabel.BackgroundTransparency = 1
-TitleLabel.Text = "CYBER HACKER | FREE 1.2.3"
+TitleLabel.Text = "CYBER HACKER | FREE 1.2.4"
 TitleLabel.TextColor3 = Color3.fromRGB(0, 255, 128)
 TitleLabel.TextSize = 13
 TitleLabel.Font = Enum.Font.GothamBold
@@ -547,42 +547,46 @@ local function createSlider(parent, name, min, max, default, callback)
 end
 
 -- ==========================================================================
--- ABA CANAL & ESTATÍSTICAS / LIMPAR CACHE
+-- ABA CANAL & ESTATÍSTICAS / SUPER ESTILIZADA
 -- ==========================================================================
 local ChannelCard = Instance.new("Frame", panelChannel)
-ChannelCard.Size = UDim2.new(1, 0, 0, 250)
-ChannelCard.BackgroundColor3 = Color3.fromRGB(10, 14, 20)
+ChannelCard.Size = UDim2.new(1, 0, 0, 275)
+ChannelCard.BackgroundColor3 = Color3.fromRGB(8, 11, 16)
 ChannelCard.ZIndex = 31
-Instance.new("UICorner", ChannelCard).CornerRadius = UDim.new(0, 12)
+Instance.new("UICorner", ChannelCard).CornerRadius = UDim.new(0, 14)
+
+local ChannelCardStroke = Instance.new("UIStroke", ChannelCard)
+ChannelCardStroke.Thickness = 1.5
+ChannelCardStroke.Color = Color3.fromRGB(0, 255, 128)
 
 local CardTitle = Instance.new("TextLabel", ChannelCard)
-CardTitle.Size = UDim2.new(1, 0, 0, 30)
-CardTitle.Position = UDim2.new(0, 0, 0, 8)
+CardTitle.Size = UDim2.new(1, 0, 0, 32)
+CardTitle.Position = UDim2.new(0, 0, 0, 10)
 CardTitle.BackgroundTransparency = 1
-CardTitle.Text = "DARK GAMING YT"
+CardTitle.Text = "⚡ DARK GAMING YT ⚡"
 CardTitle.TextColor3 = Color3.fromRGB(0, 255, 128)
 CardTitle.TextSize = 14
 CardTitle.Font = Enum.Font.GothamBold
 CardTitle.ZIndex = 31
 
 local CardDesc = Instance.new("TextLabel", ChannelCard)
-CardDesc.Size = UDim2.new(0.9, 0, 0, 40)
-CardDesc.Position = UDim2.new(0.05, 0, 0, 38)
+CardDesc.Size = UDim2.new(0.9, 0, 0, 35)
+CardDesc.Position = UDim2.new(0.05, 0, 0, 44)
 CardDesc.BackgroundTransparency = 1
-CardDesc.Text = "Inscreva-se no canal oficial para acompanhar novos scripts e atualizações!"
-CardDesc.TextColor3 = Color3.fromRGB(180, 200, 190)
+CardDesc.Text = "Inscreva-se no canal oficial para acompanhar novos scripts, atualizações e conteúdos exclusivos!"
+CardDesc.TextColor3 = Color3.fromRGB(160, 195, 180)
 CardDesc.TextSize = 10
 CardDesc.Font = Enum.Font.GothamMedium
 CardDesc.TextWrapped = true
 CardDesc.ZIndex = 31
 
 local CopyChannelBtn = Instance.new("TextButton", ChannelCard)
-CopyChannelBtn.Size = UDim2.new(0.9, 0, 0, 36)
-CopyChannelBtn.Position = UDim2.new(0.05, 0, 0, 82)
+CopyChannelBtn.Size = UDim2.new(0.9, 0, 0, 38)
+CopyChannelBtn.Position = UDim2.new(0.05, 0, 0, 88)
 CopyChannelBtn.BackgroundColor3 = Color3.fromRGB(0, 180, 90)
 CopyChannelBtn.Text = "📺 Copiar Link do Canal"
 CopyChannelBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
-CopyChannelBtn.TextSize = 11
+CopyChannelBtn.TextSize = 12
 CopyChannelBtn.Font = Enum.Font.GothamBold
 CopyChannelBtn.ZIndex = 31
 Instance.new("UICorner", CopyChannelBtn).CornerRadius = UDim.new(0, 10)
@@ -591,20 +595,20 @@ CopyChannelBtn.MouseButton1Click:Connect(function()
 	pcall(function()
 		setclipboard("https://youtu.be/D2Iqev9FHyA?si=GAnnU5ckAE_rzOOq")
 	end)
-	CopyChannelBtn.Text = "✅ Link Copiado!"
+	CopyChannelBtn.Text = "✅ Link Copiado com Sucesso!"
 	task.wait(2)
 	CopyChannelBtn.Text = "📺 Copiar Link do Canal"
 end)
 
 local StatsBox = Instance.new("Frame", ChannelCard)
-StatsBox.Size = UDim2.new(0.9, 0, 0, 36)
-StatsBox.Position = UDim2.new(0.05, 0, 0, 128)
+StatsBox.Size = UDim2.new(0.9, 0, 0, 38)
+StatsBox.Position = UDim2.new(0.05, 0, 0, 136)
 StatsBox.BackgroundColor3 = Color3.fromRGB(5, 7, 10)
 StatsBox.ZIndex = 31
 Instance.new("UICorner", StatsBox).CornerRadius = UDim.new(0, 10)
 local StatsStroke = Instance.new("UIStroke", StatsBox)
 StatsStroke.Color = Color3.fromRGB(0, 255, 128)
-StatsStroke.Thickness = 1
+StatsStroke.Thickness = 1.2
 
 local StatsLabel = Instance.new("TextLabel", StatsBox)
 StatsLabel.Size = UDim2.new(1, 0, 1, 0)
@@ -617,17 +621,20 @@ StatsLabel.ZIndex = 31
 
 statsLabelReference = StatsLabel
 
--- OPÇÃO LIMPAR CACHE NA ABA CANAL / UTILITÁRIOS
 local ClearCacheBtn = Instance.new("TextButton", ChannelCard)
-ClearCacheBtn.Size = UDim2.new(0.9, 0, 0, 36)
-ClearCacheBtn.Position = UDim2.new(0.05, 0, 0, 175)
-ClearCacheBtn.BackgroundColor3 = Color3.fromRGB(18, 24, 34)
-ClearCacheBtn.Text = "🧹 Limpar Cache & Otimizar"
+ClearCacheBtn.Size = UDim2.new(0.9, 0, 0, 38)
+ClearCacheBtn.Position = UDim2.new(0.05, 0, 0, 184)
+ClearCacheBtn.BackgroundColor3 = Color3.fromRGB(14, 18, 26)
+ClearCacheBtn.Text = "🧹 Limpar Cache & Otimizar Jogo"
 ClearCacheBtn.TextColor3 = Color3.fromRGB(0, 255, 128)
 ClearCacheBtn.TextSize = 11
 ClearCacheBtn.Font = Enum.Font.GothamBold
 ClearCacheBtn.ZIndex = 31
 Instance.new("UICorner", ClearCacheBtn).CornerRadius = UDim.new(0, 10)
+
+local ClearStroke = Instance.new("UIStroke", ClearCacheBtn)
+ClearStroke.Color = Color3.fromRGB(0, 180, 90)
+ClearStroke.Thickness = 1
 
 ClearCacheBtn.MouseButton1Click:Connect(function()
 	pcall(function()
@@ -638,13 +645,13 @@ ClearCacheBtn.MouseButton1Click:Connect(function()
 		end
 		collectgarbage("collect")
 	end)
-	ClearCacheBtn.Text = "✨ Cache Limpo com Sucesso!"
+	ClearCacheBtn.Text = "✨ Cache Limpo & Otimizado!"
 	task.wait(2)
-	ClearCacheBtn.Text = "🧹 Limpar Cache & Otimizar"
+	ClearCacheBtn.Text = "🧹 Limpar Cache & Otimizar Jogo"
 end)
 
 -- ==========================================================================
--- FUNÇÕES DE ZUMBIS E CHEATS (FUNCIONAMENTO GARANTIDO)
+-- FUNÇÕES DE ZUMBIS E CHEATS
 -- ==========================================================================
 local function getZombies()
 	local list = {}
@@ -831,9 +838,6 @@ end)
 
 _G.Free_AimSmooth = 5
 
--- ==========================================================================
--- AIMBOT CABEÇA (HS)
--- ==========================================================================
 createToggle(panelBoss, "🎯 Aimbot (Foco Headshot / Cabeça)", function(enabled)
 	_G.Free_AimLock = enabled
 	task.spawn(function()
@@ -873,4 +877,4 @@ createSlider(panelBoss, "⚙️ Suavidade Headshot (Aimbot)", 1, 10, 5, function
 	_G.Free_AimSmooth = val
 end)
 
-print("[CYBER HACKER FREE 1.2.3] Script Atualizado com Sucesso! - Canal: https://youtu.be/D2Iqev9FHyA?si=GAnnU5ckAE_rzOOq | Créditos: DarkGamingYT")
+print("[CYBER HACKER FREE 1.2.4] Script Atualizado com Sucesso! - Canal: https://youtu.be/D2Iqev9FHyA?si=GAnnU5ckAE_rzOOq | Créditos: DarkGamingYT")
