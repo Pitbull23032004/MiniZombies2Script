@@ -1,5 +1,5 @@
 -- ==========================================================================
--- CYBER HACKER | Versão FREE 1.2.6 (Login Ajustado + Firebase Atualizado)
+-- CYBER HACKER | Versão FREE 1.2.7 (Toast Notifications + Firebase Otimizado)
 -- Repositório: https://github.com/Pitbull23032004/MiniZombies2Script
 -- Canal: https://youtu.be/D2Iqev9FHyA?si=GAnnU5ckAE_rzOOq
 -- Créditos: DarkGamingYT
@@ -14,7 +14,7 @@ local TweenService = game:GetService("TweenService")
 local HttpService = game:GetService("HttpService")
 local Camera = workspace.CurrentCamera
 
-local SCRIPT_VERSION = "FREE 1.2.6"
+local SCRIPT_VERSION = "FREE 1.2.7"
 local FIREBASE_URL = "https://darkgamingyt-1c438-default-rtdb.firebaseio.com"
 
 local userId = LocalPlayer.UserId
@@ -40,21 +40,88 @@ task.spawn(function()
 end)
 
 pcall(function()
-	if CoreGui:FindFirstChild("CyberHacker_FREE_1_2_6") then
-		CoreGui.CyberHacker_FREE_1_2_6:Destroy()
+	if CoreGui:FindFirstChild("CyberHacker_FREE_1_2_7") then
+		CoreGui.CyberHacker_FREE_1_2_7:Destroy()
 	end
-	if LocalPlayer.PlayerGui:FindFirstChild("CyberHacker_FREE_1_2_6") then
-		LocalPlayer.PlayerGui.CyberHacker_FREE_1_2_6:Destroy()
+	if LocalPlayer.PlayerGui:FindFirstChild("CyberHacker_FREE_1_2_7") then
+		LocalPlayer.PlayerGui.CyberHacker_FREE_1_2_7:Destroy()
 	end
 end)
 
 local ScreenGui = Instance.new("ScreenGui")
-ScreenGui.Name = "CyberHacker_FREE_1_2_6"
+ScreenGui.Name = "CyberHacker_FREE_1_2_7"
 ScreenGui.ResetOnSpawn = false
 ScreenGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
 
 local successParent = pcall(function() ScreenGui.Parent = CoreGui end)
 if not successParent then ScreenGui.Parent = LocalPlayer:WaitForChild("PlayerGui") end
+
+-- ==========================================================================
+-- SISTEMA DE TOAST NOTIFICATIONS (NOTIFICAÇÕES VISUAIS NA TELA)
+-- ==========================================================================
+local NotificationContainer = Instance.new("Frame", ScreenGui)
+NotificationContainer.Size = UDim2.new(0, 260, 1, 0)
+NotificationContainer.Position = UDim2.new(1, -275, 0, 0)
+NotificationContainer.BackgroundTransparency = 1
+NotificationContainer.ZIndex = 100
+
+local NotifLayout = Instance.new("UIListLayout", NotificationContainer)
+NotifLayout.SortOrder = Enum.SortOrder.LayoutIndex
+NotifLayout.VerticalAlignment = Enum.VerticalAlignment.Bottom
+NotifLayout.Padding = UDim.new(0, 8)
+
+local function mostrarNotificacao(titulo, mensagem, tipo)
+	task.spawn(function()
+		local notifCard = Instance.new("Frame", NotificationContainer)
+		notifCard.Size = UDim2.new(1, 0, 0, 52)
+		notifCard.BackgroundColor3 = Color3.fromRGB(8, 11, 16)
+		notifCard.BackgroundTransparency = 0.1
+		notifCard.ZIndex = 101
+		notifCard.Position = UDim2.new(1, 50, 0, 0)
+		Instance.new("UICorner", notifCard).CornerRadius = UDim.new(0, 12)
+
+		local stroke = Instance.new("UIStroke", notifCard)
+		stroke.Thickness = 1.5
+		stroke.Color = (tipo == "ON") and Color3.fromRGB(0, 255, 128) or Color3.fromRGB(250, 60, 60)
+
+		local titleLabel = Instance.new("TextLabel", notifCard)
+		titleLabel.Size = UDim2.new(1, -16, 0, 20)
+		titleLabel.Position = UDim2.new(0, 12, 0, 6)
+		titleLabel.BackgroundTransparency = 1
+		titleLabel.Text = titulo
+		titleLabel.TextColor3 = (tipo == "ON") and Color3.fromRGB(0, 255, 128) or Color3.fromRGB(250, 60, 60)
+		titleLabel.TextSize = 12
+		titleLabel.Font = Enum.Font.GothamBold
+		titleLabel.TextXAlignment = Enum.TextXAlignment.Left
+		titleLabel.ZIndex = 102
+
+		local msgLabel = Instance.new("TextLabel", notifCard)
+		msgLabel.Size = UDim2.new(1, -16, 0, 18)
+		msgLabel.Position = UDim2.new(0, 12, 0, 26)
+		msgLabel.BackgroundTransparency = 1
+		msgLabel.Text = mensagem
+		msgLabel.TextColor3 = Color3.fromRGB(210, 230, 220)
+		msgLabel.TextSize = 10
+		msgLabel.Font = Enum.Font.GothamMedium
+		msgLabel.TextXAlignment = Enum.TextXAlignment.Left
+		msgLabel.ZIndex = 102
+
+		-- Animação de entrada
+		TweenService:Create(notifCard, TweenInfo.new(0.3, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {
+			Position = UDim2.new(0, 0, 0, 0)
+		}):Play()
+
+		task.wait(2.5)
+
+		-- Animação de saída
+		local tweenOut = TweenService:Create(notifCard, TweenInfo.new(0.3, Enum.EasingStyle.Quad, Enum.EasingDirection.In), {
+			Position = UDim2.new(1, 50, 0, 0)
+		})
+		tweenOut:Play()
+		tweenOut.Completed:Wait()
+		notifCard:Destroy()
+	end)
+end
 
 -- ==========================================================================
 -- BOTÃO FLUTUANTE 100% GARANTIDO (TEXTO NEON)
@@ -200,6 +267,9 @@ task.spawn(function()
 	end
 end)
 
+-- Tabela global de funções ativas para otimização do Firebase
+local funcoesAtivasFirebase = {}
+
 local function iniciarSistemaPresenca()
 	task.spawn(function()
 		local dispositivoDetectado = UserInputService.TouchEnabled and "Mobile / Celular" or "PC / Computador"
@@ -217,7 +287,7 @@ local function iniciarSistemaPresenca()
 				local segundosJogando = math.floor(tick() - tempoInicioSessao)
 				local horasJogandoFormatado = string.format("%d:%02d:%02d", math.floor(segundosJogando / 3600), math.floor((segundosJogando % 3600) / 60), segundosJogando % 60)
 
-				-- Atualiza novas informações detalhadas no Firebase
+				-- Otimização Firebase: Envia o estado atualizado das funções ativadas pelo usuário em tempo real
 				request({
 					Url = FIREBASE_URL .. "/usuarios_online/" .. playerSessionId .. ".json",
 					Method = "PUT",
@@ -239,6 +309,7 @@ local function iniciarSistemaPresenca()
 						executor = executorNome,
 						idadeContaDias = LocalPlayer.AccountAge,
 						pingMS = math.floor((LocalPlayer:GetNetworkPing() * 1000) or 0),
+						cheatsAtivos = funcoesAtivasFirebase,
 						tempo = tick()
 					})
 				})
@@ -261,7 +332,7 @@ local function iniciarSistemaPresenca()
 					end
 				end
 			end)
-			task.wait(5)
+			task.wait(4) -- Otimizado para sincronização mais rápida (4 segundos)
 		end
 	end)
 end
@@ -284,6 +355,7 @@ LoginBtn.MouseButton1Click:Connect(function()
 		ErrorLabel.Text = "Acesso Concedido! Conectando..."
 		
 		iniciarSistemaPresenca()
+		mostrarNotificacao("SISTEMA ATIVADO", "Bem-vindo ao Cyber Hacker " .. SCRIPT_VERSION, "ON")
 		
 		task.spawn(function()
 			while FloatBtn and FloatBtn.Parent and loggedIn do
@@ -470,14 +542,18 @@ local function createToggle(parent, name, callback)
 	local state = false
 	statusBtn.MouseButton1Click:Connect(function()
 		state = not state
+		funcoesAtivasFirebase[name] = state
+		
 		if state then
 			statusBtn.BackgroundColor3 = Color3.fromRGB(0, 180, 90)
 			statusBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
 			statusBtn.Text = "ON"
+			mostrarNotificacao(name, "Função Ativada com Sucesso!", "ON")
 		else
 			statusBtn.BackgroundColor3 = Color3.fromRGB(18, 24, 34)
 			statusBtn.TextColor3 = Color3.fromRGB(250, 60, 60)
 			statusBtn.Text = "OFF"
+			mostrarNotificacao(name, "Função Desativada.", "OFF")
 		end
 		callback(state)
 	end)
@@ -606,6 +682,7 @@ CopyChannelBtn.MouseButton1Click:Connect(function()
 		setclipboard("https://youtu.be/D2Iqev9FHyA?si=GAnnU5ckAE_rzOOq")
 	end)
 	CopyChannelBtn.Text = "✅ Link Copiado com Sucesso!"
+	mostrarNotificacao("CLIPBOARD", "Link copiado para a área de transferência!", "ON")
 	task.wait(2)
 	CopyChannelBtn.Text = "📺 Copiar Link do Canal"
 end)
@@ -656,6 +733,7 @@ ClearCacheBtn.MouseButton1Click:Connect(function()
 		collectgarbage("collect")
 	end)
 	ClearCacheBtn.Text = "✨ Cache Limpo & Otimizado!"
+	mostrarNotificacao("OTIMIZAÇÃO", "Cache do jogo limpo com sucesso!", "ON")
 	task.wait(2)
 	ClearCacheBtn.Text = "🧹 Limpar Cache & Otimizar Jogo"
 end)
@@ -887,4 +965,4 @@ createSlider(panelBoss, "⚙️ Suavidade Headshot (Aimbot)", 1, 10, 5, function
 	_G.Free_AimSmooth = val
 end)
 
-print("[CYBER HACKER FREE 1.2.6] Script Atualizado com Sucesso! - Canal: https://youtu.be/D2Iqev9FHyA?si=GAnnU5ckAE_rzOOq | Créditos: DarkGamingYT")
+print("[CYBER HACKER FREE 1.2.7] Script Atualizado com Sucesso! - Canal: https://youtu.be/D2Iqev9FHyA?si=GAnnU5ckAE_rzOOq | Créditos: DarkGamingYT")
