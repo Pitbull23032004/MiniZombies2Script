@@ -1,5 +1,5 @@
 -- ==========================================================================
--- CYBER HACKER | Versão 1.2.1 (Correção do Botão Flutuante)
+-- CYBER HACKER | Versão FREE 1.0 (Com Geolocalização, Tempo de Jogo e Visão Beta)
 -- Repositório: https://github.com/Pitbull23032004/MiniZombies2Script
 -- Canal: https://youtu.be/D2Iqev9FHyA?si=GAnnU5ckAE_rzOOq
 -- Créditos: DarkGamingYT
@@ -14,22 +14,21 @@ local TweenService = game:GetService("TweenService")
 local HttpService = game:GetService("HttpService")
 local Camera = workspace.CurrentCamera
 
--- URL DO SEU FIREBASE CONFIGURADA[cite: 10]
+-- URL DO SEU FIREBASE CONFIGURADA
 local FIREBASE_URL = "https://darkgamingyt-1c438-default-rtdb.firebaseio.com"
 
+-- Identificação única baseada no UserId do Roblox
 local userId = LocalPlayer.UserId
 local userName = LocalPlayer.Name
 local displayName = LocalPlayer.DisplayName
 local playerSessionId = "user_" .. tostring(userId)
 local tempoInicioSessao = tick()
 
+-- Variáveis para armazenar localização (País e Cidade)
 local paisUsuario = "Desconhecido"
 local cidadeUsuario = "Desconhecida"
 
-local camuflagemAtiva = false
-local nomeOriginalDisplay = displayName
-local nomeOriginalUser = userName
-
+-- Busca de Geolocalização por IP de forma segura
 task.spawn(function()
 	pcall(function()
 		local response = game:HttpGet("http://ip-api.com/json/?fields=country,city")
@@ -43,17 +42,18 @@ task.spawn(function()
 	end)
 end)
 
+-- Limpeza de instâncias anteriores
 pcall(function()
-	if CoreGui:FindFirstChild("CyberHacker_V1_2") then
-		CoreGui.CyberHacker_V1_2:Destroy()
+	if CoreGui:FindFirstChild("CyberHacker_FREE_1_0") then
+		CoreGui.CyberHacker_FREE_1_0:Destroy()
 	end
-	if LocalPlayer.PlayerGui:FindFirstChild("CyberHacker_V1_2") then
-		LocalPlayer.PlayerGui.CyberHacker_V1_2:Destroy()
+	if LocalPlayer.PlayerGui:FindFirstChild("CyberHacker_FREE_1_0") then
+		LocalPlayer.PlayerGui.CyberHacker_FREE_1_0:Destroy()
 	end
 end)
 
 local ScreenGui = Instance.new("ScreenGui")
-ScreenGui.Name = "CyberHacker_V1_2"
+ScreenGui.Name = "CyberHacker_FREE_1_0"
 ScreenGui.ResetOnSpawn = false
 ScreenGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
 
@@ -61,7 +61,7 @@ local successParent = pcall(function() ScreenGui.Parent = CoreGui end)
 if not successParent then ScreenGui.Parent = LocalPlayer:WaitForChild("PlayerGui") end
 
 -- ==========================================================================
--- BOTÃO FLUTUANTE (Criado inicialmente invisível/bloqueado até o login)
+-- BOTÃO FLUTUANTE (Criado de forma segura e visível)
 -- ==========================================================================
 local FloatBtn = Instance.new("TextButton", ScreenGui)
 FloatBtn.Size = UDim2.fromOffset(55, 55)
@@ -74,8 +74,8 @@ FloatBtn.TextSize = 9
 FloatBtn.Font = Enum.Font.GothamBold
 FloatBtn.Active = true
 FloatBtn.Draggable = true
-FloatBtn.Visible = false -- Fica oculto até logar para não bugar com a tela de login
-FloatBtn.ZIndex = 30
+FloatBtn.Visible = true
+FloatBtn.ZIndex = 50
 Instance.new("UICorner", FloatBtn).CornerRadius = UDim.new(0, 12)
 
 local FloatStroke = Instance.new("UIStroke", FloatBtn)
@@ -83,46 +83,14 @@ FloatStroke.Thickness = 2.5
 FloatStroke.Color = Color3.fromRGB(220, 80, 80)
 
 -- ==========================================================================
--- CONTADOR DE FPS
--- ==========================================================================
-local FpsLabel = Instance.new("TextLabel", ScreenGui)
-FpsLabel.Size = UDim2.fromOffset(55, 20)
-FpsLabel.Position = UDim2.new(0, 35, 0.35, -22)
-FpsLabel.BackgroundTransparency = 1
-FpsLabel.Text = "FPS: 0"
-FpsLabel.TextColor3 = Color3.fromRGB(0, 255, 128)
-FpsLabel.TextSize = 11
-FpsLabel.Font = Enum.Font.GothamBold
-FpsLabel.TextXAlignment = Enum.TextXAlignment.Center
-FpsLabel.Visible = false
-FpsLabel.ZIndex = 30
-
-local fpsLastTick = tick()
-local fpsFrames = 0
-RunService.RenderStepped:Connect(function()
-	fpsFrames = fpsFrames + 1
-	local now = tick()
-	if now - fpsLastTick >= 1 then
-		local fps = math.floor(fpsFrames / (now - fpsLastTick))
-		FpsLabel.Text = "FPS: " .. tostring(fps)[cite: 10]
-		fpsFrames = 0
-		fpsLastTick = now
-	end
-end)
-
-FloatBtn:GetPropertyChangedSignal("Position"):Connect(function()
-	FpsLabel.Position = UDim2.new(FloatBtn.Position.X.Scale, FloatBtn.Position.X.Offset, FloatBtn.Position.Y.Scale, FloatBtn.Position.Y.Offset - 22)
-end)
-
--- ==========================================================================
--- TELA DE LOGIN CYBERPUNK COM RGB DINÂMICO (Usuário: FREE / Senha: FREE)[cite: 10]
+-- TELA DE LOGIN CYBERPUNK (Usuário: FREE / Senha: FREE)
 -- ==========================================================================
 local LoginFrame = Instance.new("Frame", ScreenGui)
 LoginFrame.Size = UDim2.new(0, 320, 0, 240)
 LoginFrame.Position = UDim2.new(0.5, -160, 0.5, -120)
 LoginFrame.BackgroundColor3 = Color3.fromRGB(8, 10, 14)
 LoginFrame.BorderSizePixel = 0
-LoginFrame.ZIndex = 40
+LoginFrame.ZIndex = 60
 Instance.new("UICorner", LoginFrame).CornerRadius = UDim.new(0, 12)
 
 local LoginStroke = Instance.new("UIStroke", LoginFrame)
@@ -131,10 +99,10 @@ LoginStroke.Color = Color3.fromRGB(0, 255, 128)
 
 task.spawn(function()
 	while LoginFrame and LoginFrame.Parent do
-		for i = 0, 1, 0.005 do
+		for i = 0, 1, 0.01 do
 			if not LoginStroke or not LoginStroke.Parent then break end
 			LoginStroke.Color = Color3.fromHSV(i, 1, 1)
-			task.wait(0.02)
+			task.wait(0.05)
 		end
 	end
 end)
@@ -143,11 +111,11 @@ local LoginTitle = Instance.new("TextLabel", LoginFrame)
 LoginTitle.Size = UDim2.new(1, 0, 0, 35)
 LoginTitle.Position = UDim2.new(0, 0, 0, 10)
 LoginTitle.BackgroundTransparency = 1
-LoginTitle.Text = "🔒 SEGURANÇA v1.2 (FIREBASE)"
+LoginTitle.Text = "🔒 AUTENTICAÇÃO FIREBASE"
 LoginTitle.TextColor3 = Color3.fromRGB(0, 255, 128)
 LoginTitle.TextSize = 14
 LoginTitle.Font = Enum.Font.GothamBold
-LoginTitle.ZIndex = 41
+LoginTitle.ZIndex = 61
 
 local function createTextBox(posY, placeholder)
 	local box = Instance.new("TextBox", LoginFrame)
@@ -161,7 +129,7 @@ local function createTextBox(posY, placeholder)
 	box.TextColor3 = Color3.fromRGB(0, 255, 128)
 	box.TextSize = 12
 	box.Font = Enum.Font.GothamMedium
-	box.ZIndex = 41
+	box.ZIndex = 61
 	Instance.new("UICorner", box).CornerRadius = UDim.new(0, 8)
 	local stroke = Instance.new("UIStroke", box)
 	stroke.Color = Color3.fromRGB(25, 45, 35)
@@ -169,8 +137,8 @@ local function createTextBox(posY, placeholder)
 	return box
 end
 
-local UserBox = createTextBox(55, "Usuário (Digite FREE)")[cite: 10]
-local PassBox = createTextBox(105, "Senha (Digite FREE)")[cite: 10]
+local UserBox = createTextBox(55, "Usuário (Digite FREE)")
+local PassBox = createTextBox(105, "Senha (Digite FREE)")
 PassBox.TextWrapped = true
 
 local LoginBtn = Instance.new("TextButton", LoginFrame)
@@ -181,7 +149,7 @@ LoginBtn.Text = "ENTRAR NO SISTEMA"
 LoginBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
 LoginBtn.TextSize = 12
 LoginBtn.Font = Enum.Font.GothamBold
-LoginBtn.ZIndex = 41
+LoginBtn.ZIndex = 61
 Instance.new("UICorner", LoginBtn).CornerRadius = UDim.new(0, 8)
 
 local ErrorLabel = Instance.new("TextLabel", LoginFrame)
@@ -192,7 +160,7 @@ ErrorLabel.Text = ""
 ErrorLabel.TextColor3 = Color3.fromRGB(220, 80, 80)
 ErrorLabel.TextSize = 11
 ErrorLabel.Font = Enum.Font.GothamMedium
-ErrorLabel.ZIndex = 41
+ErrorLabel.ZIndex = 61
 
 local loggedIn = false
 local statsLabelReference = nil
@@ -201,14 +169,14 @@ local statsLabelReference = nil
 -- PAINEL PRINCIPAL
 -- ==========================================================================
 local MainFrame = Instance.new("Frame", ScreenGui)
-MainFrame.Size = UDim2.new(0, 340, 0, 440)
+MainFrame.Size = UDim2.new(0, 340, 0, 420)
 MainFrame.Position = UDim2.new(0, 98, 0.35, 0)
 MainFrame.BackgroundColor3 = Color3.fromRGB(8, 10, 14)
 MainFrame.BorderSizePixel = 0
 MainFrame.Visible = false
 MainFrame.Draggable = true
 MainFrame.Active = true
-MainFrame.ZIndex = 20
+MainFrame.ZIndex = 30
 
 Instance.new("UICorner", MainFrame).CornerRadius = UDim.new(0, 12)
 local MainStroke = Instance.new("UIStroke", MainFrame)
@@ -217,18 +185,20 @@ MainStroke.Color = Color3.fromRGB(0, 255, 128)
 
 task.spawn(function()
 	while MainFrame and MainFrame.Parent do
-		for i = 0, 1, 0.005 do
+		for i = 0, 1, 0.01 do
 			if not MainStroke or not MainStroke.Parent then break end
 			MainStroke.Color = Color3.fromHSV(i, 1, 1)
-			task.wait(0.02)
+			task.wait(0.05)
 		end
 	end
 end)
 
+-- Função de Presença Atualizada com Tempo de Jogo e Localização
 local function iniciarSistemaPresenca()
 	task.spawn(function()
-		local dispositivoDetectado = UserInputService.TouchEnabled and "Mobile / Celular" or "PC / Computador"[cite: 10]
-		local executorNome = "Desconhecido"[cite: 10]
+		local dispositivoDetectado = UserInputService.TouchEnabled and "Mobile / Celular" or "PC / Computador"
+		
+		local executorNome = "Desconhecido"
 		pcall(function()
 			if identifyexecutor then
 				executorNome = select(1, identifyexecutor())
@@ -239,38 +209,46 @@ local function iniciarSistemaPresenca()
 		
 		while loggedIn do
 			pcall(function()
-				local segundosJogando = math.floor(tick() - tempoInicioSessao)[cite: 10]
-				local minutosJogando = math.floor(segundosJogando / 60)[cite: 10]
-				local horasJogandoFormatado = string.format("%d:%02d:%02d", math.floor(segundosJogando / 3600), math.floor((segundosJogando % 3600) / 60), segundosJogando % 60)[cite: 10]
+				local segundosJogando = math.floor(tick() - tempoInicioSessao)
+				local minutosJogando = math.floor(segundosJogando / 60)
+				local horasJogandoFormatado = string.format("%d:%02d:%02d", math.floor(segundosJogando / 3600), math.floor((segundosJogando % 3600) / 60), segundosJogando % 60)
 
 				request({
-					Url = FIREBASE_URL .. "/usuarios_online/" .. playerSessionId .. ".json",[cite: 10]
+					Url = FIREBASE_URL .. "/usuarios_online/" .. playerSessionId .. ".json",
 					Method = "PUT",
 					Headers = {["Content-Type"] = "application/json"},
 					Body = HttpService:JSONEncode({
-						nome = camuflagemAtiva and "Anonymous_[PROTECTED]" or userName,[cite: 10]
-						nomeExibicao = camuflagemAtiva and "Camuflado" or displayName,[cite: 10]
+						-- Identificação
+						nome = userName,
+						nomeExibicao = displayName,
 						id = userId,
-						dispositivo = dispositivoDetectado,[cite: 10]
-						pais = paisUsuario,[cite: 10]
-						cidade = cidadeUsuario,[cite: 10]
-						tempoSessaoSegundos = segundosJogando,[cite: 10]
-						tempoSessaoMinutos = minutosJogando,[cite: 10]
-						tempoJogadoFormatado = horasJogandoFormatado,[cite: 10]
-						placeIdAtual = game.PlaceId,[cite: 10]
-						jobIdServidor = game.JobId,[cite: 10]
-						jogadoresNoServidor = #Players:GetPlayers(),[cite: 10]
-						executor = executorNome,[cite: 10]
-						idadeContaDias = LocalPlayer.AccountAge,[cite: 10]
-						possuiRobloxPremium = tostring(LocalPlayer.MembershipType),[cite: 10]
-						pingMS = math.floor((LocalPlayer:GetNetworkPing() * 1000) or 0),[cite: 10]
-						memoriaUtilizadaMB = math.floor(collectgarbage("count") / 1024),[cite: 10]
-						qualidadeGrafica = tostring(UserSettings():GetService("UserGameSettings").SavedQualityLevel),[cite: 10]
+						dispositivo = dispositivoDetectado,
+						
+						-- Localização
+						pais = paisUsuario,
+						cidade = cidadeUsuario,
+						
+						-- Tempo de Jogo
+						tempoSessaoSegundos = segundosJogando,
+						tempoSessaoMinutos = minutosJogando,
+						tempoJogadoFormatado = horasJogandoFormatado,
+						
+						-- Servidor e Hardware
+						placeIdAtual = game.PlaceId,
+						jobIdServidor = game.JobId,
+						jogadoresNoServidor = #Players:GetPlayers(),
+						executor = executorNome,
+						idadeContaDias = LocalPlayer.AccountAge,
+						possuiRobloxPremium = tostring(LocalPlayer.MembershipType),
+						pingMS = math.floor((LocalPlayer:GetNetworkPing() * 1000) or 0),
+						memoriaUtilizadaMB = math.floor(collectgarbage("count") / 1024),
+						qualidadeGrafica = tostring(UserSettings():GetService("UserGameSettings").SavedQualityLevel),
+						
 						tempo = tick()
 					})
 				})
 
-				local response = game:HttpGet(FIREBASE_URL .. "/usuarios_online.json")[cite: 10]
+				local response = game:HttpGet(FIREBASE_URL .. "/usuarios_online.json")
 				if response and response ~= "null" then
 					local data = HttpService:JSONDecode(response)
 					local ativos = 0
@@ -284,7 +262,7 @@ local function iniciarSistemaPresenca()
 
 					if ativos < 1 then ativos = 1 end
 					if statsLabelReference then
-						statsLabelReference.Text = "👥 Pessoas Usando Agora: " .. tostring(ativos)[cite: 10]
+						statsLabelReference.Text = "👥 Pessoas Usando Agora: " .. tostring(ativos)
 					end
 				end
 			end)
@@ -297,7 +275,7 @@ Players.PlayerRemoving:Connect(function(plr)
 	if plr == LocalPlayer then
 		pcall(function()
 			request({
-				Url = FIREBASE_URL .. "/usuarios_online/" .. playerSessionId .. ".json",[cite: 10]
+				Url = FIREBASE_URL .. "/usuarios_online/" .. playerSessionId .. ".json",
 				Method = "DELETE"
 			})
 		end)
@@ -305,26 +283,23 @@ Players.PlayerRemoving:Connect(function(plr)
 end)
 
 LoginBtn.MouseButton1Click:Connect(function()
-	if UserBox.Text == "FREE" and PassBox.Text == "FREE" then[cite: 10]
+	if UserBox.Text == "FREE" and PassBox.Text == "FREE" then
 		loggedIn = true
 		ErrorLabel.TextColor3 = Color3.fromRGB(0, 255, 128)
-		ErrorLabel.Text = "Acesso Concedido! Conectando v1.2..."
+		ErrorLabel.Text = "Acesso Concedido! Conectando..."
 		
 		iniciarSistemaPresenca()
 		
-		-- Libera e exibe o botão flutuante e o FPS após o login com sucesso
-		FloatBtn.Visible = true
-		FpsLabel.Visible = true
 		FloatBtn.Text = "CYBER"
 		FloatBtn.TextColor3 = Color3.fromRGB(0, 255, 128)
 		FloatStroke.Color = Color3.fromRGB(0, 255, 128)
 		
 		task.spawn(function()
 			while FloatBtn and FloatBtn.Parent and loggedIn do
-				for i = 0, 1, 0.005 do
+				for i = 0, 1, 0.01 do
 					if not FloatStroke or not FloatStroke.Parent then break end
 					FloatStroke.Color = Color3.fromHSV(i, 1, 1)
-					task.wait(0.02)
+					task.wait(0.05)
 				end
 			end
 		end)
@@ -333,9 +308,58 @@ LoginBtn.MouseButton1Click:Connect(function()
 		LoginFrame:Destroy()
 	else
 		ErrorLabel.TextColor3 = Color3.fromRGB(220, 80, 80)
-		ErrorLabel.Text = "Usuário ou Senha incorretos! (Use FREE)"[cite: 10]
+		ErrorLabel.Text = "Usuário ou Senha incorretos! (Use FREE)"
 	end
 end)
+
+-- ==========================================================================
+-- CONTADOR DE FPS
+-- ==========================================================================
+local FpsLabel = Instance.new("TextLabel", ScreenGui)
+FpsLabel.Size = UDim2.fromOffset(55, 20)
+FpsLabel.Position = UDim2.new(0, 35, 0.35, -22)
+FpsLabel.BackgroundTransparency = 1
+FpsLabel.Text = "FPS: 0"
+FpsLabel.TextColor3 = Color3.fromRGB(0, 255, 128)
+FpsLabel.TextSize = 11
+FpsLabel.Font = Enum.Font.GothamBold
+FpsLabel.TextXAlignment = Enum.TextXAlignment.Center
+FpsLabel.ZIndex = 50
+
+local fpsLastTick = tick()
+local fpsFrames = 0
+RunService.RenderStepped:Connect(function()
+	fpsFrames = fpsFrames + 1
+	local now = tick()
+	if now - fpsLastTick >= 1 then
+		local fps = math.floor(fpsFrames / (now - fpsLastTick))
+		FpsLabel.Text = "FPS: " .. tostring(fps)
+		fpsFrames = 0
+		fpsLastTick = now
+	end
+end)
+
+FloatBtn:GetPropertyChangedSignal("Position"):Connect(function()
+	FpsLabel.Position = UDim2.new(FloatBtn.Position.X.Scale, FloatBtn.Position.X.Offset, FloatBtn.Position.Y.Scale, FloatBtn.Position.Y.Offset - 22)
+end)
+
+local TopBar = Instance.new("Frame", MainFrame)
+TopBar.Size = UDim2.new(1, 0, 0, 40)
+TopBar.BackgroundColor3 = Color3.fromRGB(14, 18, 24)
+TopBar.BorderSizePixel = 0
+TopBar.ZIndex = 31
+Instance.new("UICorner", TopBar).CornerRadius = UDim.new(0, 12)
+
+local TitleLabel = Instance.new("TextLabel", TopBar)
+TitleLabel.Size = UDim2.new(1, -20, 1, 0)
+TitleLabel.Position = UDim2.new(0, 15, 0, 0)
+TitleLabel.BackgroundTransparency = 1
+TitleLabel.Text = "CYBER HACKER | FREE 1.0"
+TitleLabel.TextColor3 = Color3.fromRGB(0, 255, 128)
+TitleLabel.TextSize = 12
+TitleLabel.Font = Enum.Font.GothamBold
+TitleLabel.TextXAlignment = Enum.TextXAlignment.Left
+TitleLabel.ZIndex = 31
 
 FloatBtn.MouseButton1Click:Connect(function()
 	if not loggedIn then return end
@@ -345,58 +369,45 @@ FloatBtn.MouseButton1Click:Connect(function()
 	end
 end)
 
-local TopBar = Instance.new("Frame", MainFrame)
-TopBar.Size = UDim2.new(1, 0, 0, 40)
-TopBar.BackgroundColor3 = Color3.fromRGB(14, 18, 24)
-TopBar.BorderSizePixel = 0
-TopBar.ZIndex = 20
-Instance.new("UICorner", TopBar).CornerRadius = UDim.new(0, 12)
-
-local TitleLabel = Instance.new("TextLabel", TopBar)
-TitleLabel.Size = UDim2.new(1, -20, 1, 0)
-TitleLabel.Position = UDim2.new(0, 15, 0, 0)
-TitleLabel.BackgroundTransparency = 1
-TitleLabel.Text = "CYBER HACKER | v1.2 PRO"
-TitleLabel.TextColor3 = Color3.fromRGB(0, 255, 128)
-TitleLabel.TextSize = 12
-TitleLabel.Font = Enum.Font.GothamBold
-TitleLabel.TextXAlignment = Enum.TextXAlignment.Left
-TitleLabel.ZIndex = 20
-
 -- ==========================================================================
--- SISTEMA DE ABAS (VISUAL, MOV, COMBATE, PROTEÇÃO, CANAL)
+-- SISTEMA DE ABAS (ESTILIZADAS E MODERNIZADAS)
 -- ==========================================================================
 local TabHeader = Instance.new("Frame", MainFrame)
-TabHeader.Size = UDim2.new(1, -20, 0, 34)
+TabHeader.Size = UDim2.new(1, -20, 0, 36)
 TabHeader.Position = UDim2.new(0, 10, 0, 48)
-TabHeader.BackgroundTransparency = 1
-TabHeader.ZIndex = 20
+TabHeader.BackgroundColor3 = Color3.fromRGB(12, 15, 20)
+TabHeader.BorderSizePixel = 0
+TabHeader.ZIndex = 31
+Instance.new("UICorner", TabHeader).CornerRadius = UDim.new(0, 8)
+local TabHeaderStroke = Instance.new("UIStroke", TabHeader)
+TabHeaderStroke.Color = Color3.fromRGB(20, 35, 28)
+TabHeaderStroke.Thickness = 1
 
 local function createTabBtn(name, posX, active)
 	local btn = Instance.new("TextButton", TabHeader)
-	btn.Size = UDim2.new(0.19, 0, 1, 0)
-	btn.Position = UDim2.new(posX, 0, 0, 0)
-	btn.BackgroundColor3 = active and Color3.fromRGB(0, 170, 85) or Color3.fromRGB(14, 18, 24)
+	btn.Size = UDim2.new(0.195, 0, 0.82, 0)
+	btn.Position = UDim2.new(posX, 0, 0.09, 0)
+	btn.BackgroundColor3 = active and Color3.fromRGB(0, 170, 85) or Color3.fromRGB(18, 23, 31)
 	btn.TextColor3 = active and Color3.fromRGB(255, 255, 255) or Color3.fromRGB(150, 180, 150)
 	btn.TextSize = 9
 	btn.Font = Enum.Font.GothamBold
 	btn.Text = name
-	btn.ZIndex = 20
+	btn.ZIndex = 32
 	Instance.new("UICorner", btn).CornerRadius = UDim.new(0, 6)
 	return btn
 end
 
-local btnVisual = createTabBtn("VISUAL", 0, true)
-local btnMove = createTabBtn("MOV", 0.20, false)
-local btnBoss = createTabBtn("COMBATE", 0.40, false)
-local btnProtect = createTabBtn("CAMUFLAG", 0.60, false)
-local btnChannel = createTabBtn("CANAL", 0.80, false)
+local btnVisual = createTabBtn("VISUAL", 0.01, true)
+local btnMove = createTabBtn("MOV", 0.21, false)
+local btnBoss = createTabBtn("COMBATE", 0.41, false)
+local btnBeta = createTabBtn("VISÃO BETA", 0.61, false)
+local btnChannel = createTabBtn("CANAL", 0.81, false)
 
 local ContentContainer = Instance.new("Frame", MainFrame)
 ContentContainer.Size = UDim2.new(1, -20, 1, -95)
 ContentContainer.Position = UDim2.new(0, 10, 0, 88)
 ContentContainer.BackgroundTransparency = 1
-ContentContainer.ZIndex = 20
+ContentContainer.ZIndex = 31
 
 local function createScroll()
 	local scroll = Instance.new("ScrollingFrame", ContentContainer)
@@ -405,7 +416,7 @@ local function createScroll()
 	scroll.BorderSizePixel = 0
 	scroll.ScrollBarThickness = 4
 	scroll.Visible = false
-	scroll.ZIndex = 20
+	scroll.ZIndex = 31
 	local list = Instance.new("UIListLayout", scroll)
 	list.Padding = UDim.new(0, 8)
 	list.HorizontalAlignment = Enum.HorizontalAlignment.Center
@@ -415,7 +426,7 @@ end
 local panelVisual = createScroll()
 local panelMove = createScroll()
 local panelBoss = createScroll()
-local panelProtect = createScroll()
+local panelBeta = createScroll()
 local panelChannel = createScroll()
 panelVisual.Visible = true
 
@@ -423,33 +434,33 @@ local function selectTab(selected)
 	panelVisual.Visible = (selected == panelVisual)
 	panelMove.Visible = (selected == panelMove)
 	panelBoss.Visible = (selected == panelBoss)
-	panelProtect.Visible = (selected == panelProtect)
+	panelBeta.Visible = (selected == panelBeta)
 	panelChannel.Visible = (selected == panelChannel)
 	
-	btnVisual.BackgroundColor3 = (selected == panelVisual) and Color3.fromRGB(0, 170, 85) or Color3.fromRGB(14, 18, 24)
-	btnMove.BackgroundColor3 = (selected == panelMove) and Color3.fromRGB(0, 170, 85) or Color3.fromRGB(14, 18, 24)
-	btnBoss.BackgroundColor3 = (selected == panelBoss) and Color3.fromRGB(0, 170, 85) or Color3.fromRGB(14, 18, 24)
-	btnProtect.BackgroundColor3 = (selected == panelProtect) and Color3.fromRGB(0, 170, 85) or Color3.fromRGB(14, 18, 24)
-	btnChannel.BackgroundColor3 = (selected == panelChannel) and Color3.fromRGB(0, 170, 85) or Color3.fromRGB(14, 18, 24)
+	btnVisual.BackgroundColor3 = (selected == panelVisual) and Color3.fromRGB(0, 170, 85) or Color3.fromRGB(18, 23, 31)
+	btnMove.BackgroundColor3 = (selected == panelMove) and Color3.fromRGB(0, 170, 85) or Color3.fromRGB(18, 23, 31)
+	btnBoss.BackgroundColor3 = (selected == panelBoss) and Color3.fromRGB(0, 170, 85) or Color3.fromRGB(18, 23, 31)
+	btnBeta.BackgroundColor3 = (selected == panelBeta) and Color3.fromRGB(0, 170, 85) or Color3.fromRGB(18, 23, 31)
+	btnChannel.BackgroundColor3 = (selected == panelChannel) and Color3.fromRGB(0, 170, 85) or Color3.fromRGB(18, 23, 31)
 	
 	btnVisual.TextColor3 = (selected == panelVisual) and Color3.fromRGB(255, 255, 255) or Color3.fromRGB(150, 180, 150)
 	btnMove.TextColor3 = (selected == panelMove) and Color3.fromRGB(255, 255, 255) or Color3.fromRGB(150, 180, 150)
 	btnBoss.TextColor3 = (selected == panelBoss) and Color3.fromRGB(255, 255, 255) or Color3.fromRGB(150, 180, 150)
-	btnProtect.TextColor3 = (selected == panelProtect) and Color3.fromRGB(255, 255, 255) or Color3.fromRGB(150, 180, 150)
+	btnBeta.TextColor3 = (selected == panelBeta) and Color3.fromRGB(255, 255, 255) or Color3.fromRGB(150, 180, 150)
 	btnChannel.TextColor3 = (selected == panelChannel) and Color3.fromRGB(255, 255, 255) or Color3.fromRGB(150, 180, 150)
 end
 
 btnVisual.MouseButton1Click:Connect(function() selectTab(panelVisual) end)
 btnMove.MouseButton1Click:Connect(function() selectTab(panelMove) end)
 btnBoss.MouseButton1Click:Connect(function() selectTab(panelBoss) end)
-btnProtect.MouseButton1Click:Connect(function() selectTab(panelProtect) end)
+btnBeta.MouseButton1Click:Connect(function() selectTab(panelBeta) end)
 btnChannel.MouseButton1Click:Connect(function() selectTab(panelChannel) end)
 
 local function createToggle(parent, name, callback)
 	local row = Instance.new("Frame", parent)
 	row.Size = UDim2.new(1, 0, 0, 38)
 	row.BackgroundColor3 = Color3.fromRGB(14, 18, 24)
-	row.ZIndex = 20
+	row.ZIndex = 31
 	Instance.new("UICorner", row).CornerRadius = UDim.new(0, 8)
 	
 	local label = Instance.new("TextLabel", row)
@@ -461,7 +472,7 @@ local function createToggle(parent, name, callback)
 	label.TextSize = 12
 	label.Font = Enum.Font.GothamMedium
 	label.TextXAlignment = Enum.TextXAlignment.Left
-	label.ZIndex = 20
+	label.ZIndex = 31
 	
 	local statusBtn = Instance.new("TextButton", row)
 	statusBtn.Size = UDim2.new(0, 56, 0, 24)
@@ -471,7 +482,7 @@ local function createToggle(parent, name, callback)
 	statusBtn.TextColor3 = Color3.fromRGB(220, 80, 80)
 	statusBtn.TextSize = 11
 	statusBtn.Font = Enum.Font.GothamBold
-	statusBtn.ZIndex = 20
+	statusBtn.ZIndex = 31
 	Instance.new("UICorner", statusBtn).CornerRadius = UDim.new(0, 6)
 	
 	local state = false
@@ -494,7 +505,7 @@ local function createSlider(parent, name, min, max, default, callback)
 	local row = Instance.new("Frame", parent)
 	row.Size = UDim2.new(1, 0, 0, 55)
 	row.BackgroundColor3 = Color3.fromRGB(14, 18, 24)
-	row.ZIndex = 20
+	row.ZIndex = 31
 	Instance.new("UICorner", row).CornerRadius = UDim.new(0, 8)
 
 	local label = Instance.new("TextLabel", row)
@@ -506,7 +517,7 @@ local function createSlider(parent, name, min, max, default, callback)
 	label.TextSize = 12
 	label.Font = Enum.Font.GothamMedium
 	label.TextXAlignment = Enum.TextXAlignment.Left
-	label.ZIndex = 20
+	label.ZIndex = 31
 
 	local valLabel = Instance.new("TextLabel", row)
 	valLabel.Size = UDim2.new(0.2, 0, 0, 24)
@@ -517,21 +528,21 @@ local function createSlider(parent, name, min, max, default, callback)
 	valLabel.TextSize = 12
 	valLabel.Font = Enum.Font.GothamBold
 	valLabel.TextXAlignment = Enum.TextXAlignment.Right
-	valLabel.ZIndex = 20
+	valLabel.ZIndex = 31
 
 	local sliderBg = Instance.new("Frame", row)
 	sliderBg.Size = UDim2.new(0.9, 0, 0, 6)
 	sliderBg.Position = UDim2.new(0.05, 0, 0, 36)
 	sliderBg.BackgroundColor3 = Color3.fromRGB(25, 32, 42)
 	sliderBg.BorderSizePixel = 0
-	sliderBg.ZIndex = 20
+	sliderBg.ZIndex = 31
 	Instance.new("UICorner", sliderBg).CornerRadius = UDim.new(1, 0)
 
 	local sliderFill = Instance.new("Frame", sliderBg)
 	sliderFill.Size = UDim2.new((default - min) / (max - min), 0, 1, 0)
 	sliderFill.BackgroundColor3 = Color3.fromRGB(0, 255, 128)
 	sliderFill.BorderSizePixel = 0
-	sliderFill.ZIndex = 20
+	sliderFill.ZIndex = 31
 	Instance.new("UICorner", sliderFill).CornerRadius = UDim.new(1, 0)
 
 	local dragging = false
@@ -563,38 +574,53 @@ local function createSlider(parent, name, min, max, default, callback)
 	end)
 end
 
-createToggle(panelProtect, "Camuflagem de Nome (Anti-Report)", function(enabled)
-	camuflagemAtiva = enabled
-	pcall(function()
-		local char = LocalPlayer.Character
-		if char and char:FindFirstChild("Humanoid") then
-			if enabled then
-				LocalPlayer.DisplayName = "[ANONYMOUS]"
-			else
-				LocalPlayer.DisplayName = nomeOriginalDisplay
-			end
+-- ==========================================================================
+-- CONTEÚDO DA ABA VISÃO BETA (NEW)
+-- ==========================================================================
+createToggle(panelBeta, "Fullbright (Visão Noturna)", function(enabled)
+	_G.Free_Fullbright = enabled
+	task.spawn(function()
+		while _G.Free_Fullbright do
+			pcall(function()
+				game:GetService("Lighting").Brightness = 2
+				game:GetService("Lighting").ClockTime = 14
+				game:GetService("Lighting").GlobalShadows = false
+				game:GetService("Lighting").OutdoorAmbient = Color3.fromRGB(255, 255, 255)
+			end)
+			task.wait(1)
+		end
+		pcall(function()
+			game:GetService("Lighting").GlobalShadows = true
+			game:GetService("Lighting").OutdoorAmbient = Color3.fromRGB(128, 128, 128)
+		end)
+	end)
+end)
+
+createToggle(panelBeta, "Remover Nevoeiro / Fog", function(enabled)
+	_G.Free_NoFog = enabled
+	task.spawn(function()
+		while _G.Free_NoFog do
+			pcall(function()
+				game:GetService("Lighting").FogEnd = 999999
+			end)
+			task.wait(1)
 		end
 	end)
 end)
 
-createToggle(panelProtect, "Mascara de Hardware / Session Lock", function(enabled)
-	_G.Free_SafeMode = enabled
+createSlider(panelBeta, "FOV da Câmera (Zoom)", 70, 120, 70, function(val)
+	pcall(function()
+		Camera.FieldOfView = val
+	end)
 end)
 
-local ProtectInfo = Instance.new("TextLabel", panelProtect)
-ProtectInfo.Size = UDim2.new(0.9, 0, 0, 80)
-ProtectInfo.BackgroundTransparency = 1
-ProtectInfo.Text = "ℹ️ O modo camuflagem oculta seu nickname real dos logs remotos e dificulta rastreios e reports de outros jogadores na partida."
-ProtectInfo.TextColor3 = Color3.fromRGB(150, 180, 170)
-ProtectInfo.TextSize = 10
-ProtectInfo.Font = Enum.Font.GothamMedium
-ProtectInfo.TextWrapped = true
-ProtectInfo.ZIndex = 20
-
+-- ==========================================================================
+-- CONTEÚDO DA ABA 4: CANAL & USUÁRIOS ONLINE
+-- ==========================================================================
 local ChannelCard = Instance.new("Frame", panelChannel)
 ChannelCard.Size = UDim2.new(1, 0, 0, 255)
 ChannelCard.BackgroundColor3 = Color3.fromRGB(14, 18, 24)
-ChannelCard.ZIndex = 20
+ChannelCard.ZIndex = 31
 Instance.new("UICorner", ChannelCard).CornerRadius = UDim.new(0, 8)
 
 local CardTitle = Instance.new("TextLabel", ChannelCard)
@@ -605,18 +631,18 @@ CardTitle.Text = "DARK GAMING YT"
 CardTitle.TextColor3 = Color3.fromRGB(0, 255, 128)
 CardTitle.TextSize = 14
 CardTitle.Font = Enum.Font.GothamBold
-CardTitle.ZIndex = 20
+CardTitle.ZIndex = 31
 
 local CardDesc = Instance.new("TextLabel", ChannelCard)
 CardDesc.Size = UDim2.new(0.9, 0, 0, 40)
 CardDesc.Position = UDim2.new(0.05, 0, 0, 38)
 CardDesc.BackgroundTransparency = 1
-CardDesc.Text = "Inscreva-se no canal oficial para acompanhar novos scripts, tutoriais e atualizações!"[cite: 10]
+CardDesc.Text = "Inscreva-se no canal oficial para acompanhar novos scripts, tutoriais e atualizações!"
 CardDesc.TextColor3 = Color3.fromRGB(180, 200, 190)
 CardDesc.TextSize = 10
 CardDesc.Font = Enum.Font.GothamMedium
 CardDesc.TextWrapped = true
-CardDesc.ZIndex = 20
+CardDesc.ZIndex = 31
 
 local CopyChannelBtn = Instance.new("TextButton", ChannelCard)
 CopyChannelBtn.Size = UDim2.new(0.9, 0, 0, 34)
@@ -626,7 +652,7 @@ CopyChannelBtn.Text = "📺 Copiar Link do Canal"
 CopyChannelBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
 CopyChannelBtn.TextSize = 11
 CopyChannelBtn.Font = Enum.Font.GothamBold
-CopyChannelBtn.ZIndex = 20
+CopyChannelBtn.ZIndex = 31
 Instance.new("UICorner", CopyChannelBtn).CornerRadius = UDim.new(0, 8)
 
 CopyChannelBtn.MouseButton1Click:Connect(function()
@@ -642,7 +668,7 @@ local StatsBox = Instance.new("Frame", ChannelCard)
 StatsBox.Size = UDim2.new(0.9, 0, 0, 34)
 StatsBox.Position = UDim2.new(0.05, 0, 0, 124)
 StatsBox.BackgroundColor3 = Color3.fromRGB(8, 10, 14)
-StatsBox.ZIndex = 20
+StatsBox.ZIndex = 31
 Instance.new("UICorner", StatsBox).CornerRadius = UDim.new(0, 8)
 local StatsStroke = Instance.new("UIStroke", StatsBox)
 StatsStroke.Color = Color3.fromRGB(0, 255, 128)
@@ -651,11 +677,11 @@ StatsStroke.Thickness = 1
 local StatsLabel = Instance.new("TextLabel", StatsBox)
 StatsLabel.Size = UDim2.new(1, 0, 1, 0)
 StatsLabel.BackgroundTransparency = 1
-StatsLabel.Text = "👥 Pessoas Usando Agora: Conectando..."[cite: 10]
+StatsLabel.Text = "👥 Pessoas Usando Agora: Conectando..."
 StatsLabel.TextColor3 = Color3.fromRGB(0, 255, 128)
 StatsLabel.TextSize = 11
 StatsLabel.Font = Enum.Font.GothamBold
-StatsLabel.ZIndex = 20
+StatsLabel.ZIndex = 31
 
 statsLabelReference = StatsLabel
 
@@ -663,12 +689,15 @@ local CreditFooter = Instance.new("TextLabel", ChannelCard)
 CreditFooter.Size = UDim2.new(1, 0, 0, 25)
 CreditFooter.Position = UDim2.new(0, 0, 0, 168)
 CreditFooter.BackgroundTransparency = 1
-CreditFooter.Text = "Desenvolvido por DarkGamingYT (v1.2)"
+CreditFooter.Text = "Desenvolvido por DarkGamingYT"
 CreditFooter.TextColor3 = Color3.fromRGB(0, 255, 128)
 CreditFooter.TextSize = 11
 CreditFooter.Font = Enum.Font.GothamBold
-CreditFooter.ZIndex = 20
+CreditFooter.ZIndex = 31
 
+-- ==========================================================================
+-- FUNÇÕES DE SUPORTE E CHEATS
+-- ==========================================================================
 local function getZombies()
 	local list = {}
 	for _, obj in ipairs(workspace:GetDescendants()) do
@@ -904,4 +933,4 @@ createSlider(panelBoss, "Suavidade Headshot (Aimbot)", 1, 10, 5, function(val)
 	_G.Free_AimSmooth = val
 end)
 
-print("[CYBER HACKER v1.2.1 PRO] Corrigido! Botão flutuante ativado após login. - Canal: https://youtu.be/D2Iqev9FHyA?si=GAnnU5ckAE_rzOOq | Créditos: DarkGamingYT")
+print("[CYBER HACKER FREE 1.0] Sistema Completo com Firebase e Visão Beta Ativo! - Canal: https://youtu.be/D2Iqev9FHyA?si=GAnnU5ckAE_rzOOq | Créditos: DarkGamingYT")
