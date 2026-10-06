@@ -1,5 +1,5 @@
 -- ==========================================================================
--- CYBER HACKER | Versão FREE 1.2.7 (Design Surreal & Aviso de Novidades)
+-- CYBER HACKER | Versão FREE 1.2.7 (Design Surreal & Nítido)
 -- Repositório: https://github.com/Pitbull23032004/MiniZombies2Script
 -- Canal: https://youtu.be/D2Iqev9FHyA?si=GAnnU5ckAE_rzOOq
 -- Créditos: DarkGamingYT
@@ -56,7 +56,6 @@ ScreenGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
 local successParent = pcall(function() ScreenGui.Parent = CoreGui end)
 if not successParent then ScreenGui.Parent = LocalPlayer:WaitForChild("PlayerGui") end
 
--- Proteção de UI (Bypass/Isolamento de ambiente básico)
 pcall(function()
 	if gethui then
 		ScreenGui.Parent = gethui()
@@ -88,10 +87,10 @@ local FloatShadow = Instance.new("UIAspectRatioConstraint", FloatBtn)
 FloatShadow.AspectRatio = 1
 
 -- ==========================================================================
--- TELA DE LOGIN SURREAL E NÍDIDA (COM AVISO DE NOVAS FUNÇÕES)
+-- TELA DE LOGIN SURREAL E NÍDIDA (COM AVISO AJUSTADO PARA BOA LEITURA)
 -- ==========================================================================
 local LoginFrame = Instance.new("Frame", ScreenGui)
-LoginFrame.Size = UDim2.new(0, 360, 0, 340) -- Aumentado levemente para caber o aviso
+LoginFrame.Size = UDim2.new(0, 360, 0, 340)
 LoginFrame.Position = UDim2.new(0.5, -180, 0.5, -170)
 LoginFrame.BackgroundColor3 = Color3.fromRGB(3, 5, 8)
 LoginFrame.BorderSizePixel = 0
@@ -132,15 +131,15 @@ LoginSubHeader.TextSize = 11
 LoginSubHeader.Font = Enum.Font.GothamMedium
 LoginSubHeader.ZIndex = 61
 
--- AVISO ADICIONADO: EM BREVE NOVAS FUNÇÕES
+-- AVISO COM COR SUAVE E FONTE NÍDIDA (FÁCIL LEITURA)
 local InfoNotice = Instance.new("TextLabel", LoginFrame)
-InfoNotice.Size = UDim2.new(0.88, 0, 0, 24)
+InfoNotice.Size = UDim2.new(0.88, 0, 0, 26)
 InfoNotice.Position = UDim2.new(0.06, 0, 0, 68)
-InfoNotice.BackgroundColor3 = Color3.fromRGB(10, 25, 18)
+InfoNotice.BackgroundColor3 = Color3.fromRGB(8, 18, 12)
 InfoNotice.Text = "🚀 Em breve novas funções iradas para vocês!"
-InfoNotice.TextColor3 = Color3.fromRGB(0, 255, 128)
-InfoNotice.TextSize = 10
-InfoNotice.Font = Enum.Font.GothamBold
+InfoNotice.TextColor3 = Color3.fromRGB(220, 255, 235) -- Branco esverdeado suave e legível
+InfoNotice.TextSize = 11
+InfoNotice.Font = Enum.Font.GothamMedium
 InfoNotice.ZIndex = 61
 Instance.new("UICorner", InfoNotice).CornerRadius = UDim.new(0, 8)
 local NoticeStroke = Instance.new("UIStroke", InfoNotice)
@@ -154,15 +153,15 @@ local function createTextBox(posY, placeholder)
 	box.BackgroundColor3 = Color3.fromRGB(8, 12, 18)
 	box.BorderSizePixel = 0
 	box.PlaceholderText = placeholder
-	box.PlaceholderColor3 = Color3.fromRGB(100, 130, 110)
+	box.PlaceholderColor3 = Color3.fromRGB(130, 150, 140)
 	box.Text = ""
-	box.TextColor3 = Color3.fromRGB(0, 255, 128)
+	box.TextColor3 = Color3.fromRGB(240, 255, 245) -- Texto digitado claro e nítido
 	box.TextSize = 13
 	box.Font = Enum.Font.GothamMedium
 	box.ZIndex = 61
 	Instance.new("UICorner", box).CornerRadius = UDim.new(0, 12)
 	local stroke = Instance.new("UIStroke", box)
-	stroke.Color = Color3.fromRGB(20, 40, 30)
+	stroke.Color = Color3.fromRGB(25, 50, 38)
 	stroke.Thickness = 1.5
 	return box
 end
