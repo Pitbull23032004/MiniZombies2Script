@@ -1,5 +1,5 @@
 -- ==========================================================================
--- CYBER HACKER | Versão FREE 1.2.7 (Toast Notifications + Firebase Otimizado)
+-- CYBER HACKER | Versão FREE 1.2.7 (Corrigido & Otimizado)
 -- Repositório: https://github.com/Pitbull23032004/MiniZombies2Script
 -- Canal: https://youtu.be/D2Iqev9FHyA?si=GAnnU5ckAE_rzOOq
 -- Créditos: DarkGamingYT
@@ -53,82 +53,19 @@ ScreenGui.Name = "CyberHacker_FREE_1_2_7"
 ScreenGui.ResetOnSpawn = false
 ScreenGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
 
-local successParent = pcall(function() ScreenGui.Parent = CoreGui end)
-if not successParent then ScreenGui.Parent = LocalPlayer:WaitForChild("PlayerGui") end
-
--- ==========================================================================
--- SISTEMA DE TOAST NOTIFICATIONS (NOTIFICAÇÕES VISUAIS NA TELA)
--- ==========================================================================
-local NotificationContainer = Instance.new("Frame", ScreenGui)
-NotificationContainer.Size = UDim2.new(0, 260, 1, 0)
-NotificationContainer.Position = UDim2.new(1, -275, 0, 0)
-NotificationContainer.BackgroundTransparency = 1
-NotificationContainer.ZIndex = 100
-
-local NotifLayout = Instance.new("UIListLayout", NotificationContainer)
-NotifLayout.SortOrder = Enum.SortOrder.LayoutIndex
-NotifLayout.VerticalAlignment = Enum.VerticalAlignment.Bottom
-NotifLayout.Padding = UDim.new(0, 8)
-
-local function mostrarNotificacao(titulo, mensagem, tipo)
-	task.spawn(function()
-		local notifCard = Instance.new("Frame", NotificationContainer)
-		notifCard.Size = UDim2.new(1, 0, 0, 52)
-		notifCard.BackgroundColor3 = Color3.fromRGB(8, 11, 16)
-		notifCard.BackgroundTransparency = 0.1
-		notifCard.ZIndex = 101
-		notifCard.Position = UDim2.new(1, 50, 0, 0)
-		Instance.new("UICorner", notifCard).CornerRadius = UDim.new(0, 12)
-
-		local stroke = Instance.new("UIStroke", notifCard)
-		stroke.Thickness = 1.5
-		stroke.Color = (tipo == "ON") and Color3.fromRGB(0, 255, 128) or Color3.fromRGB(250, 60, 60)
-
-		local titleLabel = Instance.new("TextLabel", notifCard)
-		titleLabel.Size = UDim2.new(1, -16, 0, 20)
-		titleLabel.Position = UDim2.new(0, 12, 0, 6)
-		titleLabel.BackgroundTransparency = 1
-		titleLabel.Text = titulo
-		titleLabel.TextColor3 = (tipo == "ON") and Color3.fromRGB(0, 255, 128) or Color3.fromRGB(250, 60, 60)
-		titleLabel.TextSize = 12
-		titleLabel.Font = Enum.Font.GothamBold
-		titleLabel.TextXAlignment = Enum.TextXAlignment.Left
-		titleLabel.ZIndex = 102
-
-		local msgLabel = Instance.new("TextLabel", notifCard)
-		msgLabel.Size = UDim2.new(1, -16, 0, 18)
-		msgLabel.Position = UDim2.new(0, 12, 0, 26)
-		msgLabel.BackgroundTransparency = 1
-		msgLabel.Text = mensagem
-		msgLabel.TextColor3 = Color3.fromRGB(210, 230, 220)
-		msgLabel.TextSize = 10
-		msgLabel.Font = Enum.Font.GothamMedium
-		msgLabel.TextXAlignment = Enum.TextXAlignment.Left
-		msgLabel.ZIndex = 102
-
-		-- Animação de entrada
-		TweenService:Create(notifCard, TweenInfo.new(0.3, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {
-			Position = UDim2.new(0, 0, 0, 0)
-		}):Play()
-
-		task.wait(2.5)
-
-		-- Animação de saída
-		local tweenOut = TweenService:Create(notifCard, TweenInfo.new(0.3, Enum.EasingStyle.Quad, Enum.EasingDirection.In), {
-			Position = UDim2.new(1, 50, 0, 0)
-		})
-		tweenOut:Play()
-		tweenOut.Completed:Wait()
-		notifCard:Destroy()
-	end)
+-- Correção de Container (Uso de gethui se disponível para evitar ocultação)
+local parentGUI = (gethui and gethui()) or CoreGui
+local successParent = pcall(function() ScreenGui.Parent = parentGUI end)
+if not successParent then 
+	ScreenGui.Parent = LocalPlayer:WaitForChild("PlayerGui") 
 end
 
 -- ==========================================================================
--- BOTÃO FLUTUANTE 100% GARANTIDO (TEXTO NEON)
+-- BOTÃO FLUTUANTE 100% GARANTIDO (AJUSTADO CONTRA SUMIÇO)
 -- ==========================================================================
 local FloatBtn = Instance.new("TextButton", ScreenGui)
 FloatBtn.Size = UDim2.fromOffset(56, 56)
-FloatBtn.Position = UDim2.new(0, 35, 0.35, 0)
+FloatBtn.Position = UDim2.new(0, 50, 0.4, 0) -- Posição segura para mobile e PC
 FloatBtn.BackgroundColor3 = Color3.fromRGB(5, 7, 10)
 FloatBtn.Text = "⚡"
 FloatBtn.TextColor3 = Color3.fromRGB(0, 255, 128)
@@ -137,7 +74,7 @@ FloatBtn.Font = Enum.Font.GothamBold
 FloatBtn.Active = true
 FloatBtn.Draggable = true
 FloatBtn.Visible = true
-FloatBtn.ZIndex = 50
+FloatBtn.ZIndex = 999
 Instance.new("UICorner", FloatBtn).CornerRadius = UDim.new(0, 16)
 
 local FloatStroke = Instance.new("UIStroke", FloatBtn)
@@ -250,7 +187,7 @@ MainFrame.BorderSizePixel = 0
 MainFrame.Visible = false
 MainFrame.Draggable = true
 MainFrame.Active = true
-MainFrame.ZIndex = 30
+MainFrame.ZIndex = 500
 
 Instance.new("UICorner", MainFrame).CornerRadius = UDim.new(0, 16)
 local MainStroke = Instance.new("UIStroke", MainFrame)
@@ -266,9 +203,6 @@ task.spawn(function()
 		end
 	end
 end)
-
--- Tabela global de funções ativas para otimização do Firebase
-local funcoesAtivasFirebase = {}
 
 local function iniciarSistemaPresenca()
 	task.spawn(function()
@@ -287,7 +221,6 @@ local function iniciarSistemaPresenca()
 				local segundosJogando = math.floor(tick() - tempoInicioSessao)
 				local horasJogandoFormatado = string.format("%d:%02d:%02d", math.floor(segundosJogando / 3600), math.floor((segundosJogando % 3600) / 60), segundosJogando % 60)
 
-				-- Otimização Firebase: Envia o estado atualizado das funções ativadas pelo usuário em tempo real
 				request({
 					Url = FIREBASE_URL .. "/usuarios_online/" .. playerSessionId .. ".json",
 					Method = "PUT",
@@ -309,7 +242,6 @@ local function iniciarSistemaPresenca()
 						executor = executorNome,
 						idadeContaDias = LocalPlayer.AccountAge,
 						pingMS = math.floor((LocalPlayer:GetNetworkPing() * 1000) or 0),
-						cheatsAtivos = funcoesAtivasFirebase,
 						tempo = tick()
 					})
 				})
@@ -332,7 +264,7 @@ local function iniciarSistemaPresenca()
 					end
 				end
 			end)
-			task.wait(4) -- Otimizado para sincronização mais rápida (4 segundos)
+			task.wait(5)
 		end
 	end)
 end
@@ -355,7 +287,6 @@ LoginBtn.MouseButton1Click:Connect(function()
 		ErrorLabel.Text = "Acesso Concedido! Conectando..."
 		
 		iniciarSistemaPresenca()
-		mostrarNotificacao("SISTEMA ATIVADO", "Bem-vindo ao Cyber Hacker " .. SCRIPT_VERSION, "ON")
 		
 		task.spawn(function()
 			while FloatBtn and FloatBtn.Parent and loggedIn do
@@ -380,14 +311,14 @@ end)
 -- ==========================================================================
 local FpsLabel = Instance.new("TextLabel", ScreenGui)
 FpsLabel.Size = UDim2.fromOffset(60, 20)
-FpsLabel.Position = UDim2.new(0, 35, 0.35, -24)
+FpsLabel.Position = UDim2.new(0, 50, 0.4, -24)
 FpsLabel.BackgroundTransparency = 1
 FpsLabel.Text = "FPS: 0"
 FpsLabel.TextColor3 = Color3.fromRGB(0, 255, 128)
 FpsLabel.TextSize = 11
 FpsLabel.Font = Enum.Font.GothamBold
 FpsLabel.TextXAlignment = Enum.TextXAlignment.Center
-FpsLabel.ZIndex = 50
+FpsLabel.ZIndex = 999
 
 local fpsLastTick = tick()
 local fpsFrames = 0
@@ -410,7 +341,7 @@ local TopBar = Instance.new("Frame", MainFrame)
 TopBar.Size = UDim2.new(1, 0, 0, 44)
 TopBar.BackgroundColor3 = Color3.fromRGB(10, 14, 20)
 TopBar.BorderSizePixel = 0
-TopBar.ZIndex = 31
+TopBar.ZIndex = 501
 Instance.new("UICorner", TopBar).CornerRadius = UDim.new(0, 16)
 
 local TitleLabel = Instance.new("TextLabel", TopBar)
@@ -422,7 +353,7 @@ TitleLabel.TextColor3 = Color3.fromRGB(0, 255, 128)
 TitleLabel.TextSize = 13
 TitleLabel.Font = Enum.Font.GothamBold
 TitleLabel.TextXAlignment = Enum.TextXAlignment.Left
-TitleLabel.ZIndex = 31
+TitleLabel.ZIndex = 502
 
 FloatBtn.MouseButton1Click:Connect(function()
 	if not loggedIn then return end
@@ -440,7 +371,7 @@ TabHeader.Size = UDim2.new(1, -20, 0, 40)
 TabHeader.Position = UDim2.new(0, 10, 0, 54)
 TabHeader.BackgroundColor3 = Color3.fromRGB(8, 11, 16)
 TabHeader.BorderSizePixel = 0
-TabHeader.ZIndex = 31
+TabHeader.ZIndex = 501
 Instance.new("UICorner", TabHeader).CornerRadius = UDim.new(0, 12)
 
 local function createTabBtn(name, posX, active)
@@ -452,7 +383,7 @@ local function createTabBtn(name, posX, active)
 	btn.TextSize = 10
 	btn.Font = Enum.Font.GothamBold
 	btn.Text = name
-	btn.ZIndex = 32
+	btn.ZIndex = 502
 	Instance.new("UICorner", btn).CornerRadius = UDim.new(0, 10)
 	return btn
 end
@@ -466,7 +397,7 @@ local ContentContainer = Instance.new("Frame", MainFrame)
 ContentContainer.Size = UDim2.new(1, -20, 1, -108)
 ContentContainer.Position = UDim2.new(0, 10, 0, 104)
 ContentContainer.BackgroundTransparency = 1
-ContentContainer.ZIndex = 31
+ContentContainer.ZIndex = 501
 
 local function createScroll()
 	local scroll = Instance.new("ScrollingFrame", ContentContainer)
@@ -475,7 +406,7 @@ local function createScroll()
 	scroll.BorderSizePixel = 0
 	scroll.ScrollBarThickness = 4
 	scroll.Visible = false
-	scroll.ZIndex = 31
+	scroll.ZIndex = 501
 	local list = Instance.new("UIListLayout", scroll)
 	list.Padding = UDim.new(0, 8)
 	list.HorizontalAlignment = Enum.HorizontalAlignment.Center
@@ -514,7 +445,7 @@ local function createToggle(parent, name, callback)
 	local row = Instance.new("Frame", parent)
 	row.Size = UDim2.new(1, 0, 0, 42)
 	row.BackgroundColor3 = Color3.fromRGB(10, 14, 20)
-	row.ZIndex = 31
+	row.ZIndex = 501
 	Instance.new("UICorner", row).CornerRadius = UDim.new(0, 12)
 	
 	local label = Instance.new("TextLabel", row)
@@ -526,7 +457,7 @@ local function createToggle(parent, name, callback)
 	label.TextSize = 12
 	label.Font = Enum.Font.GothamMedium
 	label.TextXAlignment = Enum.TextXAlignment.Left
-	label.ZIndex = 31
+	label.ZIndex = 502
 	
 	local statusBtn = Instance.new("TextButton", row)
 	statusBtn.Size = UDim2.new(0, 60, 0, 28)
@@ -536,24 +467,20 @@ local function createToggle(parent, name, callback)
 	statusBtn.TextColor3 = Color3.fromRGB(250, 60, 60)
 	statusBtn.TextSize = 11
 	statusBtn.Font = Enum.Font.GothamBold
-	statusBtn.ZIndex = 31
+	statusBtn.ZIndex = 502
 	Instance.new("UICorner", statusBtn).CornerRadius = UDim.new(0, 10)
 	
 	local state = false
 	statusBtn.MouseButton1Click:Connect(function()
 		state = not state
-		funcoesAtivasFirebase[name] = state
-		
 		if state then
 			statusBtn.BackgroundColor3 = Color3.fromRGB(0, 180, 90)
 			statusBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
 			statusBtn.Text = "ON"
-			mostrarNotificacao(name, "Função Ativada com Sucesso!", "ON")
 		else
 			statusBtn.BackgroundColor3 = Color3.fromRGB(18, 24, 34)
 			statusBtn.TextColor3 = Color3.fromRGB(250, 60, 60)
 			statusBtn.Text = "OFF"
-			mostrarNotificacao(name, "Função Desativada.", "OFF")
 		end
 		callback(state)
 	end)
@@ -563,7 +490,7 @@ local function createSlider(parent, name, min, max, default, callback)
 	local row = Instance.new("Frame", parent)
 	row.Size = UDim2.new(1, 0, 0, 58)
 	row.BackgroundColor3 = Color3.fromRGB(10, 14, 20)
-	row.ZIndex = 31
+	row.ZIndex = 501
 	Instance.new("UICorner", row).CornerRadius = UDim.new(0, 12)
 
 	local label = Instance.new("TextLabel", row)
@@ -575,7 +502,7 @@ local function createSlider(parent, name, min, max, default, callback)
 	label.TextSize = 12
 	label.Font = Enum.Font.GothamMedium
 	label.TextXAlignment = Enum.TextXAlignment.Left
-	label.ZIndex = 31
+	label.ZIndex = 502
 
 	local valLabel = Instance.new("TextLabel", row)
 	valLabel.Size = UDim2.new(0.2, 0, 0, 24)
@@ -586,21 +513,21 @@ local function createSlider(parent, name, min, max, default, callback)
 	valLabel.TextSize = 12
 	valLabel.Font = Enum.Font.GothamBold
 	valLabel.TextXAlignment = Enum.TextXAlignment.Right
-	valLabel.ZIndex = 31
+	valLabel.ZIndex = 502
 
 	local sliderBg = Instance.new("Frame", row)
 	sliderBg.Size = UDim2.new(0.9, 0, 0, 6)
 	sliderBg.Position = UDim2.new(0.05, 0, 0, 40)
 	sliderBg.BackgroundColor3 = Color3.fromRGB(18, 24, 34)
 	sliderBg.BorderSizePixel = 0
-	sliderBg.ZIndex = 31
+	sliderBg.ZIndex = 502
 	Instance.new("UICorner", sliderBg).CornerRadius = UDim.new(1, 0)
 
 	local sliderFill = Instance.new("Frame", sliderBg)
 	sliderFill.Size = UDim2.new((default - min) / (max - min), 0, 1, 0)
 	sliderFill.BackgroundColor3 = Color3.fromRGB(0, 255, 128)
 	sliderFill.BorderSizePixel = 0
-	sliderFill.ZIndex = 31
+	sliderFill.ZIndex = 502
 	Instance.new("UICorner", sliderFill).CornerRadius = UDim.new(1, 0)
 
 	local dragging = false
@@ -638,7 +565,7 @@ end
 local ChannelCard = Instance.new("Frame", panelChannel)
 ChannelCard.Size = UDim2.new(1, 0, 0, 275)
 ChannelCard.BackgroundColor3 = Color3.fromRGB(8, 11, 16)
-ChannelCard.ZIndex = 31
+ChannelCard.ZIndex = 501
 Instance.new("UICorner", ChannelCard).CornerRadius = UDim.new(0, 14)
 
 local ChannelCardStroke = Instance.new("UIStroke", ChannelCard)
@@ -653,7 +580,7 @@ CardTitle.Text = "⚡ DARK GAMING YT ⚡"
 CardTitle.TextColor3 = Color3.fromRGB(0, 255, 128)
 CardTitle.TextSize = 14
 CardTitle.Font = Enum.Font.GothamBold
-CardTitle.ZIndex = 31
+CardTitle.ZIndex = 502
 
 local CardDesc = Instance.new("TextLabel", ChannelCard)
 CardDesc.Size = UDim2.new(0.9, 0, 0, 35)
@@ -664,7 +591,7 @@ CardDesc.TextColor3 = Color3.fromRGB(220, 240, 230)
 CardDesc.TextSize = 11
 CardDesc.Font = Enum.Font.GothamMedium
 CardDesc.TextWrapped = true
-CardDesc.ZIndex = 31
+CardDesc.ZIndex = 502
 
 local CopyChannelBtn = Instance.new("TextButton", ChannelCard)
 CopyChannelBtn.Size = UDim2.new(0.9, 0, 0, 38)
@@ -674,7 +601,7 @@ CopyChannelBtn.Text = "📺 Copiar Link do Canal"
 CopyChannelBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
 CopyChannelBtn.TextSize = 12
 CopyChannelBtn.Font = Enum.Font.GothamBold
-CopyChannelBtn.ZIndex = 31
+CopyChannelBtn.ZIndex = 502
 Instance.new("UICorner", CopyChannelBtn).CornerRadius = UDim.new(0, 10)
 
 CopyChannelBtn.MouseButton1Click:Connect(function()
@@ -682,7 +609,6 @@ CopyChannelBtn.MouseButton1Click:Connect(function()
 		setclipboard("https://youtu.be/D2Iqev9FHyA?si=GAnnU5ckAE_rzOOq")
 	end)
 	CopyChannelBtn.Text = "✅ Link Copiado com Sucesso!"
-	mostrarNotificacao("CLIPBOARD", "Link copiado para a área de transferência!", "ON")
 	task.wait(2)
 	CopyChannelBtn.Text = "📺 Copiar Link do Canal"
 end)
@@ -691,7 +617,7 @@ local StatsBox = Instance.new("Frame", ChannelCard)
 StatsBox.Size = UDim2.new(0.9, 0, 0, 38)
 StatsBox.Position = UDim2.new(0.05, 0, 0, 136)
 StatsBox.BackgroundColor3 = Color3.fromRGB(5, 7, 10)
-StatsBox.ZIndex = 31
+StatsBox.ZIndex = 502
 Instance.new("UICorner", StatsBox).CornerRadius = UDim.new(0, 10)
 local StatsStroke = Instance.new("UIStroke", StatsBox)
 StatsStroke.Color = Color3.fromRGB(0, 255, 128)
@@ -704,7 +630,7 @@ StatsLabel.Text = "👥 Pessoas Usando Agora: Conectando..."
 StatsLabel.TextColor3 = Color3.fromRGB(0, 255, 128)
 StatsLabel.TextSize = 11
 StatsLabel.Font = Enum.Font.GothamBold
-StatsLabel.ZIndex = 31
+StatsLabel.ZIndex = 503
 
 statsLabelReference = StatsLabel
 
@@ -716,7 +642,7 @@ ClearCacheBtn.Text = "🧹 Limpar Cache & Otimizar Jogo"
 ClearCacheBtn.TextColor3 = Color3.fromRGB(0, 255, 128)
 ClearCacheBtn.TextSize = 11
 ClearCacheBtn.Font = Enum.Font.GothamBold
-ClearCacheBtn.ZIndex = 31
+ClearCacheBtn.ZIndex = 502
 Instance.new("UICorner", ClearCacheBtn).CornerRadius = UDim.new(0, 10)
 
 local ClearStroke = Instance.new("UIStroke", ClearCacheBtn)
@@ -733,7 +659,6 @@ ClearCacheBtn.MouseButton1Click:Connect(function()
 		collectgarbage("collect")
 	end)
 	ClearCacheBtn.Text = "✨ Cache Limpo & Otimizado!"
-	mostrarNotificacao("OTIMIZAÇÃO", "Cache do jogo limpo com sucesso!", "ON")
 	task.wait(2)
 	ClearCacheBtn.Text = "🧹 Limpar Cache & Otimizar Jogo"
 end)
