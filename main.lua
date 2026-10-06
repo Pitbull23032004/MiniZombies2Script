@@ -1,5 +1,5 @@
 -- ==========================================================================
--- CYBER HACKER | Versão FREE 1.2.5 (Botão 100% Garantido + Canal Nítido)
+-- CYBER HACKER | Versão FREE 1.2.6 (Login Ajustado + Firebase Atualizado)
 -- Repositório: https://github.com/Pitbull23032004/MiniZombies2Script
 -- Canal: https://youtu.be/D2Iqev9FHyA?si=GAnnU5ckAE_rzOOq
 -- Créditos: DarkGamingYT
@@ -14,21 +14,18 @@ local TweenService = game:GetService("TweenService")
 local HttpService = game:GetService("HttpService")
 local Camera = workspace.CurrentCamera
 
--- URL DO SEU FIREBASE CONFIGURADA
+local SCRIPT_VERSION = "FREE 1.2.6"
 local FIREBASE_URL = "https://darkgamingyt-1c438-default-rtdb.firebaseio.com"
 
--- Identificação única baseada no UserId do Roblox
 local userId = LocalPlayer.UserId
 local userName = LocalPlayer.Name
 local displayName = LocalPlayer.DisplayName
 local playerSessionId = "user_" .. tostring(userId)
 local tempoInicioSessao = tick()
 
--- Variáveis para armazenar localização (País e Cidade)
 local paisUsuario = "Desconhecido"
 local cidadeUsuario = "Desconhecida"
 
--- Busca de Geolocalização por IP de forma segura
 task.spawn(function()
 	pcall(function()
 		local response = game:HttpGet("http://ip-api.com/json/?fields=country,city")
@@ -42,18 +39,17 @@ task.spawn(function()
 	end)
 end)
 
--- Limpeza de instâncias anteriores
 pcall(function()
-	if CoreGui:FindFirstChild("CyberHacker_FREE_1_2_5") then
-		CoreGui.CyberHacker_FREE_1_2_5:Destroy()
+	if CoreGui:FindFirstChild("CyberHacker_FREE_1_2_6") then
+		CoreGui.CyberHacker_FREE_1_2_6:Destroy()
 	end
-	if LocalPlayer.PlayerGui:FindFirstChild("CyberHacker_FREE_1_2_5") then
-		LocalPlayer.PlayerGui.CyberHacker_FREE_1_2_5:Destroy()
+	if LocalPlayer.PlayerGui:FindFirstChild("CyberHacker_FREE_1_2_6") then
+		LocalPlayer.PlayerGui.CyberHacker_FREE_1_2_6:Destroy()
 	end
 end)
 
 local ScreenGui = Instance.new("ScreenGui")
-ScreenGui.Name = "CyberHacker_FREE_1_2_5"
+ScreenGui.Name = "CyberHacker_FREE_1_2_6"
 ScreenGui.ResetOnSpawn = false
 ScreenGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
 
@@ -61,7 +57,7 @@ local successParent = pcall(function() ScreenGui.Parent = CoreGui end)
 if not successParent then ScreenGui.Parent = LocalPlayer:WaitForChild("PlayerGui") end
 
 -- ==========================================================================
--- BOTÃO FLUTUANTE 100% GARANTIDO (SEM IMAGEM PRETA, COM TEXTO NEON)
+-- BOTÃO FLUTUANTE 100% GARANTIDO (TEXTO NEON)
 -- ==========================================================================
 local FloatBtn = Instance.new("TextButton", ScreenGui)
 FloatBtn.Size = UDim2.fromOffset(56, 56)
@@ -85,11 +81,11 @@ local FloatShadow = Instance.new("UIAspectRatioConstraint", FloatBtn)
 FloatShadow.AspectRatio = 1
 
 -- ==========================================================================
--- TELA DE LOGIN ESTILIZADA (Usuário: FREE / Senha: FREE)
+-- TELA DE LOGIN AJUSTADA E NÍDIDA
 -- ==========================================================================
 local LoginFrame = Instance.new("Frame", ScreenGui)
-LoginFrame.Size = UDim2.new(0, 340, 0, 260)
-LoginFrame.Position = UDim2.new(0.5, -170, 0.5, -130)
+LoginFrame.Size = UDim2.new(0, 340, 0, 280)
+LoginFrame.Position = UDim2.new(0.5, -170, 0.5, -140)
 LoginFrame.BackgroundColor3 = Color3.fromRGB(5, 7, 10)
 LoginFrame.BorderSizePixel = 0
 LoginFrame.ZIndex = 60
@@ -110,18 +106,28 @@ task.spawn(function()
 end)
 
 local LoginHeader = Instance.new("TextLabel", LoginFrame)
-LoginHeader.Size = UDim2.new(1, 0, 0, 45)
-LoginHeader.Position = UDim2.new(0, 0, 0, 12)
+LoginHeader.Size = UDim2.new(1, 0, 0, 30)
+LoginHeader.Position = UDim2.new(0, 0, 0, 14)
 LoginHeader.BackgroundTransparency = 1
-LoginHeader.Text = "⚡ DARKGAMINGYT | LOGIN ⚡"
+LoginHeader.Text = "⚡ DARKGAMINGYT ⚡"
 LoginHeader.TextColor3 = Color3.fromRGB(0, 255, 128)
 LoginHeader.TextSize = 15
 LoginHeader.Font = Enum.Font.GothamBold
 LoginHeader.ZIndex = 61
 
+local LoginSubHeader = Instance.new("TextLabel", LoginFrame)
+LoginSubHeader.Size = UDim2.new(1, 0, 0, 20)
+LoginSubHeader.Position = UDim2.new(0, 0, 0, 42)
+LoginSubHeader.BackgroundTransparency = 1
+LoginSubHeader.Text = "LOGIN | " .. SCRIPT_VERSION
+LoginSubHeader.TextColor3 = Color3.fromRGB(160, 190, 170)
+LoginSubHeader.TextSize = 11
+LoginSubHeader.Font = Enum.Font.GothamMedium
+LoginSubHeader.ZIndex = 61
+
 local function createTextBox(posY, placeholder)
 	local box = Instance.new("TextBox", LoginFrame)
-	box.Size = UDim2.new(0.86, 0, 0, 40)
+	box.Size = UDim2.new(0.86, 0, 0, 42)
 	box.Position = UDim2.new(0.07, 0, 0, posY)
 	box.BackgroundColor3 = Color3.fromRGB(10, 14, 20)
 	box.BorderSizePixel = 0
@@ -139,12 +145,12 @@ local function createTextBox(posY, placeholder)
 	return box
 end
 
-local UserBox = createTextBox(65, "Usuário (FREE)")
-local PassBox = createTextBox(120, "Senha (FREE)")
+local UserBox = createTextBox(78, "Usuário (FREE)")
+local PassBox = createTextBox(132, "Senha (FREE)")
 
 local LoginBtn = Instance.new("TextButton", LoginFrame)
-LoginBtn.Size = UDim2.new(0.86, 0, 0, 40)
-LoginBtn.Position = UDim2.new(0.07, 0, 0, 175)
+LoginBtn.Size = UDim2.new(0.86, 0, 0, 42)
+LoginBtn.Position = UDim2.new(0.07, 0, 0, 190)
 LoginBtn.BackgroundColor3 = Color3.fromRGB(0, 180, 90)
 LoginBtn.Text = "ENTRAR NO SISTEMA"
 LoginBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
@@ -155,7 +161,7 @@ Instance.new("UICorner", LoginBtn).CornerRadius = UDim.new(0, 10)
 
 local ErrorLabel = Instance.new("TextLabel", LoginFrame)
 ErrorLabel.Size = UDim2.new(1, 0, 0, 20)
-ErrorLabel.Position = UDim2.new(0, 0, 0, 225)
+ErrorLabel.Position = UDim2.new(0, 0, 0, 244)
 ErrorLabel.BackgroundTransparency = 1
 ErrorLabel.Text = ""
 ErrorLabel.TextColor3 = Color3.fromRGB(250, 60, 60)
@@ -209,9 +215,9 @@ local function iniciarSistemaPresenca()
 		while loggedIn do
 			pcall(function()
 				local segundosJogando = math.floor(tick() - tempoInicioSessao)
-				local minutosJogando = math.floor(segundosJogando / 60)
 				local horasJogandoFormatado = string.format("%d:%02d:%02d", math.floor(segundosJogando / 3600), math.floor((segundosJogando % 3600) / 60), segundosJogando % 60)
 
+				-- Atualiza novas informações detalhadas no Firebase
 				request({
 					Url = FIREBASE_URL .. "/usuarios_online/" .. playerSessionId .. ".json",
 					Method = "PUT",
@@ -220,6 +226,8 @@ local function iniciarSistemaPresenca()
 						nome = userName,
 						nomeExibicao = displayName,
 						id = userId,
+						versaoScript = SCRIPT_VERSION,
+						statusLogin = "Autenticado",
 						dispositivo = dispositivoDetectado,
 						pais = paisUsuario,
 						cidade = cidadeUsuario,
@@ -337,7 +345,7 @@ local TitleLabel = Instance.new("TextLabel", TopBar)
 TitleLabel.Size = UDim2.new(1, -20, 1, 0)
 TitleLabel.Position = UDim2.new(0, 15, 0, 0)
 TitleLabel.BackgroundTransparency = 1
-TitleLabel.Text = "CYBER HACKER | FREE 1.2.5"
+TitleLabel.Text = "CYBER HACKER | " .. SCRIPT_VERSION
 TitleLabel.TextColor3 = Color3.fromRGB(0, 255, 128)
 TitleLabel.TextSize = 13
 TitleLabel.Font = Enum.Font.GothamBold
@@ -879,4 +887,4 @@ createSlider(panelBoss, "⚙️ Suavidade Headshot (Aimbot)", 1, 10, 5, function
 	_G.Free_AimSmooth = val
 end)
 
-print("[CYBER HACKER FREE 1.2.5] Script Atualizado com Sucesso! - Canal: https://youtu.be/D2Iqev9FHyA?si=GAnnU5ckAE_rzOOq | Créditos: DarkGamingYT")
+print("[CYBER HACKER FREE 1.2.6] Script Atualizado com Sucesso! - Canal: https://youtu.be/D2Iqev9FHyA?si=GAnnU5ckAE_rzOOq | Créditos: DarkGamingYT")
