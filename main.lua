@@ -1,5 +1,5 @@
 -- ==========================================================================
--- CYBER HACKER | Versão FREE 1.2.4 (Botão Ajustado + Aba Canal Estilizada)
+-- CYBER HACKER | Versão FREE 1.2.5 (Botão 100% Garantido + Canal Nítido)
 -- Repositório: https://github.com/Pitbull23032004/MiniZombies2Script
 -- Canal: https://youtu.be/D2Iqev9FHyA?si=GAnnU5ckAE_rzOOq
 -- Créditos: DarkGamingYT
@@ -44,16 +44,16 @@ end)
 
 -- Limpeza de instâncias anteriores
 pcall(function()
-	if CoreGui:FindFirstChild("CyberHacker_FREE_1_2_4") then
-		CoreGui.CyberHacker_FREE_1_2_4:Destroy()
+	if CoreGui:FindFirstChild("CyberHacker_FREE_1_2_5") then
+		CoreGui.CyberHacker_FREE_1_2_5:Destroy()
 	end
-	if LocalPlayer.PlayerGui:FindFirstChild("CyberHacker_FREE_1_2_4") then
-		LocalPlayer.PlayerGui.CyberHacker_FREE_1_2_4:Destroy()
+	if LocalPlayer.PlayerGui:FindFirstChild("CyberHacker_FREE_1_2_5") then
+		LocalPlayer.PlayerGui.CyberHacker_FREE_1_2_5:Destroy()
 	end
 end)
 
 local ScreenGui = Instance.new("ScreenGui")
-ScreenGui.Name = "CyberHacker_FREE_1_2_4"
+ScreenGui.Name = "CyberHacker_FREE_1_2_5"
 ScreenGui.ResetOnSpawn = false
 ScreenGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
 
@@ -61,14 +61,16 @@ local successParent = pcall(function() ScreenGui.Parent = CoreGui end)
 if not successParent then ScreenGui.Parent = LocalPlayer:WaitForChild("PlayerGui") end
 
 -- ==========================================================================
--- BOTÃO FLUTUANTE COM ÍCONE ESTILIZADO DE TECNOLOGIA
+-- BOTÃO FLUTUANTE 100% GARANTIDO (SEM IMAGEM PRETA, COM TEXTO NEON)
 -- ==========================================================================
-local FloatBtn = Instance.new("ImageButton", ScreenGui)
+local FloatBtn = Instance.new("TextButton", ScreenGui)
 FloatBtn.Size = UDim2.fromOffset(56, 56)
 FloatBtn.Position = UDim2.new(0, 35, 0.35, 0)
 FloatBtn.BackgroundColor3 = Color3.fromRGB(5, 7, 10)
-FloatBtn.Image = "rbxassetid://6031265935" -- Ícone tecnológico estilizado garantido visível
-FloatBtn.ImageColor3 = Color3.fromRGB(0, 255, 128)
+FloatBtn.Text = "⚡"
+FloatBtn.TextColor3 = Color3.fromRGB(0, 255, 128)
+FloatBtn.TextSize = 24
+FloatBtn.Font = Enum.Font.GothamBold
 FloatBtn.Active = true
 FloatBtn.Draggable = true
 FloatBtn.Visible = true
@@ -335,7 +337,7 @@ local TitleLabel = Instance.new("TextLabel", TopBar)
 TitleLabel.Size = UDim2.new(1, -20, 1, 0)
 TitleLabel.Position = UDim2.new(0, 15, 0, 0)
 TitleLabel.BackgroundTransparency = 1
-TitleLabel.Text = "CYBER HACKER | FREE 1.2.4"
+TitleLabel.Text = "CYBER HACKER | FREE 1.2.5"
 TitleLabel.TextColor3 = Color3.fromRGB(0, 255, 128)
 TitleLabel.TextSize = 13
 TitleLabel.Font = Enum.Font.GothamBold
@@ -547,7 +549,7 @@ local function createSlider(parent, name, min, max, default, callback)
 end
 
 -- ==========================================================================
--- ABA CANAL & ESTATÍSTICAS / SUPER ESTILIZADA
+-- ABA CANAL & ESTATÍSTICAS / SUPER NÍTIDA E ESTILIZADA
 -- ==========================================================================
 local ChannelCard = Instance.new("Frame", panelChannel)
 ChannelCard.Size = UDim2.new(1, 0, 0, 275)
@@ -574,8 +576,8 @@ CardDesc.Size = UDim2.new(0.9, 0, 0, 35)
 CardDesc.Position = UDim2.new(0.05, 0, 0, 44)
 CardDesc.BackgroundTransparency = 1
 CardDesc.Text = "Inscreva-se no canal oficial para acompanhar novos scripts, atualizações e conteúdos exclusivos!"
-CardDesc.TextColor3 = Color3.fromRGB(160, 195, 180)
-CardDesc.TextSize = 10
+CardDesc.TextColor3 = Color3.fromRGB(220, 240, 230)
+CardDesc.TextSize = 11
 CardDesc.Font = Enum.Font.GothamMedium
 CardDesc.TextWrapped = true
 CardDesc.ZIndex = 31
@@ -877,4 +879,4 @@ createSlider(panelBoss, "⚙️ Suavidade Headshot (Aimbot)", 1, 10, 5, function
 	_G.Free_AimSmooth = val
 end)
 
-print("[CYBER HACKER FREE 1.2.4] Script Atualizado com Sucesso! - Canal: https://youtu.be/D2Iqev9FHyA?si=GAnnU5ckAE_rzOOq | Créditos: DarkGamingYT")
+print("[CYBER HACKER FREE 1.2.5] Script Atualizado com Sucesso! - Canal: https://youtu.be/D2Iqev9FHyA?si=GAnnU5ckAE_rzOOq | Créditos: DarkGamingYT")
