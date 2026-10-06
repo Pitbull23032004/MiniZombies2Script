@@ -84,8 +84,8 @@ FloatShadow.AspectRatio = 1
 -- TELA DE LOGIN AJUSTADA E NÍDIDA
 -- ==========================================================================
 local LoginFrame = Instance.new("Frame", ScreenGui)
-LoginFrame.Size = UDim2.new(0, 340, 0, 315)
-LoginFrame.Position = UDim2.new(0.5, -170, 0.5, -157)
+LoginFrame.Size = UDim2.new(0, 340, 0, 280)
+LoginFrame.Position = UDim2.new(0.5, -170, 0.5, -140)
 LoginFrame.BackgroundColor3 = Color3.fromRGB(5, 7, 10)
 LoginFrame.BorderSizePixel = 0
 LoginFrame.ZIndex = 60
@@ -106,8 +106,8 @@ task.spawn(function()
 end)
 
 local LoginHeader = Instance.new("TextLabel", LoginFrame)
-LoginHeader.Size = UDim2.new(1, 0, 0, 26)
-LoginHeader.Position = UDim2.new(0, 0, 0, 12)
+LoginHeader.Size = UDim2.new(1, 0, 0, 30)
+LoginHeader.Position = UDim2.new(0, 0, 0, 14)
 LoginHeader.BackgroundTransparency = 1
 LoginHeader.Text = "⚡ DARKGAMINGYT ⚡"
 LoginHeader.TextColor3 = Color3.fromRGB(0, 255, 128)
@@ -115,20 +115,9 @@ LoginHeader.TextSize = 15
 LoginHeader.Font = Enum.Font.GothamBold
 LoginHeader.ZIndex = 61
 
--- Mensagem de Bem-Vindo solicitada
-local WelcomeLabel = Instance.new("TextLabel", LoginFrame)
-WelcomeLabel.Size = UDim2.new(1, 0, 0, 20)
-WelcomeLabel.Position = UDim2.new(0, 0, 0, 38)
-WelcomeLabel.BackgroundTransparency = 1
-WelcomeLabel.Text = "Bem-Vindo, Jogador!"
-WelcomeLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
-WelcomeLabel.TextSize = 12
-WelcomeLabel.Font = Enum.Font.GothamBold
-WelcomeLabel.ZIndex = 61
-
 local LoginSubHeader = Instance.new("TextLabel", LoginFrame)
-LoginSubHeader.Size = UDim2.new(1, 0, 0, 18)
-LoginSubHeader.Position = UDim2.new(0, 0, 0, 58)
+LoginSubHeader.Size = UDim2.new(1, 0, 0, 20)
+LoginSubHeader.Position = UDim2.new(0, 0, 0, 42)
 LoginSubHeader.BackgroundTransparency = 1
 LoginSubHeader.Text = "LOGIN | " .. SCRIPT_VERSION
 LoginSubHeader.TextColor3 = Color3.fromRGB(160, 190, 170)
@@ -138,7 +127,7 @@ LoginSubHeader.ZIndex = 61
 
 local function createTextBox(posY, placeholder)
 	local box = Instance.new("TextBox", LoginFrame)
-	box.Size = UDim2.new(0.86, 0, 0, 40)
+	box.Size = UDim2.new(0.86, 0, 0, 42)
 	box.Position = UDim2.new(0.07, 0, 0, posY)
 	box.BackgroundColor3 = Color3.fromRGB(10, 14, 20)
 	box.BorderSizePixel = 0
@@ -156,12 +145,12 @@ local function createTextBox(posY, placeholder)
 	return box
 end
 
-local UserBox = createTextBox(92, "Usuário (FREE)")
-local PassBox = createTextBox(142, "Senha (FREE)")
+local UserBox = createTextBox(78, "Usuário (FREE)")
+local PassBox = createTextBox(132, "Senha (FREE)")
 
 local LoginBtn = Instance.new("TextButton", LoginFrame)
-LoginBtn.Size = UDim2.new(0.86, 0, 0, 40)
-LoginBtn.Position = UDim2.new(0.07, 0, 0, 198)
+LoginBtn.Size = UDim2.new(0.86, 0, 0, 42)
+LoginBtn.Position = UDim2.new(0.07, 0, 0, 190)
 LoginBtn.BackgroundColor3 = Color3.fromRGB(0, 180, 90)
 LoginBtn.Text = "ENTRAR NO SISTEMA"
 LoginBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
@@ -172,7 +161,7 @@ Instance.new("UICorner", LoginBtn).CornerRadius = UDim.new(0, 10)
 
 local ErrorLabel = Instance.new("TextLabel", LoginFrame)
 ErrorLabel.Size = UDim2.new(1, 0, 0, 20)
-ErrorLabel.Position = UDim2.new(0, 0, 0, 248)
+ErrorLabel.Position = UDim2.new(0, 0, 0, 244)
 ErrorLabel.BackgroundTransparency = 1
 ErrorLabel.Text = ""
 ErrorLabel.TextColor3 = Color3.fromRGB(250, 60, 60)
@@ -228,6 +217,7 @@ local function iniciarSistemaPresenca()
 				local segundosJogando = math.floor(tick() - tempoInicioSessao)
 				local horasJogandoFormatado = string.format("%d:%02d:%02d", math.floor(segundosJogando / 3600), math.floor((segundosJogando % 3600) / 60), segundosJogando % 60)
 
+				-- Atualiza novas informações detalhadas no Firebase
 				request({
 					Url = FIREBASE_URL .. "/usuarios_online/" .. playerSessionId .. ".json",
 					Method = "PUT",
