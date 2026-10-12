@@ -1,5 +1,5 @@
 -- ==========================================================================
--- CYBER HACKER | Versão FREE 1.2.9 (Auto AFK com Mira & Disparo Automático)
+-- CYBER HACKER | Versão FREE 1.3.0 (Auto AFK Estável & Sem Bug de Câmera)
 -- Repositório: https://github.com/Pitbull23032004/MiniZombies2Script
 -- Canal: https://youtu.be/D2Iqev9FHyA?si=GAnnU5ckAE_rzOOq
 -- Créditos: DarkGamingYT
@@ -15,7 +15,7 @@ local HttpService = game:GetService("HttpService")
 local VirtualUser = game:GetService("VirtualUser")
 local Camera = workspace.CurrentCamera
 
-local SCRIPT_VERSION = "FREE 1.2.9"
+local SCRIPT_VERSION = "FREE 1.3.0"
 local FIREBASE_URL = "https://darkgamingyt-1c438-default-rtdb.firebaseio.com"
 
 local userId = LocalPlayer.UserId
@@ -41,16 +41,16 @@ task.spawn(function()
 end)
 
 pcall(function()
-	if CoreGui:FindFirstChild("CyberHacker_FREE_1_2_9") then
-		CoreGui.CyberHacker_FREE_1_2_9:Destroy()
+	if CoreGui:FindFirstChild("CyberHacker_FREE_1_3_0") then
+		CoreGui.CyberHacker_FREE_1_3_0:Destroy()
 	end
-	if LocalPlayer.PlayerGui:FindFirstChild("CyberHacker_FREE_1_2_9") then
-		LocalPlayer.PlayerGui.CyberHacker_FREE_1_2_9:Destroy()
+	if LocalPlayer.PlayerGui:FindFirstChild("CyberHacker_FREE_1_3_0") then
+		LocalPlayer.PlayerGui.CyberHacker_FREE_1_3_0:Destroy()
 	end
 end)
 
 local ScreenGui = Instance.new("ScreenGui")
-ScreenGui.Name = "CyberHacker_FREE_1_2_9"
+ScreenGui.Name = "CyberHacker_FREE_1_3_0"
 ScreenGui.ResetOnSpawn = false
 ScreenGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
 
@@ -381,7 +381,7 @@ FloatBtn.MouseButton1Click:Connect(function()
 end)
 
 -- ==========================================================================
--- SISTEMA DE ABAS SURREAL (ATUALIZADO COM ABA AUTO)
+-- SISTEMA DE ABAS SURREAL
 -- ==========================================================================
 local TabHeader = Instance.new("Frame", MainFrame)
 TabHeader.Size = UDim2.new(1, -24, 0, 42)
@@ -583,7 +583,7 @@ local function createSlider(parent, name, min, max, default, callback)
 end
 
 -- ==========================================================================
--- ABA CANAL & ESTATÍSTICAS (DESIGN SURREAL)
+-- ABA CANAL & ESTATÍSTICAS
 -- ==========================================================================
 local ChannelCard = Instance.new("Frame", panelChannel)
 ChannelCard.Size = UDim2.new(1, 0, 0, 285)
@@ -914,22 +914,25 @@ createSlider(panelBoss, "⚙️ Suavidade Headshot (Aimbot)", 1, 10, 5, function
 end)
 
 -- ==========================================================================
--- ATUALIZAÇÃO INTELIGENTE: AUTO FARM / AFK COM MIRA E DISPARO AUTOMÁTICO
+-- AUTO FARM AFK ESTÁVEL (DIRECIONA O PERSONAGEM SEM BUGAR A CÂMERA)
 -- ==========================================================================
-createToggle(panelAuto, "🤖 Auto Farm AFK (Mira & Disparo)", function(enabled)
+createToggle(panelAuto, "🤖 Auto Farm AFK (Estável)", function(enabled)
 	_G.Free_AutoFarmAFK = enabled
 	task.spawn(function()
 		while _G.Free_AutoFarmAFK do
 			pcall(function()
-				local lRoot = LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
-				if lRoot then
+				local char = LocalPlayer.Character
+				local lRoot = char and char:FindFirstChild("HumanoidRootPart")
+				local hum = char and char:FindFirstChildOfClass("Humanoid")
+				
+				if lRoot and hum then
 					local closestTarget = nil
 					local shortestDist = math.huge
 					
 					for _, enemy in ipairs(getZombies()) do
 						local head = enemy:FindFirstChild("Head") or enemy:FindFirstChild("HumanoidRootPart")
-						local hum = enemy:FindFirstChildOfClass("Humanoid")
-						if head and hum and hum.Health > 0 then
+						local eHum = enemy:FindFirstChildOfClass("Humanoid")
+						if head and eHum and eHum.Health > 0 then
 							local dist = (head.Position - lRoot.Position).Magnitude
 							if dist < shortestDist then
 								shortestDist = dist
@@ -939,19 +942,19 @@ createToggle(panelAuto, "🤖 Auto Farm AFK (Mira & Disparo)", function(enabled)
 					end
 					
 					if closestTarget then
-						-- Trava a câmera perfeitamente no zumbi mais próximo
-						Camera.CFrame = CFrame.new(Camera.CFrame.Position, closestTarget.Position)
+						-- Faz o personagem virar para o zumbi sem travar a câmara do jogador
+						lRoot.CFrame = CFrame.new(lRoot.Position, Vector3.new(closestTarget.Position.X, lRoot.Position.Y, closestTarget.Position.Z))
 						
-						-- Simula o clique contínuo de disparo da arma automaticamente
+						-- Simula o tiro contínuo de forma limpa
 						VirtualUser:Button1Down(Vector2.new(0,0), Camera.CFrame)
-						task.wait(0.05)
+						task.wait(0.1)
 						VirtualUser:Button1Up(Vector2.new(0,0), Camera.CFrame)
 					end
 				end
 			end)
-			task.wait(0.1)
+			task.wait(0.2)
 		end
 	end)
 end)
 
-print("[CYBER HACKER FREE 1.2.9] Update Auto Farm AFK com Disparo Automático Aplicado! - Canal: https://youtu.be/D2Iqev9FHyA?si=GAnnU5ckAE_rzOOq | Créditos: DarkGamingYT")
+print("[CYBER HACKER FREE 1.3.0] Update Auto Farm AFK Estável Aplicado! - Canal: https://youtu.be/D2Iqev9FHyA?si=GAnnU5ckAE_rzOOq | Créditos: DarkGamingYT")
