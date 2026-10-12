@@ -1,5 +1,5 @@
 -- ==========================================================================
--- CYBER HACKER | Versão FREE 1.2.8 (Auto Farm Sobrevivência Adicionado)
+-- CYBER HACKER | Versão FREE 1.2.9 (Auto AFK com Mira & Disparo Automático)
 -- Repositório: https://github.com/Pitbull23032004/MiniZombies2Script
 -- Canal: https://youtu.be/D2Iqev9FHyA?si=GAnnU5ckAE_rzOOq
 -- Créditos: DarkGamingYT
@@ -12,9 +12,10 @@ local RunService = game:GetService("RunService")
 local CoreGui = game:GetService("CoreGui")
 local TweenService = game:GetService("TweenService")
 local HttpService = game:GetService("HttpService")
+local VirtualUser = game:GetService("VirtualUser")
 local Camera = workspace.CurrentCamera
 
-local SCRIPT_VERSION = "FREE 1.2.8"
+local SCRIPT_VERSION = "FREE 1.2.9"
 local FIREBASE_URL = "https://darkgamingyt-1c438-default-rtdb.firebaseio.com"
 
 local userId = LocalPlayer.UserId
@@ -40,16 +41,16 @@ task.spawn(function()
 end)
 
 pcall(function()
-	if CoreGui:FindFirstChild("CyberHacker_FREE_1_2_8") then
-		CoreGui.CyberHacker_FREE_1_2_8:Destroy()
+	if CoreGui:FindFirstChild("CyberHacker_FREE_1_2_9") then
+		CoreGui.CyberHacker_FREE_1_2_9:Destroy()
 	end
-	if LocalPlayer.PlayerGui:FindFirstChild("CyberHacker_FREE_1_2_8") then
-		LocalPlayer.PlayerGui.CyberHacker_FREE_1_2_8:Destroy()
+	if LocalPlayer.PlayerGui:FindFirstChild("CyberHacker_FREE_1_2_9") then
+		LocalPlayer.PlayerGui.CyberHacker_FREE_1_2_9:Destroy()
 	end
 end)
 
 local ScreenGui = Instance.new("ScreenGui")
-ScreenGui.Name = "CyberHacker_FREE_1_2_8"
+ScreenGui.Name = "CyberHacker_FREE_1_2_9"
 ScreenGui.ResetOnSpawn = false
 ScreenGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
 
@@ -392,7 +393,7 @@ Instance.new("UICorner", TabHeader).CornerRadius = UDim.new(0, 14)
 
 local function createTabBtn(name, posX, active)
 	local btn = Instance.new("TextButton", TabHeader)
-	btn.Size = UDim2.new(0.18, 0, 0.82, 0) -- Ajustado proporcionalmente para 5 abas
+	btn.Size = UDim2.new(0.18, 0, 0.82, 0)
 	btn.Position = UDim2.new(posX, 0, 0.09, 0)
 	btn.BackgroundColor3 = active and Color3.fromRGB(0, 200, 100) or Color3.fromRGB(12, 16, 24)
 	btn.TextColor3 = active and Color3.fromRGB(255, 255, 255) or Color3.fromRGB(150, 190, 170)
@@ -407,7 +408,7 @@ end
 local btnVisual = createTabBtn("VISUAL", 0.015, true)
 local btnMove = createTabBtn("MOV", 0.21, false)
 local btnBoss = createTabBtn("COMBATE", 0.405, false)
-local btnAuto = createTabBtn("AUTO", 0.60, false)       -- Nova Aba Auto Farm
+local btnAuto = createTabBtn("AUTO", 0.60, false)
 local btnChannel = createTabBtn("CANAL", 0.795, false)
 
 local ContentContainer = Instance.new("Frame", MainFrame)
@@ -694,7 +695,7 @@ local function getZombies()
 		if obj:IsA("Model") and obj ~= LocalPlayer.Character then
 			local root = obj:FindFirstChild("HumanoidRootPart") or obj:FindFirstChild("Head")
 			local hum = obj:FindFirstChildOfClass("Humanoid")
-			if root and hum and not Players:GetPlayerFromCharacter(obj) then
+			if root and hum and not Players:GetPlayerFromCharacter(obj) and hum.Health > 0 then
 				table.insert(list, obj)
 			end
 		end
@@ -913,29 +914,44 @@ createSlider(panelBoss, "⚙️ Suavidade Headshot (Aimbot)", 1, 10, 5, function
 end)
 
 -- ==========================================================================
--- NOVA FUNÇÃO: AUTO FARM / SOBREVIVÊNCIA AFK (ELIMINAÇÃO AUTOMÁTICA)
+-- ATUALIZAÇÃO INTELIGENTE: AUTO FARM / AFK COM MIRA E DISPARO AUTOMÁTICO
 -- ==========================================================================
-createToggle(panelAuto, "🤖 Auto Farm Sobrevivência (AFK)", function(enabled)
-	_G.Free_AutoFarm = enabled
+createToggle(panelAuto, "🤖 Auto Farm AFK (Mira & Disparo)", function(enabled)
+	_G.Free_AutoFarmAFK = enabled
 	task.spawn(function()
-		while _G.Free_AutoFarm do
+		while _G.Free_AutoFarmAFK do
 			pcall(function()
-				local lChar = LocalPlayer.Character
-				local lRoot = lChar and lChar:FindFirstChild("HumanoidRootPart")
+				local lRoot = LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
 				if lRoot then
+					local closestTarget = nil
+					local shortestDist = math.huge
+					
 					for _, enemy in ipairs(getZombies()) do
+						local head = enemy:FindFirstChild("Head") or enemy:FindFirstChild("HumanoidRootPart")
 						local hum = enemy:FindFirstChildOfClass("Humanoid")
-						local rootPart = enemy:FindFirstChild("HumanoidRootPart") or enemy:FindFirstChild("Head")
-						if hum and hum.Health > 0 and rootPart then
-							-- Teleporta levemente próximo ou zera o HP direto se permitido pelo jogo
-							hum.Health = 0
+						if head and hum and hum.Health > 0 then
+							local dist = (head.Position - lRoot.Position).Magnitude
+							if dist < shortestDist then
+								shortestDist = dist
+								closestTarget = head
+							end
 						end
+					end
+					
+					if closestTarget then
+						-- Trava a câmera perfeitamente no zumbi mais próximo
+						Camera.CFrame = CFrame.new(Camera.CFrame.Position, closestTarget.Position)
+						
+						-- Simula o clique contínuo de disparo da arma automaticamente
+						VirtualUser:Button1Down(Vector2.new(0,0), Camera.CFrame)
+						task.wait(0.05)
+						VirtualUser:Button1Up(Vector2.new(0,0), Camera.CFrame)
 					end
 				end
 			end)
-			task.wait(0.5)
+			task.wait(0.1)
 		end
 	end)
 end)
 
-print("[CYBER HACKER FREE 1.2.8] Update Auto Farm Adicionado com Sucesso! - Canal: https://youtu.be/D2Iqev9FHyA?si=GAnnU5ckAE_rzOOq | Créditos: DarkGamingYT")
+print("[CYBER HACKER FREE 1.2.9] Update Auto Farm AFK com Disparo Automático Aplicado! - Canal: https://youtu.be/D2Iqev9FHyA?si=GAnnU5ckAE_rzOOq | Créditos: DarkGamingYT")
