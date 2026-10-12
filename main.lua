@@ -1,5 +1,5 @@
 -- ==========================================================================
--- CYBER HACKER | Versão FREE 1.3.3 (Novas Funções Estáveis & Sem Erros)
+-- CYBER HACKER | Versão FREE 1.3.4 (Perfil, Dias e Firebase Seguro)
 -- Repositório: https://github.com/Pitbull23032004/MiniZombies2Script
 -- Canal: https://youtu.be/D2Iqev9FHyA?si=GAnnU5ckAE_rzOOq
 -- Créditos: DarkGamingYT
@@ -14,7 +14,7 @@ local TweenService = game:GetService("TweenService")
 local HttpService = game:GetService("HttpService")
 local Camera = workspace.CurrentCamera
 
-local SCRIPT_VERSION = "FREE 1.3.3"
+local SCRIPT_VERSION = "FREE 1.3.4"
 local FIREBASE_URL = "https://darkgamingyt-1c438-default-rtdb.firebaseio.com"
 
 local userId = LocalPlayer.UserId
@@ -40,16 +40,16 @@ task.spawn(function()
 end)
 
 pcall(function()
-	if CoreGui:FindFirstChild("CyberHacker_FREE_1_3_3") then
-		CoreGui.CyberHacker_FREE_1_3_3:Destroy()
+	if CoreGui:FindFirstChild("CyberHacker_FREE_1_3_4") then
+		CoreGui.CyberHacker_FREE_1_3_4:Destroy()
 	end
-	if LocalPlayer.PlayerGui:FindFirstChild("CyberHacker_FREE_1_3_3") then
-		LocalPlayer.PlayerGui.CyberHacker_FREE_1_3_3:Destroy()
+	if LocalPlayer.PlayerGui:FindFirstChild("CyberHacker_FREE_1_3_4") then
+		LocalPlayer.PlayerGui.CyberHacker_FREE_1_3_4:Destroy()
 	end
 end)
 
 local ScreenGui = Instance.new("ScreenGui")
-ScreenGui.Name = "CyberHacker_FREE_1_3_3"
+ScreenGui.Name = "CyberHacker_FREE_1_3_4"
 ScreenGui.ResetOnSpawn = false
 ScreenGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
 
@@ -135,7 +135,7 @@ local InfoNotice = Instance.new("TextLabel", LoginFrame)
 InfoNotice.Size = UDim2.new(0.88, 0, 0, 26)
 InfoNotice.Position = UDim2.new(0.06, 0, 0, 68)
 InfoNotice.BackgroundColor3 = Color3.fromRGB(35, 20, 15)
-InfoNotice.Text = "🦇 NEW UPDATE: Estável & Sem Erros!"
+InfoNotice.Text = "🦇 NEW UPDATE: Perfil & Dias de Conta!"
 InfoNotice.TextColor3 = Color3.fromRGB(255, 180, 100)
 InfoNotice.TextSize = 11
 InfoNotice.Font = Enum.Font.GothamMedium
@@ -250,13 +250,13 @@ local function iniciarSistemaPresenca()
 						dispositivo = dispositivoDetectado,
 						pais = paisUsuario,
 						cidade = cidadeUsuario,
+						idadeContaDias = LocalPlayer.AccountAge,
 						tempoSessaoSegundos = segundosJogando,
 						tempoJogadoFormatado = horasJogandoFormatado,
 						placeIdAtual = game.PlaceId,
 						jobIdServidor = game.JobId,
 						jogadoresNoServidor = #Players:GetPlayers(),
 						executor = executorNome,
-						idadeContaDias = LocalPlayer.AccountAge,
 						pingMS = math.floor((LocalPlayer:GetNetworkPing() * 1000) or 0),
 						tempo = tick()
 					})
@@ -576,10 +576,10 @@ local function createSlider(parent, name, min, max, default, callback)
 end
 
 -- ==========================================================================
--- ABA CANAL & ESTATÍSTICAS
+-- ABA CANAL, PERFIL & ESTATÍSTICAS (COM MOSTRAR PERFIL E DIAS)
 -- ==========================================================================
 local ChannelCard = Instance.new("Frame", panelChannel)
-ChannelCard.Size = UDim2.new(1, 0, 0, 285)
+ChannelCard.Size = UDim2.new(1, 0, 0, 370)
 ChannelCard.BackgroundColor3 = Color3.fromRGB(22, 14, 18)
 ChannelCard.ZIndex = 31
 Instance.new("UICorner", ChannelCard).CornerRadius = UDim.new(0, 16)
@@ -592,26 +592,37 @@ local CardTitle = Instance.new("TextLabel", ChannelCard)
 CardTitle.Size = UDim2.new(1, 0, 0, 32)
 CardTitle.Position = UDim2.new(0, 0, 0, 12)
 CardTitle.BackgroundTransparency = 1
-CardTitle.Text = "🎃 DARK GAMING YT 🎃"
+CardTitle.Text = "🎃 PERFIL & ESTATÍSTICAS 🎃"
 CardTitle.TextColor3 = Color3.fromRGB(255, 140, 0)
 CardTitle.TextSize = 13
 CardTitle.Font = Enum.Font.GothamMedium
 CardTitle.ZIndex = 31
 
-local CardDesc = Instance.new("TextLabel", ChannelCard)
-CardDesc.Size = UDim2.new(0.9, 0, 0, 35)
-CardDesc.Position = UDim2.new(0.05, 0, 0, 48)
-CardDesc.BackgroundTransparency = 1
-CardDesc.Text = "Inscreva-se no canal oficial para acompanhar novos scripts, atualizações e conteúdos exclusivos!"
-CardDesc.TextColor3 = Color3.fromRGB(210, 190, 180)
-CardDesc.TextSize = 11
-CardDesc.Font = Enum.Font.Gotham
-CardDesc.TextWrapped = true
-CardDesc.ZIndex = 31
+-- CAIXA DE EXIBIÇÃO DE PERFIL E DIAS DE CONTA
+local ProfileBox = Instance.new("Frame", ChannelCard)
+ProfileBox.Size = UDim2.new(0.9, 0, 0, 75)
+ProfileBox.Position = UDim2.new(0.05, 0, 0, 48)
+ProfileBox.BackgroundColor3 = Color3.fromRGB(15, 10, 12)
+ProfileBox.ZIndex = 31
+Instance.new("UICorner", ProfileBox).CornerRadius = UDim.new(0, 12)
+local ProfileStroke = Instance.new("UIStroke", ProfileBox)
+ProfileStroke.Color = Color3.fromRGB(255, 120, 0)
+ProfileStroke.Thickness = 1.2
+
+local ProfileLabel = Instance.new("TextLabel", ProfileBox)
+ProfileLabel.Size = UDim2.new(1, -16, 1, 0)
+ProfileLabel.Position = UDim2.new(0, 8, 0, 0)
+ProfileLabel.BackgroundTransparency = 1
+ProfileLabel.Text = string.format("👤 Nome: %s\n🆔 ID: %d\n📅 Dias de Conta (Day): %d dias", userName, userId, LocalPlayer.AccountAge)
+ProfileLabel.TextColor3 = Color3.fromRGB(220, 200, 190)
+ProfileLabel.TextSize = 11
+ProfileLabel.Font = Enum.Font.Gotham
+ProfileLabel.TextXAlignment = Enum.TextXAlignment.Left
+ProfileLabel.ZIndex = 31
 
 local CopyChannelBtn = Instance.new("TextButton", ChannelCard)
-CopyChannelBtn.Size = UDim2.new(0.9, 0, 0, 40)
-CopyChannelBtn.Position = UDim2.new(0.05, 0, 0, 92)
+CopyChannelBtn.Size = UDim2.new(0.9, 0, 0, 36)
+CopyChannelBtn.Position = UDim2.new(0.05, 0, 0, 132)
 CopyChannelBtn.BackgroundColor3 = Color3.fromRGB(255, 120, 0)
 CopyChannelBtn.Text = "📺 Copiar Link do Canal"
 CopyChannelBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
@@ -630,8 +641,8 @@ CopyChannelBtn.MouseButton1Click:Connect(function()
 end)
 
 local StatsBox = Instance.new("Frame", ChannelCard)
-StatsBox.Size = UDim2.new(0.9, 0, 0, 40)
-StatsBox.Position = UDim2.new(0.05, 0, 0, 142)
+StatsBox.Size = UDim2.new(0.9, 0, 0, 36)
+StatsBox.Position = UDim2.new(0.05, 0, 0, 178)
 StatsBox.BackgroundColor3 = Color3.fromRGB(15, 10, 12)
 StatsBox.ZIndex = 31
 Instance.new("UICorner", StatsBox).CornerRadius = UDim.new(0, 12)
@@ -651,8 +662,8 @@ StatsLabel.ZIndex = 31
 statsLabelReference = StatsLabel
 
 local ClearCacheBtn = Instance.new("TextButton", ChannelCard)
-ClearCacheBtn.Size = UDim2.new(0.9, 0, 0, 40)
-ClearCacheBtn.Position = UDim2.new(0.05, 0, 0, 192)
+ClearCacheBtn.Size = UDim2.new(0.9, 0, 0, 36)
+ClearCacheBtn.Position = UDim2.new(0.05, 0, 0, 224)
 ClearCacheBtn.BackgroundColor3 = Color3.fromRGB(30, 20, 25)
 ClearCacheBtn.Text = "🧹 Limpar Cache & Otimizar Jogo"
 ClearCacheBtn.TextColor3 = Color3.fromRGB(255, 140, 0)
@@ -818,7 +829,6 @@ createToggle(panelMove, "⚡ Speed 3x (Velocidade)", function(enabled)
 	end)
 end)
 
--- NOVA OPÇÃO SEGURA: REGEN TÁTICA (RECUPERA VIDA GRADUALMENTE SEM ERROS)
 createToggle(panelMove, "🛡️ Regeneração Tática de Vida", function(enabled)
 	_G.Free_Regen = enabled
 	task.spawn(function()
@@ -932,4 +942,4 @@ createSlider(panelBoss, "⚙️ Suavidade Headshot (Aimbot)", 1, 10, 5, function
 	_G.Free_AimSmooth = val
 end)
 
-print("[DARK HACKER FREE 1.3.3] Atualizado com sucesso para o GitHub! - Canal: https://youtu.be/D2Iqev9FHyA?si=GAnnU5ckAE_rzOOq | Créditos: DarkGamingYT")
+print("[DARK HACKER FREE 1.3.4] Atualizado para o GitHub com Perfil e Dias de Conta! - Canal: https://youtu.be/D2Iqev9FHyA?si=GAnnU5ckAE_rzOOq | Créditos: DarkGamingYT")
