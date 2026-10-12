@@ -1,5 +1,5 @@
 -- ==========================================================================
--- CYBER HACKER | Versão FREE 1.3.2 (Halloween Theme & Clean Login)
+-- CYBER HACKER | Versão FREE 1.3.3 (Novas Funções Estáveis & Sem Erros)
 -- Repositório: https://github.com/Pitbull23032004/MiniZombies2Script
 -- Canal: https://youtu.be/D2Iqev9FHyA?si=GAnnU5ckAE_rzOOq
 -- Créditos: DarkGamingYT
@@ -14,7 +14,7 @@ local TweenService = game:GetService("TweenService")
 local HttpService = game:GetService("HttpService")
 local Camera = workspace.CurrentCamera
 
-local SCRIPT_VERSION = "FREE 1.3.2"
+local SCRIPT_VERSION = "FREE 1.3.3"
 local FIREBASE_URL = "https://darkgamingyt-1c438-default-rtdb.firebaseio.com"
 
 local userId = LocalPlayer.UserId
@@ -40,16 +40,16 @@ task.spawn(function()
 end)
 
 pcall(function()
-	if CoreGui:FindFirstChild("CyberHacker_FREE_1_3_2") then
-		CoreGui.CyberHacker_FREE_1_3_2:Destroy()
+	if CoreGui:FindFirstChild("CyberHacker_FREE_1_3_3") then
+		CoreGui.CyberHacker_FREE_1_3_3:Destroy()
 	end
-	if LocalPlayer.PlayerGui:FindFirstChild("CyberHacker_FREE_1_3_2") then
-		LocalPlayer.PlayerGui.CyberHacker_FREE_1_3_2:Destroy()
+	if LocalPlayer.PlayerGui:FindFirstChild("CyberHacker_FREE_1_3_3") then
+		LocalPlayer.PlayerGui.CyberHacker_FREE_1_3_3:Destroy()
 	end
 end)
 
 local ScreenGui = Instance.new("ScreenGui")
-ScreenGui.Name = "CyberHacker_FREE_1_3_2"
+ScreenGui.Name = "CyberHacker_FREE_1_3_3"
 ScreenGui.ResetOnSpawn = false
 ScreenGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
 
@@ -63,7 +63,7 @@ pcall(function()
 end)
 
 -- ==========================================================================
--- BOTÃO FLUTUANTE TEMÁTICO (VIBE HALLOWEEN / LARANJA)
+-- BOTÃO FLUTUANTE ESTILOSO (HALLOWEEN THEME)
 -- ==========================================================================
 local FloatBtn = Instance.new("TextButton", ScreenGui)
 FloatBtn.Size = UDim2.fromOffset(58, 58)
@@ -105,7 +105,7 @@ task.spawn(function()
 	while LoginFrame and LoginFrame.Parent do
 		for i = 0, 1, 0.008 do
 			if not LoginStroke or not LoginStroke.Parent then break end
-			LoginStroke.Color = Color3.fromHSV(i * 0.15 + 0.05, 0.9, 1) -- Variação de tons laranjas/quentes
+			LoginStroke.Color = Color3.fromHSV(i * 0.15 + 0.05, 0.9, 1)
 			task.wait(0.04)
 		end
 	end
@@ -131,12 +131,11 @@ LoginSubHeader.TextSize = 11
 LoginSubHeader.Font = Enum.Font.Gotham
 LoginSubHeader.ZIndex = 61
 
--- AVISO "NEW UPDATE" COM FONTE SUAVE E SEM NEGRITO
 local InfoNotice = Instance.new("TextLabel", LoginFrame)
 InfoNotice.Size = UDim2.new(0.88, 0, 0, 26)
 InfoNotice.Position = UDim2.new(0.06, 0, 0, 68)
 InfoNotice.BackgroundColor3 = Color3.fromRGB(35, 20, 15)
-InfoNotice.Text = "🦇 NEW UPDATE: Otimizado e Estiloso!"
+InfoNotice.Text = "🦇 NEW UPDATE: Estável & Sem Erros!"
 InfoNotice.TextColor3 = Color3.fromRGB(255, 180, 100)
 InfoNotice.TextSize = 11
 InfoNotice.Font = Enum.Font.GothamMedium
@@ -194,7 +193,7 @@ local loggedIn = false
 local statsLabelReference = nil
 
 -- ==========================================================================
--- PAINEL PRINCIPAL (VIBE HALLOWEEN / LIMPO E SEM NEGRITO EXAGERADO)
+-- PAINEL PRINCIPAL
 -- ==========================================================================
 local MainFrame = Instance.new("Frame", ScreenGui)
 MainFrame.Size = UDim2.new(0, 370, 0, 430)
@@ -681,19 +680,21 @@ ClearCacheBtn.MouseButton1Click:Connect(function()
 end)
 
 -- ==========================================================================
--- FUNÇÕES DE ZUMBIS E CHEATS
+-- FUNÇÕES DE ZUMBIS E CHEATS SEGUROS (COM TRATAMENTO DE ERRO)
 -- ==========================================================================
 local function getZombies()
 	local list = {}
-	for _, obj in ipairs(workspace:GetDescendants()) do
-		if obj:IsA("Model") and obj ~= LocalPlayer.Character then
-			local root = obj:FindFirstChild("HumanoidRootPart") or obj:FindFirstChild("Head")
-			local hum = obj:FindFirstChildOfClass("Humanoid")
-			if root and hum and not Players:GetPlayerFromCharacter(obj) and hum.Health > 0 then
-				table.insert(list, obj)
+	pcall(function()
+		for _, obj in ipairs(workspace:GetDescendants()) do
+			if obj:IsA("Model") and obj ~= LocalPlayer.Character then
+				local root = obj:FindFirstChild("HumanoidRootPart") or obj:FindFirstChild("Head")
+				local hum = obj:FindFirstChildOfClass("Humanoid")
+				if root and hum and not Players:GetPlayerFromCharacter(obj) and hum.Health > 0 then
+					table.insert(list, obj)
+				end
 			end
 		end
-	end
+	end)
 	return list
 end
 
@@ -714,9 +715,11 @@ createToggle(panelVisual, "✨ ESP Craft (Visualizador)", function(enabled)
 			end)
 			task.wait(1)
 		end
-		for _, v in ipairs(workspace:GetDescendants()) do
-			if v.Name == "FreeHighlight" then v:Destroy() end
-		end
+		pcall(function()
+			for _, v in ipairs(workspace:GetDescendants()) do
+				if v.Name == "FreeHighlight" then v:Destroy() end
+			end
+		end)
 	end)
 end)
 
@@ -755,9 +758,11 @@ createToggle(panelVisual, "🏷️ ESP Name & HP (Detalhes)", function(enabled)
 			end)
 			task.wait(0.3)
 		end
-		for _, v in ipairs(workspace:GetDescendants()) do
-			if v.Name == "FreeNameTag" then v:Destroy() end
-		end
+		pcall(function()
+			for _, v in ipairs(workspace:GetDescendants()) do
+				if v.Name == "FreeNameTag" then v:Destroy() end
+			end
+		end)
 	end)
 end)
 
@@ -813,6 +818,22 @@ createToggle(panelMove, "⚡ Speed 3x (Velocidade)", function(enabled)
 	end)
 end)
 
+-- NOVA OPÇÃO SEGURA: REGEN TÁTICA (RECUPERA VIDA GRADUALMENTE SEM ERROS)
+createToggle(panelMove, "🛡️ Regeneração Tática de Vida", function(enabled)
+	_G.Free_Regen = enabled
+	task.spawn(function()
+		while _G.Free_Regen do
+			pcall(function()
+				local hum = LocalPlayer.Character and LocalPlayer.Character:FindFirstChildOfClass("Humanoid")
+				if hum and hum.Health > 0 and hum.Health < hum.MaxHealth then
+					hum.Health = math.clamp(hum.Health + 5, 0, hum.MaxHealth)
+				end
+			end)
+			task.wait(1)
+		end
+	end)
+end)
+
 createToggle(panelMove, "👻 Wall Hack (Atravessar Paredes)", function(enabled)
 	_G.Free_Noclip = enabled
 end)
@@ -846,23 +867,27 @@ createToggle(panelMove, "🛸 Fly (Modo Voo Beta)", function(enabled)
 		if hum then hum.AutoRotate = false end
 		
 		flyConn = RunService.RenderStepped:Connect(function()
-			local cam = workspace.CurrentCamera
-			local move = Vector3.zero
-			local spd = 50
-			if UserInputService:IsKeyDown(Enum.KeyCode.W) then move = move + cam.CFrame.LookVector end
-			if UserInputService:IsKeyDown(Enum.KeyCode.S) then move = move - cam.CFrame.LookVector end
-			if UserInputService:IsKeyDown(Enum.KeyCode.A) then move = move - cam.CFrame.RightVector end
-			if UserInputService:IsKeyDown(Enum.KeyCode.D) then move = move + cam.CFrame.RightVector end
-			if UserInputService:IsKeyDown(Enum.KeyCode.Space) then move = move + Vector3.new(0, 1, 0) end
-			if UserInputService:IsKeyDown(Enum.KeyCode.LeftShift) then spd = 90 end
-			if bv then bv.Velocity = move * spd end
-			if bg then bg.CFrame = cam.CFrame end
+			pcall(function()
+				local cam = workspace.CurrentCamera
+				local move = Vector3.zero
+				local spd = 50
+				if UserInputService:IsKeyDown(Enum.KeyCode.W) then move = move + cam.CFrame.LookVector end
+				if UserInputService:IsKeyDown(Enum.KeyCode.S) then move = move - cam.CFrame.LookVector end
+				if UserInputService:IsKeyDown(Enum.KeyCode.A) then move = move - cam.CFrame.RightVector end
+				if UserInputService:IsKeyDown(Enum.KeyCode.D) then move = move + cam.CFrame.RightVector end
+				if UserInputService:IsKeyDown(Enum.KeyCode.Space) then move = move + Vector3.new(0, 1, 0) end
+				if UserInputService:IsKeyDown(Enum.KeyCode.LeftShift) then spd = 90 end
+				if bv then bv.Velocity = move * spd end
+				if bg then bg.CFrame = cam.CFrame end
+			end)
 		end)
 	else
-		if flyConn then flyConn:Disconnect() end
-		if root:FindFirstChild("FreeFlyVel") then root.FreeFlyVel:Destroy() end
-		if root:FindFirstChild("FreeFlyGyro") then root.FreeFlyGyro:Destroy() end
-		if hum then hum.PlatformStand = false; hum.AutoRotate = true end
+		pcall(function()
+			if flyConn then flyConn:Disconnect() end
+			if root:FindFirstChild("FreeFlyVel") then root.FreeFlyVel:Destroy() end
+			if root:FindFirstChild("FreeFlyGyro") then root.FreeFlyGyro:Destroy() end
+			if hum then hum.PlatformStand = false; hum.AutoRotate = true end
+		end)
 	end
 end)
 
@@ -907,4 +932,4 @@ createSlider(panelBoss, "⚙️ Suavidade Headshot (Aimbot)", 1, 10, 5, function
 	_G.Free_AimSmooth = val
 end)
 
-print("[DARK HACKER FREE 1.3.2] Update Halloween & Clean Login Aplicado com Sucesso! - Canal: https://youtu.be/D2Iqev9FHyA?si=GAnnU5ckAE_rzOOq | Créditos: DarkGamingYT")
+print("[DARK HACKER FREE 1.3.3] Atualizado com sucesso para o GitHub! - Canal: https://youtu.be/D2Iqev9FHyA?si=GAnnU5ckAE_rzOOq | Créditos: DarkGamingYT")
