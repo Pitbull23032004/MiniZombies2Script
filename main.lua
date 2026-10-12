@@ -1,5 +1,5 @@
 -- ==========================================================================
--- CYBER HACKER | Versão FREE 1.3.5 (Aimbot Multi-Alvo: Cabeça, Quadril, Barra, Pé)
+-- CYBER HACKER | Versão FREE 1.3.6 (Aimbot Multi-Alvo Atualizado & Sem Regen)
 -- Repositório: https://github.com/Pitbull23032004/MiniZombies2Script
 -- Canal: https://youtu.be/D2Iqev9FHyA?si=GAnnU5ckAE_rzOOq
 -- Créditos: DarkGamingYT
@@ -14,7 +14,7 @@ local TweenService = game:GetService("TweenService")
 local HttpService = game:GetService("HttpService")
 local Camera = workspace.CurrentCamera
 
-local SCRIPT_VERSION = "FREE 1.3.5"
+local SCRIPT_VERSION = "FREE 1.3.6"
 local FIREBASE_URL = "https://darkgamingyt-1c438-default-rtdb.firebaseio.com"
 
 local userId = LocalPlayer.UserId
@@ -40,16 +40,16 @@ task.spawn(function()
 end)
 
 pcall(function()
-	if CoreGui:FindFirstChild("CyberHacker_FREE_1_3_5") then
-		CoreGui.CyberHacker_FREE_1_3_5:Destroy()
+	if CoreGui:FindFirstChild("CyberHacker_FREE_1_3_6") then
+		CoreGui.CyberHacker_FREE_1_3_6:Destroy()
 	end
-	if LocalPlayer.PlayerGui:FindFirstChild("CyberHacker_FREE_1_3_5") then
-		LocalPlayer.PlayerGui.CyberHacker_FREE_1_3_5:Destroy()
+	if LocalPlayer.PlayerGui:FindFirstChild("CyberHacker_FREE_1_3_6") then
+		LocalPlayer.PlayerGui.CyberHacker_FREE_1_3_6:Destroy()
 	end
 end)
 
 local ScreenGui = Instance.new("ScreenGui")
-ScreenGui.Name = "CyberHacker_FREE_1_3_5"
+ScreenGui.Name = "CyberHacker_FREE_1_3_6"
 ScreenGui.ResetOnSpawn = false
 ScreenGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
 
@@ -135,7 +135,7 @@ local InfoNotice = Instance.new("TextLabel", LoginFrame)
 InfoNotice.Size = UDim2.new(0.88, 0, 0, 26)
 InfoNotice.Position = UDim2.new(0.06, 0, 0, 68)
 InfoNotice.BackgroundColor3 = Color3.fromRGB(35, 20, 15)
-InfoNotice.Text = "🦇 NEW UPDATE: Aimbot Multi-Alvo!"
+InfoNotice.Text = "🦇 NEW UPDATE: Otimizado & Sem Erros!"
 InfoNotice.TextColor3 = Color3.fromRGB(255, 180, 100)
 InfoNotice.TextSize = 11
 InfoNotice.Font = Enum.Font.GothamMedium
@@ -828,21 +828,6 @@ createToggle(panelMove, "⚡ Speed 3x (Velocidade)", function(enabled)
 	end)
 end)
 
-createToggle(panelMove, "🛡️ Regeneração Tática de Vida", function(enabled)
-	_G.Free_Regen = enabled
-	task.spawn(function()
-		while _G.Free_Regen do
-			pcall(function()
-				local hum = LocalPlayer.Character and LocalPlayer.Character:FindFirstChildOfClass("Humanoid")
-				if hum and hum.Health > 0 and hum.Health < hum.MaxHealth then
-					hum.Health = math.clamp(hum.Health + 5, 0, hum.MaxHealth)
-				end
-			end)
-			task.wait(1)
-		end
-	end)
-end)
-
 createToggle(panelMove, "👻 Wall Hack (Atravessar Paredes)", function(enabled)
 	_G.Free_Noclip = enabled
 end)
@@ -904,7 +889,7 @@ end)
 -- UPDATE AIMBOT: CABEÇA, QUADRIL, BARRA (CENTRO) E PÉ
 -- ==========================================================================
 _G.Free_AimSmooth = 5
-_G.Free_AimPart = "Head" -- Opções: "Head", "UpperTorso" (Quadril/Torso), "HumanoidRootPart" (Barra), "LeftFoot" / "RightFoot" (Pé)
+_G.Free_AimPart = "Head" -- Opções: "Head", "UpperTorso", "HumanoidRootPart", "RightFoot"
 
 createToggle(panelBoss, "🎯 Aimbot (Ativo)", function(enabled)
 	_G.Free_AimLock = enabled
@@ -945,7 +930,6 @@ createSlider(panelBoss, "⚙️ Suavidade do Aimbot", 1, 10, 5, function(val)
 	_G.Free_AimSmooth = val
 end)
 
--- SELETOR DE PARTE DO CORPO (BOTÕES PARA ALTERNAR ENTRE CABEÇA, QUADRIL, BARRA E PÉ)
 local AimPartRow = Instance.new("Frame", panelBoss)
 AimPartRow.Size = UDim2.new(1, 0, 0, 44)
 AimPartRow.BackgroundColor3 = Color3.fromRGB(22, 14, 18)
@@ -987,4 +971,4 @@ ChangePartBtn.MouseButton1Click:Connect(function()
 	AimPartLabel.Text = "🎯 Alvo: " .. partsNames[currentPartIndex]
 end)
 
-print("[DARK HACKER FREE 1.3.5] Aimbot Multi-Alvo Atualizado com Sucesso! - Canal: https://youtu.be/D2Iqev9FHyA?si=GAnnU5ckAE_rzOOq | Créditos: DarkGamingYT")
+print("[DARK HACKER FREE 1.3.6] Atualizado com Sucesso! - Canal: https://youtu.be/D2Iqev9FHyA?si=GAnnU5ckAE_rzOOq | Créditos: DarkGamingYT")
