@@ -1,5 +1,5 @@
 -- ==========================================================================
--- CYBER HACKER | Versão FREE 1.3.4 (Perfil, Dias e Firebase Seguro)
+-- CYBER HACKER | Versão FREE 1.3.5 (Aimbot Multi-Alvo: Cabeça, Quadril, Barra, Pé)
 -- Repositório: https://github.com/Pitbull23032004/MiniZombies2Script
 -- Canal: https://youtu.be/D2Iqev9FHyA?si=GAnnU5ckAE_rzOOq
 -- Créditos: DarkGamingYT
@@ -14,7 +14,7 @@ local TweenService = game:GetService("TweenService")
 local HttpService = game:GetService("HttpService")
 local Camera = workspace.CurrentCamera
 
-local SCRIPT_VERSION = "FREE 1.3.4"
+local SCRIPT_VERSION = "FREE 1.3.5"
 local FIREBASE_URL = "https://darkgamingyt-1c438-default-rtdb.firebaseio.com"
 
 local userId = LocalPlayer.UserId
@@ -40,16 +40,16 @@ task.spawn(function()
 end)
 
 pcall(function()
-	if CoreGui:FindFirstChild("CyberHacker_FREE_1_3_4") then
-		CoreGui.CyberHacker_FREE_1_3_4:Destroy()
+	if CoreGui:FindFirstChild("CyberHacker_FREE_1_3_5") then
+		CoreGui.CyberHacker_FREE_1_3_5:Destroy()
 	end
-	if LocalPlayer.PlayerGui:FindFirstChild("CyberHacker_FREE_1_3_4") then
-		LocalPlayer.PlayerGui.CyberHacker_FREE_1_3_4:Destroy()
+	if LocalPlayer.PlayerGui:FindFirstChild("CyberHacker_FREE_1_3_5") then
+		LocalPlayer.PlayerGui.CyberHacker_FREE_1_3_5:Destroy()
 	end
 end)
 
 local ScreenGui = Instance.new("ScreenGui")
-ScreenGui.Name = "CyberHacker_FREE_1_3_4"
+ScreenGui.Name = "CyberHacker_FREE_1_3_5"
 ScreenGui.ResetOnSpawn = false
 ScreenGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
 
@@ -135,7 +135,7 @@ local InfoNotice = Instance.new("TextLabel", LoginFrame)
 InfoNotice.Size = UDim2.new(0.88, 0, 0, 26)
 InfoNotice.Position = UDim2.new(0.06, 0, 0, 68)
 InfoNotice.BackgroundColor3 = Color3.fromRGB(35, 20, 15)
-InfoNotice.Text = "🦇 NEW UPDATE: Perfil & Dias de Conta!"
+InfoNotice.Text = "🦇 NEW UPDATE: Aimbot Multi-Alvo!"
 InfoNotice.TextColor3 = Color3.fromRGB(255, 180, 100)
 InfoNotice.TextSize = 11
 InfoNotice.Font = Enum.Font.GothamMedium
@@ -576,7 +576,7 @@ local function createSlider(parent, name, min, max, default, callback)
 end
 
 -- ==========================================================================
--- ABA CANAL, PERFIL & ESTATÍSTICAS (COM MOSTRAR PERFIL E DIAS)
+-- ABA CANAL, PERFIL & ESTATÍSTICAS
 -- ==========================================================================
 local ChannelCard = Instance.new("Frame", panelChannel)
 ChannelCard.Size = UDim2.new(1, 0, 0, 370)
@@ -598,7 +598,6 @@ CardTitle.TextSize = 13
 CardTitle.Font = Enum.Font.GothamMedium
 CardTitle.ZIndex = 31
 
--- CAIXA DE EXIBIÇÃO DE PERFIL E DIAS DE CONTA
 local ProfileBox = Instance.new("Frame", ChannelCard)
 ProfileBox.Size = UDim2.new(0.9, 0, 0, 75)
 ProfileBox.Position = UDim2.new(0.05, 0, 0, 48)
@@ -691,7 +690,7 @@ ClearCacheBtn.MouseButton1Click:Connect(function()
 end)
 
 -- ==========================================================================
--- FUNÇÕES DE ZUMBIS E CHEATS SEGUROS (COM TRATAMENTO DE ERRO)
+-- FUNÇÕES DE ZUMBIS E CHEATS SEGUROS
 -- ==========================================================================
 local function getZombies()
 	local list = {}
@@ -901,9 +900,13 @@ createToggle(panelMove, "🛸 Fly (Modo Voo Beta)", function(enabled)
 	end
 end)
 
+-- ==========================================================================
+-- UPDATE AIMBOT: CABEÇA, QUADRIL, BARRA (CENTRO) E PÉ
+-- ==========================================================================
 _G.Free_AimSmooth = 5
+_G.Free_AimPart = "Head" -- Opções: "Head", "UpperTorso" (Quadril/Torso), "HumanoidRootPart" (Barra), "LeftFoot" / "RightFoot" (Pé)
 
-createToggle(panelBoss, "🎯 Aimbot (Foco Headshot / Cabeça)", function(enabled)
+createToggle(panelBoss, "🎯 Aimbot (Ativo)", function(enabled)
 	_G.Free_AimLock = enabled
 	task.spawn(function()
 		while _G.Free_AimLock do
@@ -916,12 +919,12 @@ createToggle(panelBoss, "🎯 Aimbot (Foco Headshot / Cabeça)", function(enable
 					local zombiesList = getZombies()
 					for _, enemy in ipairs(zombiesList) do
 						local hum = enemy:FindFirstChildOfClass("Humanoid")
-						local head = enemy:FindFirstChild("Head")
-						if hum and hum.Health > 0 and head then
-							local dist = (head.Position - lRoot.Position).Magnitude
+						local targetPart = enemy:FindFirstChild(_G.Free_AimPart) or enemy:FindFirstChild("Head")
+						if hum and hum.Health > 0 and targetPart then
+							local dist = (targetPart.Position - lRoot.Position).Magnitude
 							if dist < shortestDist then
 								shortestDist = dist
-								closestTarget = head
+								closestTarget = targetPart
 							end
 						end
 					end
@@ -938,8 +941,50 @@ createToggle(panelBoss, "🎯 Aimbot (Foco Headshot / Cabeça)", function(enable
 	end)
 end)
 
-createSlider(panelBoss, "⚙️ Suavidade Headshot (Aimbot)", 1, 10, 5, function(val)
+createSlider(panelBoss, "⚙️ Suavidade do Aimbot", 1, 10, 5, function(val)
 	_G.Free_AimSmooth = val
 end)
 
-print("[DARK HACKER FREE 1.3.4] Atualizado para o GitHub com Perfil e Dias de Conta! - Canal: https://youtu.be/D2Iqev9FHyA?si=GAnnU5ckAE_rzOOq | Créditos: DarkGamingYT")
+-- SELETOR DE PARTE DO CORPO (BOTÕES PARA ALTERNAR ENTRE CABEÇA, QUADRIL, BARRA E PÉ)
+local AimPartRow = Instance.new("Frame", panelBoss)
+AimPartRow.Size = UDim2.new(1, 0, 0, 44)
+AimPartRow.BackgroundColor3 = Color3.fromRGB(22, 14, 18)
+AimPartRow.ZIndex = 31
+Instance.new("UICorner", AimPartRow).CornerRadius = UDim.new(0, 14)
+
+local AimPartLabel = Instance.new("TextLabel", AimPartRow)
+AimPartLabel.Size = UDim2.new(0.4, 0, 1, 0)
+AimPartLabel.Position = UDim2.new(0.05, 0, 0, 0)
+AimPartLabel.BackgroundTransparency = 1
+AimPartLabel.Text = "🎯 Alvo: Cabeça"
+AimPartLabel.TextColor3 = Color3.fromRGB(240, 220, 210)
+AimPartLabel.TextSize = 11
+AimPartLabel.Font = Enum.Font.GothamMedium
+AimPartLabel.TextXAlignment = Enum.TextXAlignment.Left
+AimPartLabel.ZIndex = 31
+
+local partsList = {"Head", "UpperTorso", "HumanoidRootPart", "RightFoot"}
+local partsNames = {"Cabeça", "Quadril", "Barra", "Pé"}
+local currentPartIndex = 1
+
+local ChangePartBtn = Instance.new("TextButton", AimPartRow)
+ChangePartBtn.Size = UDim2.new(0, 100, 0, 30)
+ChangePartBtn.Position = UDim2.new(0.55, 0, 0.16, 0)
+ChangePartBtn.BackgroundColor3 = Color3.fromRGB(255, 120, 0)
+ChangePartBtn.Text = "Mudar Alvo"
+ChangePartBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+ChangePartBtn.TextSize = 11
+ChangePartBtn.Font = Enum.Font.GothamMedium
+ChangePartBtn.ZIndex = 31
+Instance.new("UICorner", ChangePartBtn).CornerRadius = UDim.new(0, 10)
+
+ChangePartBtn.MouseButton1Click:Connect(function()
+	currentPartIndex = currentPartIndex + 1
+	if currentPartIndex > #partsList then
+		currentPartIndex = 1
+	end
+	_G.Free_AimPart = partsList[currentPartIndex]
+	AimPartLabel.Text = "🎯 Alvo: " .. partsNames[currentPartIndex]
+end)
+
+print("[DARK HACKER FREE 1.3.5] Aimbot Multi-Alvo Atualizado com Sucesso! - Canal: https://youtu.be/D2Iqev9FHyA?si=GAnnU5ckAE_rzOOq | Créditos: DarkGamingYT")
