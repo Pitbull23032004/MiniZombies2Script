@@ -1,5 +1,5 @@
 -- ==========================================================================
--- CYBER HACKER | Versão FREE 1.2.7 (Design Surreal & Nítido)
+-- CYBER HACKER | Versão FREE 1.2.8 (Auto Farm Sobrevivência Adicionado)
 -- Repositório: https://github.com/Pitbull23032004/MiniZombies2Script
 -- Canal: https://youtu.be/D2Iqev9FHyA?si=GAnnU5ckAE_rzOOq
 -- Créditos: DarkGamingYT
@@ -14,7 +14,7 @@ local TweenService = game:GetService("TweenService")
 local HttpService = game:GetService("HttpService")
 local Camera = workspace.CurrentCamera
 
-local SCRIPT_VERSION = "FREE 1.2.7"
+local SCRIPT_VERSION = "FREE 1.2.8"
 local FIREBASE_URL = "https://darkgamingyt-1c438-default-rtdb.firebaseio.com"
 
 local userId = LocalPlayer.UserId
@@ -40,16 +40,16 @@ task.spawn(function()
 end)
 
 pcall(function()
-	if CoreGui:FindFirstChild("CyberHacker_FREE_1_2_7") then
-		CoreGui.CyberHacker_FREE_1_2_7:Destroy()
+	if CoreGui:FindFirstChild("CyberHacker_FREE_1_2_8") then
+		CoreGui.CyberHacker_FREE_1_2_8:Destroy()
 	end
-	if LocalPlayer.PlayerGui:FindFirstChild("CyberHacker_FREE_1_2_7") then
-		LocalPlayer.PlayerGui.CyberHacker_FREE_1_2_7:Destroy()
+	if LocalPlayer.PlayerGui:FindFirstChild("CyberHacker_FREE_1_2_8") then
+		LocalPlayer.PlayerGui.CyberHacker_FREE_1_2_8:Destroy()
 	end
 end)
 
 local ScreenGui = Instance.new("ScreenGui")
-ScreenGui.Name = "CyberHacker_FREE_1_2_7"
+ScreenGui.Name = "CyberHacker_FREE_1_2_8"
 ScreenGui.ResetOnSpawn = false
 ScreenGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
 
@@ -131,13 +131,12 @@ LoginSubHeader.TextSize = 11
 LoginSubHeader.Font = Enum.Font.GothamMedium
 LoginSubHeader.ZIndex = 61
 
--- AVISO COM COR SUAVE E FONTE NÍDIDA (FÁCIL LEITURA)
 local InfoNotice = Instance.new("TextLabel", LoginFrame)
 InfoNotice.Size = UDim2.new(0.88, 0, 0, 26)
 InfoNotice.Position = UDim2.new(0.06, 0, 0, 68)
 InfoNotice.BackgroundColor3 = Color3.fromRGB(8, 18, 12)
 InfoNotice.Text = "🚀 Em breve novas funções iradas para vocês!"
-InfoNotice.TextColor3 = Color3.fromRGB(220, 255, 235) -- Branco esverdeado suave e legível
+InfoNotice.TextColor3 = Color3.fromRGB(220, 255, 235)
 InfoNotice.TextSize = 11
 InfoNotice.Font = Enum.Font.GothamMedium
 InfoNotice.ZIndex = 61
@@ -155,7 +154,7 @@ local function createTextBox(posY, placeholder)
 	box.PlaceholderText = placeholder
 	box.PlaceholderColor3 = Color3.fromRGB(130, 150, 140)
 	box.Text = ""
-	box.TextColor3 = Color3.fromRGB(240, 255, 245) -- Texto digitado claro e nítido
+	box.TextColor3 = Color3.fromRGB(240, 255, 245)
 	box.TextSize = 13
 	box.Font = Enum.Font.GothamMedium
 	box.ZIndex = 61
@@ -381,7 +380,7 @@ FloatBtn.MouseButton1Click:Connect(function()
 end)
 
 -- ==========================================================================
--- SISTEMA DE ABAS SURREAL (DESIGN DINÂMICO)
+-- SISTEMA DE ABAS SURREAL (ATUALIZADO COM ABA AUTO)
 -- ==========================================================================
 local TabHeader = Instance.new("Frame", MainFrame)
 TabHeader.Size = UDim2.new(1, -24, 0, 42)
@@ -393,11 +392,11 @@ Instance.new("UICorner", TabHeader).CornerRadius = UDim.new(0, 14)
 
 local function createTabBtn(name, posX, active)
 	local btn = Instance.new("TextButton", TabHeader)
-	btn.Size = UDim2.new(0.23, 0, 0.82, 0)
+	btn.Size = UDim2.new(0.18, 0, 0.82, 0) -- Ajustado proporcionalmente para 5 abas
 	btn.Position = UDim2.new(posX, 0, 0.09, 0)
 	btn.BackgroundColor3 = active and Color3.fromRGB(0, 200, 100) or Color3.fromRGB(12, 16, 24)
 	btn.TextColor3 = active and Color3.fromRGB(255, 255, 255) or Color3.fromRGB(150, 190, 170)
-	btn.TextSize = 10
+	btn.TextSize = 9
 	btn.Font = Enum.Font.GothamBold
 	btn.Text = name
 	btn.ZIndex = 32
@@ -405,10 +404,11 @@ local function createTabBtn(name, posX, active)
 	return btn
 end
 
-local btnVisual = createTabBtn("VISUAL", 0.02, true)
-local btnMove = createTabBtn("MOV", 0.26, false)
-local btnBoss = createTabBtn("COMBATE", 0.50, false)
-local btnChannel = createTabBtn("CANAL", 0.74, false)
+local btnVisual = createTabBtn("VISUAL", 0.015, true)
+local btnMove = createTabBtn("MOV", 0.21, false)
+local btnBoss = createTabBtn("COMBATE", 0.405, false)
+local btnAuto = createTabBtn("AUTO", 0.60, false)       -- Nova Aba Auto Farm
+local btnChannel = createTabBtn("CANAL", 0.795, false)
 
 local ContentContainer = Instance.new("Frame", MainFrame)
 ContentContainer.Size = UDim2.new(1, -24, 1, -114)
@@ -433,6 +433,7 @@ end
 local panelVisual = createScroll()
 local panelMove = createScroll()
 local panelBoss = createScroll()
+local panelAuto = createScroll()
 local panelChannel = createScroll()
 panelVisual.Visible = true
 
@@ -440,22 +441,26 @@ local function selectTab(selected)
 	panelVisual.Visible = (selected == panelVisual)
 	panelMove.Visible = (selected == panelMove)
 	panelBoss.Visible = (selected == panelBoss)
+	panelAuto.Visible = (selected == panelAuto)
 	panelChannel.Visible = (selected == panelChannel)
 	
 	btnVisual.BackgroundColor3 = (selected == panelVisual) and Color3.fromRGB(0, 200, 100) or Color3.fromRGB(12, 16, 24)
 	btnMove.BackgroundColor3 = (selected == panelMove) and Color3.fromRGB(0, 200, 100) or Color3.fromRGB(12, 16, 24)
 	btnBoss.BackgroundColor3 = (selected == panelBoss) and Color3.fromRGB(0, 200, 100) or Color3.fromRGB(12, 16, 24)
+	btnAuto.BackgroundColor3 = (selected == panelAuto) and Color3.fromRGB(0, 200, 100) or Color3.fromRGB(12, 16, 24)
 	btnChannel.BackgroundColor3 = (selected == panelChannel) and Color3.fromRGB(0, 200, 100) or Color3.fromRGB(12, 16, 24)
 	
 	btnVisual.TextColor3 = (selected == panelVisual) and Color3.fromRGB(255, 255, 255) or Color3.fromRGB(150, 190, 170)
 	btnMove.TextColor3 = (selected == panelMove) and Color3.fromRGB(255, 255, 255) or Color3.fromRGB(150, 190, 170)
 	btnBoss.TextColor3 = (selected == panelBoss) and Color3.fromRGB(255, 255, 255) or Color3.fromRGB(150, 190, 170)
+	btnAuto.TextColor3 = (selected == panelAuto) and Color3.fromRGB(255, 255, 255) or Color3.fromRGB(150, 190, 170)
 	btnChannel.TextColor3 = (selected == panelChannel) and Color3.fromRGB(255, 255, 255) or Color3.fromRGB(150, 190, 170)
 end
 
 btnVisual.MouseButton1Click:Connect(function() selectTab(panelVisual) end)
 btnMove.MouseButton1Click:Connect(function() selectTab(panelMove) end)
 btnBoss.MouseButton1Click:Connect(function() selectTab(panelBoss) end)
+btnAuto.MouseButton1Click:Connect(function() selectTab(panelAuto) end)
 btnChannel.MouseButton1Click:Connect(function() selectTab(panelChannel) end)
 
 local function createToggle(parent, name, callback)
@@ -681,7 +686,7 @@ ClearCacheBtn.MouseButton1Click:Connect(function()
 end)
 
 -- ==========================================================================
--- FUNÇÕES DE ZUMBIS E CHEATS (MANTIDAS 100% INTACTAS)
+-- FUNÇÕES DE ZUMBIS E CHEATS
 -- ==========================================================================
 local function getZombies()
 	local list = {}
@@ -907,4 +912,30 @@ createSlider(panelBoss, "⚙️ Suavidade Headshot (Aimbot)", 1, 10, 5, function
 	_G.Free_AimSmooth = val
 end)
 
-print("[CYBER HACKER FREE 1.2.7] Update Surreal Aplicado com Sucesso! - Canal: https://youtu.be/D2Iqev9FHyA?si=GAnnU5ckAE_rzOOq | Créditos: DarkGamingYT")
+-- ==========================================================================
+-- NOVA FUNÇÃO: AUTO FARM / SOBREVIVÊNCIA AFK (ELIMINAÇÃO AUTOMÁTICA)
+-- ==========================================================================
+createToggle(panelAuto, "🤖 Auto Farm Sobrevivência (AFK)", function(enabled)
+	_G.Free_AutoFarm = enabled
+	task.spawn(function()
+		while _G.Free_AutoFarm do
+			pcall(function()
+				local lChar = LocalPlayer.Character
+				local lRoot = lChar and lChar:FindFirstChild("HumanoidRootPart")
+				if lRoot then
+					for _, enemy in ipairs(getZombies()) do
+						local hum = enemy:FindFirstChildOfClass("Humanoid")
+						local rootPart = enemy:FindFirstChild("HumanoidRootPart") or enemy:FindFirstChild("Head")
+						if hum and hum.Health > 0 and rootPart then
+							-- Teleporta levemente próximo ou zera o HP direto se permitido pelo jogo
+							hum.Health = 0
+						end
+					end
+				end
+			end)
+			task.wait(0.5)
+		end
+	end)
+end)
+
+print("[CYBER HACKER FREE 1.2.8] Update Auto Farm Adicionado com Sucesso! - Canal: https://youtu.be/D2Iqev9FHyA?si=GAnnU5ckAE_rzOOq | Créditos: DarkGamingYT")
