@@ -1,5 +1,5 @@
 -- ==========================================================================
--- CYBER HACKER | Versão FREE 1.3.0 (Auto AFK Estável & Sem Bug de Câmera)
+-- CYBER HACKER | Versão FREE 1.3.1 (Auto Disparo Automático nos Zumbis)
 -- Repositório: https://github.com/Pitbull23032004/MiniZombies2Script
 -- Canal: https://youtu.be/D2Iqev9FHyA?si=GAnnU5ckAE_rzOOq
 -- Créditos: DarkGamingYT
@@ -15,7 +15,7 @@ local HttpService = game:GetService("HttpService")
 local VirtualUser = game:GetService("VirtualUser")
 local Camera = workspace.CurrentCamera
 
-local SCRIPT_VERSION = "FREE 1.3.0"
+local SCRIPT_VERSION = "FREE 1.3.1"
 local FIREBASE_URL = "https://darkgamingyt-1c438-default-rtdb.firebaseio.com"
 
 local userId = LocalPlayer.UserId
@@ -41,16 +41,16 @@ task.spawn(function()
 end)
 
 pcall(function()
-	if CoreGui:FindFirstChild("CyberHacker_FREE_1_3_0") then
-		CoreGui.CyberHacker_FREE_1_3_0:Destroy()
+	if CoreGui:FindFirstChild("CyberHacker_FREE_1_3_1") then
+		CoreGui.CyberHacker_FREE_1_3_1:Destroy()
 	end
-	if LocalPlayer.PlayerGui:FindFirstChild("CyberHacker_FREE_1_3_0") then
-		LocalPlayer.PlayerGui.CyberHacker_FREE_1_3_0:Destroy()
+	if LocalPlayer.PlayerGui:FindFirstChild("CyberHacker_FREE_1_3_1") then
+		LocalPlayer.PlayerGui.CyberHacker_FREE_1_3_1:Destroy()
 	end
 end)
 
 local ScreenGui = Instance.new("ScreenGui")
-ScreenGui.Name = "CyberHacker_FREE_1_3_0"
+ScreenGui.Name = "CyberHacker_FREE_1_3_1"
 ScreenGui.ResetOnSpawn = false
 ScreenGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
 
@@ -88,7 +88,7 @@ local FloatShadow = Instance.new("UIAspectRatioConstraint", FloatBtn)
 FloatShadow.AspectRatio = 1
 
 -- ==========================================================================
--- TELA DE LOGIN SURREAL E NÍDIDA (COM AVISO AJUSTADO PARA BOA LEITURA)
+-- TELA DE LOGIN SURREAL E NÍDIDA
 -- ==========================================================================
 local LoginFrame = Instance.new("Frame", ScreenGui)
 LoginFrame.Size = UDim2.new(0, 360, 0, 340)
@@ -194,7 +194,7 @@ local loggedIn = false
 local statsLabelReference = nil
 
 -- ==========================================================================
--- PAINEL PRINCIPAL SURREAL (DESIGN MODERNO)
+-- PAINEL PRINCIPAL SURREAL
 -- ==========================================================================
 local MainFrame = Instance.new("Frame", ScreenGui)
 MainFrame.Size = UDim2.new(0, 370, 0, 430)
@@ -914,47 +914,21 @@ createSlider(panelBoss, "⚙️ Suavidade Headshot (Aimbot)", 1, 10, 5, function
 end)
 
 -- ==========================================================================
--- AUTO FARM AFK ESTÁVEL (DIRECIONA O PERSONAGEM SEM BUGAR A CÂMERA)
+-- NOVA OPÇÃO: AUTO DISPARO CONTÍNUO (SEM BUGAR A CÂMERA)
 -- ==========================================================================
-createToggle(panelAuto, "🤖 Auto Farm AFK (Estável)", function(enabled)
-	_G.Free_AutoFarmAFK = enabled
+createToggle(panelAuto, "🔥 Auto Disparo (Auto Fire)", function(enabled)
+	_G.Free_AutoFire = enabled
 	task.spawn(function()
-		while _G.Free_AutoFarmAFK do
+		while _G.Free_AutoFire do
 			pcall(function()
-				local char = LocalPlayer.Character
-				local lRoot = char and char:FindFirstChild("HumanoidRootPart")
-				local hum = char and char:FindFirstChildOfClass("Humanoid")
-				
-				if lRoot and hum then
-					local closestTarget = nil
-					local shortestDist = math.huge
-					
-					for _, enemy in ipairs(getZombies()) do
-						local head = enemy:FindFirstChild("Head") or enemy:FindFirstChild("HumanoidRootPart")
-						local eHum = enemy:FindFirstChildOfClass("Humanoid")
-						if head and eHum and eHum.Health > 0 then
-							local dist = (head.Position - lRoot.Position).Magnitude
-							if dist < shortestDist then
-								shortestDist = dist
-								closestTarget = head
-							end
-						end
-					end
-					
-					if closestTarget then
-						-- Faz o personagem virar para o zumbi sem travar a câmara do jogador
-						lRoot.CFrame = CFrame.new(lRoot.Position, Vector3.new(closestTarget.Position.X, lRoot.Position.Y, closestTarget.Position.Z))
-						
-						-- Simula o tiro contínuo de forma limpa
-						VirtualUser:Button1Down(Vector2.new(0,0), Camera.CFrame)
-						task.wait(0.1)
-						VirtualUser:Button1Up(Vector2.new(0,0), Camera.CFrame)
-					end
-				end
+				-- Simula o clique do mouse / gatilho continuamente sem interferir na liberdade da câmara
+				VirtualUser:Button1Down(Vector2.new(0, 0), Camera.CFrame)
+				task.wait(0.08)
+				VirtualUser:Button1Up(Vector2.new(0, 0), Camera.CFrame)
 			end)
-			task.wait(0.2)
+			task.wait(0.1)
 		end
 	end)
 end)
 
-print("[CYBER HACKER FREE 1.3.0] Update Auto Farm AFK Estável Aplicado! - Canal: https://youtu.be/D2Iqev9FHyA?si=GAnnU5ckAE_rzOOq | Créditos: DarkGamingYT")
+print("[CYBER HACKER FREE 1.3.1] Update Auto Disparo Aplicado com Sucesso! - Canal: https://youtu.be/D2Iqev9FHyA?si=GAnnU5ckAE_rzOOq | Créditos: DarkGamingYT")
