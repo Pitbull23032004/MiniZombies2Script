@@ -1,5 +1,5 @@
 -- ==========================================================================
--- CYBER HACKER | Versão FREE 1.4.3 (8-Bit Edition - Clean UI & ESP Fix)
+-- CYBER HACKER | Versão FREE 1.5.0 (DRAGON EDITION - ESPs, Perfil & Loading)
 -- Repositório: https://github.com/Pitbull23032004/MiniZombies2Script
 -- Canal: https://youtu.be/D2Iqev9FHyA?si=GAnnU5ckAE_rzOOq
 -- Créditos: DarkGamingYT
@@ -13,9 +13,9 @@ local CoreGui = game:GetService("CoreGui")
 local TweenService = game:GetService("TweenService")
 local HttpService = game:GetService("HttpService")
 
-local SCRIPT_VERSION = "FREE 1.4.3 [8-BIT]"
+local SCRIPT_VERSION = "FREE 1.5.0 [DRAGON]"
 local FIREBASE_URL = "https://darkgamingyt-1c438-default-rtdb.firebaseio.com"
-local SAVE_FILE_NAME = "DarkHacker_8Bit_Login.json"
+local SAVE_FILE_NAME = "DarkHacker_Dragon_Login.json"
 
 -- Compatibilidade silenciosa de requisição HTTP para o Firebase em segundo plano
 local httpRequest = (syn and syn.request) or (http and http.request) or http_request or (fluxus and fluxus.request) or request
@@ -23,6 +23,7 @@ local httpRequest = (syn and syn.request) or (http and http.request) or http_req
 local userId = LocalPlayer.UserId
 local userName = LocalPlayer.Name
 local displayName = LocalPlayer.DisplayName
+local avatarThumbUrl = "rbxthumb://type=AvatarHeadShot&id=" .. tostring(userId) .. "&w=150&h=150"
 local playerSessionId = "user_" .. tostring(userId)
 local tempoInicioSessao = tick()
 local fpsAtual = 60
@@ -30,19 +31,21 @@ local fpsAtual = 60
 local paisUsuario = "Desconhecido"
 local cidadeUsuario = "Desconhecida"
 
--- Fonte 8-Bit nítida, alinhada e estritamente SEM NEGRITO
+-- Fonte nítida, alinhada e estritamente SEM NEGRITO
 local FONT_MAIN = Enum.Font.Code
 
--- Paleta de Cores 8-Bit
-local COLOR_BG = Color3.fromRGB(12, 13, 18)
-local COLOR_PANEL = Color3.fromRGB(18, 20, 28)
-local COLOR_ITEM = Color3.fromRGB(24, 27, 38)
-local COLOR_ACCENT = Color3.fromRGB(255, 140, 0)
-local COLOR_TEXT = Color3.fromRGB(235, 240, 245)
-local COLOR_SUBTEXT = Color3.fromRGB(150, 160, 175)
-local COLOR_WARN = Color3.fromRGB(255, 195, 70)
-local COLOR_OFF = Color3.fromRGB(235, 75, 75)
-local COLOR_ON = Color3.fromRGB(60, 230, 130)
+-- Paleta de Cores Estilo Dragão (Obsidiana, Carmesim Imperial e Ouro Fogo)
+local COLOR_BG = Color3.fromRGB(14, 8, 10)
+local COLOR_PANEL = Color3.fromRGB(24, 11, 14)
+local COLOR_ITEM = Color3.fromRGB(34, 15, 19)
+local COLOR_ACCENT = Color3.fromRGB(255, 155, 25)
+local COLOR_DRAGON_RED = Color3.fromRGB(215, 40, 45)
+local COLOR_BORDER = Color3.fromRGB(85, 30, 35)
+local COLOR_TEXT = Color3.fromRGB(245, 238, 230)
+local COLOR_SUBTEXT = Color3.fromRGB(175, 150, 145)
+local COLOR_WARN = Color3.fromRGB(255, 195, 65)
+local COLOR_OFF = Color3.fromRGB(235, 70, 70)
+local COLOR_ON = Color3.fromRGB(65, 230, 130)
 
 task.spawn(function()
 	pcall(function()
@@ -93,6 +96,46 @@ local function apply8BitStroke(parent, color, thickness)
 	stroke.LineJoinMode = Enum.LineJoinMode.Miter
 	stroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
 	return stroke
+end
+
+-- Fundo Estilo Dragão para o Painel de Login e Painel Principal
+local function applyDragonBackground(parentFrame, baseZIndex)
+	local grad = Instance.new("UIGradient", parentFrame)
+	grad.Color = ColorSequence.new({
+		ColorSequenceKeypoint.new(0, Color3.fromRGB(38, 12, 16)),
+		ColorSequenceKeypoint.new(0.5, Color3.fromRGB(18, 8, 11)),
+		ColorSequenceKeypoint.new(1, Color3.fromRGB(10, 5, 7))
+	})
+	grad.Rotation = 135
+
+	local pattern = Instance.new("ImageLabel", parentFrame)
+	pattern.Name = "DragonScaleBg"
+	pattern.Size = UDim2.new(1, 0, 1, 0)
+	pattern.BackgroundTransparency = 1
+	pattern.Image = "rbxassetid://6071575925"
+	pattern.ImageColor3 = COLOR_DRAGON_RED
+	pattern.ImageTransparency = 0.91
+	pattern.ScaleType = Enum.ScaleType.Tile
+	pattern.TileSize = UDim2.new(0, 48, 0, 48)
+	pattern.ZIndex = baseZIndex
+
+	local dragonEmblem = Instance.new("TextLabel", parentFrame)
+	dragonEmblem.Name = "DragonWatermark"
+	dragonEmblem.Size = UDim2.new(1, 0, 1, 0)
+	dragonEmblem.BackgroundTransparency = 1
+	dragonEmblem.Text = "🐉"
+	dragonEmblem.TextColor3 = COLOR_ACCENT
+	dragonEmblem.TextTransparency = 0.93
+	dragonEmblem.TextSize = 150
+	dragonEmblem.Font = FONT_MAIN
+	dragonEmblem.ZIndex = baseZIndex
+
+	local topLine = Instance.new("Frame", parentFrame)
+	topLine.Size = UDim2.new(1, 0, 0, 2)
+	topLine.Position = UDim2.new(0, 0, 0, 0)
+	topLine.BackgroundColor3 = COLOR_ACCENT
+	topLine.BorderSizePixel = 0
+	topLine.ZIndex = baseZIndex + 1
 end
 
 -- Sistema de arrastar universal (PC & Mobile)
@@ -166,13 +209,14 @@ local function saveCredentials(remember, user, pass)
 end
 
 -- ==========================================================================
--- BOTÃO FLUTUANTE 8-BIT (HUD COM FPS, PING E STATUS)
+-- BOTÃO FLUTUANTE ESTILO DRAGÃO (HUD COM FPS, PING E STATUS)
 -- ==========================================================================
 local FloatContainer = Instance.new("Frame", ScreenGui)
-FloatContainer.Size = UDim2.fromOffset(92, 54)
+FloatContainer.Size = UDim2.fromOffset(98, 54)
 FloatContainer.Position = UDim2.new(0, 28, 0.35, 0)
 FloatContainer.BackgroundColor3 = COLOR_BG
 FloatContainer.BorderSizePixel = 0
+FloatContainer.Visible = false
 FloatContainer.ZIndex = 50
 local FloatStroke = apply8BitStroke(FloatContainer, COLOR_ACCENT, 2)
 
@@ -181,12 +225,12 @@ FloatBtn.Size = UDim2.new(1, -6, 0, 30)
 FloatBtn.Position = UDim2.new(0, 3, 0, 3)
 FloatBtn.BackgroundColor3 = COLOR_PANEL
 FloatBtn.BorderSizePixel = 0
-FloatBtn.Text = "[8B] MENU"
+FloatBtn.Text = "🐉 MENU"
 FloatBtn.TextColor3 = COLOR_ACCENT
 FloatBtn.TextSize = 12
 FloatBtn.Font = FONT_MAIN
 FloatBtn.ZIndex = 51
-apply8BitStroke(FloatBtn, Color3.fromRGB(45, 50, 68), 1)
+apply8BitStroke(FloatBtn, COLOR_BORDER, 1)
 
 local FpsPingLabel = Instance.new("TextLabel", FloatContainer)
 FpsPingLabel.Size = UDim2.new(1, -6, 0, 16)
@@ -219,56 +263,158 @@ RunService.RenderStepped:Connect(function()
 end)
 
 -- ==========================================================================
--- PAINEL DE LOGIN SIMPLES, PROFISSIONAL + AVISO NÍTIDO
+-- BARRA DE CARREGAMENTO INICIAL (DRAGON LOADING SCREEN)
+-- ==========================================================================
+local LoadingFrame = Instance.new("Frame", ScreenGui)
+LoadingFrame.Size = UDim2.new(0, 320, 0, 165)
+LoadingFrame.Position = UDim2.new(0.5, -160, 0.5, -82)
+LoadingFrame.BackgroundColor3 = COLOR_BG
+LoadingFrame.BorderSizePixel = 0
+LoadingFrame.ZIndex = 80
+apply8BitStroke(LoadingFrame, COLOR_ACCENT, 2)
+applyDragonBackground(LoadingFrame, 80)
+
+local LoadTitle = Instance.new("TextLabel", LoadingFrame)
+LoadTitle.Size = UDim2.new(1, -20, 0, 24)
+LoadTitle.Position = UDim2.new(0, 10, 0, 10)
+LoadTitle.BackgroundTransparency = 1
+LoadTitle.Text = "🐉 DARK HACKER // DRAGON EDITION"
+LoadTitle.TextColor3 = COLOR_ACCENT
+LoadTitle.TextSize = 13
+LoadTitle.Font = FONT_MAIN
+LoadTitle.TextXAlignment = Enum.TextXAlignment.Center
+LoadTitle.ZIndex = 82
+
+local LoadProfileBox = Instance.new("Frame", LoadingFrame)
+LoadProfileBox.Size = UDim2.new(0.88, 0, 0, 48)
+LoadProfileBox.Position = UDim2.new(0.06, 0, 0, 40)
+LoadProfileBox.BackgroundColor3 = COLOR_PANEL
+LoadProfileBox.BorderSizePixel = 0
+LoadProfileBox.ZIndex = 82
+apply8BitStroke(LoadProfileBox, COLOR_BORDER, 1)
+
+local LoadAvatar = Instance.new("ImageLabel", LoadProfileBox)
+LoadAvatar.Size = UDim2.fromOffset(38, 38)
+LoadAvatar.Position = UDim2.new(0, 5, 0.5, -19)
+LoadAvatar.BackgroundColor3 = COLOR_BG
+LoadAvatar.BorderSizePixel = 0
+LoadAvatar.Image = avatarThumbUrl
+LoadAvatar.ZIndex = 83
+apply8BitStroke(LoadAvatar, COLOR_ACCENT, 1)
+
+local LoadUserText = Instance.new("TextLabel", LoadProfileBox)
+LoadUserText.Size = UDim2.new(1, -54, 1, 0)
+LoadUserText.Position = UDim2.new(0, 50, 0, 0)
+LoadUserText.BackgroundTransparency = 1
+LoadUserText.Text = string.format("Jogador : %s\nID Conta: %d", userName, userId)
+LoadUserText.TextColor3 = COLOR_TEXT
+LoadUserText.TextSize = 11
+LoadUserText.Font = FONT_MAIN
+LoadUserText.TextXAlignment = Enum.TextXAlignment.Left
+LoadUserText.ZIndex = 83
+
+local LoadStatusTxt = Instance.new("TextLabel", LoadingFrame)
+LoadStatusTxt.Size = UDim2.new(0.88, 0, 0, 18)
+LoadStatusTxt.Position = UDim2.new(0.06, 0, 0, 98)
+LoadStatusTxt.BackgroundTransparency = 1
+LoadStatusTxt.Text = "Iniciando sistema Dragao... [0%]"
+LoadStatusTxt.TextColor3 = COLOR_SUBTEXT
+LoadStatusTxt.TextSize = 11
+LoadStatusTxt.Font = FONT_MAIN
+LoadStatusTxt.TextXAlignment = Enum.TextXAlignment.Left
+LoadStatusTxt.ZIndex = 82
+
+local LoadBarBg = Instance.new("Frame", LoadingFrame)
+LoadBarBg.Size = UDim2.new(0.88, 0, 0, 16)
+LoadBarBg.Position = UDim2.new(0.06, 0, 0, 122)
+LoadBarBg.BackgroundColor3 = COLOR_PANEL
+LoadBarBg.BorderSizePixel = 0
+LoadBarBg.ZIndex = 82
+apply8BitStroke(LoadBarBg, COLOR_ACCENT, 1)
+
+local LoadBarFill = Instance.new("Frame", LoadBarBg)
+LoadBarFill.Size = UDim2.new(0, 0, 1, 0)
+LoadBarFill.BackgroundColor3 = COLOR_DRAGON_RED
+LoadBarFill.BorderSizePixel = 0
+LoadBarFill.ZIndex = 83
+
+local LoadBarGrad = Instance.new("UIGradient", LoadBarFill)
+LoadBarGrad.Color = ColorSequence.new({
+	ColorSequenceKeypoint.new(0, COLOR_DRAGON_RED),
+	ColorSequenceKeypoint.new(1, COLOR_ACCENT)
+})
+
+-- ==========================================================================
+-- PAINEL DE LOGIN DRAGÃO (COM FUNDO, PERFIL ROBLOX & SALVAR SENHA)
 -- ==========================================================================
 local LoginFrame = Instance.new("Frame", ScreenGui)
-LoginFrame.Size = UDim2.new(0, 330, 0, 310)
-LoginFrame.Position = UDim2.new(0.5, -165, 0.5, -155)
+LoginFrame.Size = UDim2.new(0, 340, 0, 355)
+LoginFrame.Position = UDim2.new(0.5, -170, 0.5, -177)
 LoginFrame.BackgroundColor3 = COLOR_BG
 LoginFrame.BorderSizePixel = 0
+LoginFrame.Visible = false
 LoginFrame.ZIndex = 60
 apply8BitStroke(LoginFrame, COLOR_ACCENT, 2)
+applyDragonBackground(LoginFrame, 60)
 
 local LoginTopBar = Instance.new("Frame", LoginFrame)
 LoginTopBar.Size = UDim2.new(1, 0, 0, 34)
 LoginTopBar.BackgroundColor3 = COLOR_PANEL
 LoginTopBar.BorderSizePixel = 0
-LoginTopBar.ZIndex = 61
-apply8BitStroke(LoginTopBar, Color3.fromRGB(40, 45, 60), 1)
+LoginTopBar.ZIndex = 62
+apply8BitStroke(LoginTopBar, COLOR_BORDER, 1)
 makeDraggable(LoginTopBar, LoginFrame)
 
 local LoginHeader = Instance.new("TextLabel", LoginTopBar)
-LoginHeader.Size = UDim2.new(1, -20, 1, 0)
+LoginHeader.Size = UDim2.new(1, -90, 1, 0)
 LoginHeader.Position = UDim2.new(0, 10, 0, 0)
 LoginHeader.BackgroundTransparency = 1
-LoginHeader.Text = "DARKGAMINGYT // LOGIN"
+LoginHeader.Text = "🐉 DARKGAMINGYT // LOGIN"
 LoginHeader.TextColor3 = COLOR_TEXT
 LoginHeader.TextSize = 13
 LoginHeader.Font = FONT_MAIN
 LoginHeader.TextXAlignment = Enum.TextXAlignment.Left
-LoginHeader.ZIndex = 62
+LoginHeader.ZIndex = 63
 
 local LoginVersionTag = Instance.new("TextLabel", LoginTopBar)
-LoginVersionTag.Size = UDim2.new(0, 90, 1, 0)
-LoginVersionTag.Position = UDim2.new(1, -100, 0, 0)
+LoginVersionTag.Size = UDim2.new(0, 80, 1, 0)
+LoginVersionTag.Position = UDim2.new(1, -88, 0, 0)
 LoginVersionTag.BackgroundTransparency = 1
-LoginVersionTag.Text = "v1.4.3"
+LoginVersionTag.Text = "v1.5.0"
 LoginVersionTag.TextColor3 = COLOR_ACCENT
 LoginVersionTag.TextSize = 12
 LoginVersionTag.Font = FONT_MAIN
 LoginVersionTag.TextXAlignment = Enum.TextXAlignment.Right
-LoginVersionTag.ZIndex = 62
+LoginVersionTag.ZIndex = 63
 
-local LoginSubHeader = Instance.new("TextLabel", LoginFrame)
-LoginSubHeader.Size = UDim2.new(0.88, 0, 0, 18)
-LoginSubHeader.Position = UDim2.new(0.06, 0, 0, 42)
-LoginSubHeader.BackgroundTransparency = 1
-LoginSubHeader.Text = "Acesso: Usuario FREE | Senha FREE"
-LoginSubHeader.TextColor3 = COLOR_SUBTEXT
-LoginSubHeader.TextSize = 11
-LoginSubHeader.Font = FONT_MAIN
-LoginSubHeader.TextXAlignment = Enum.TextXAlignment.Left
-LoginSubHeader.ZIndex = 61
+-- Mini Card de Perfil Roblox no Login
+local LoginProfileBar = Instance.new("Frame", LoginFrame)
+LoginProfileBar.Size = UDim2.new(0.88, 0, 0, 48)
+LoginProfileBar.Position = UDim2.new(0.06, 0, 0, 42)
+LoginProfileBar.BackgroundColor3 = COLOR_PANEL
+LoginProfileBar.BorderSizePixel = 0
+LoginProfileBar.ZIndex = 62
+apply8BitStroke(LoginProfileBar, COLOR_BORDER, 1)
+
+local LoginAvatar = Instance.new("ImageLabel", LoginProfileBar)
+LoginAvatar.Size = UDim2.fromOffset(38, 38)
+LoginAvatar.Position = UDim2.new(0, 5, 0.5, -19)
+LoginAvatar.BackgroundColor3 = COLOR_BG
+LoginAvatar.BorderSizePixel = 0
+LoginAvatar.Image = avatarThumbUrl
+LoginAvatar.ZIndex = 63
+apply8BitStroke(LoginAvatar, COLOR_ACCENT, 1)
+
+local LoginProfileInfo = Instance.new("TextLabel", LoginProfileBar)
+LoginProfileInfo.Size = UDim2.new(1, -52, 1, 0)
+LoginProfileInfo.Position = UDim2.new(0, 50, 0, 0)
+LoginProfileInfo.BackgroundTransparency = 1
+LoginProfileInfo.Text = string.format("Perfil : %s\nChave  : Usuario FREE | Senha FREE", displayName)
+LoginProfileInfo.TextColor3 = COLOR_SUBTEXT
+LoginProfileInfo.TextSize = 11
+LoginProfileInfo.Font = FONT_MAIN
+LoginProfileInfo.TextXAlignment = Enum.TextXAlignment.Left
+LoginProfileInfo.ZIndex = 63
 
 local function createLoginInput(posY, placeholder)
 	local box = Instance.new("TextBox", LoginFrame)
@@ -277,38 +423,38 @@ local function createLoginInput(posY, placeholder)
 	box.BackgroundColor3 = COLOR_PANEL
 	box.BorderSizePixel = 0
 	box.PlaceholderText = placeholder
-	box.PlaceholderColor3 = Color3.fromRGB(100, 110, 125)
+	box.PlaceholderColor3 = Color3.fromRGB(120, 100, 95)
 	box.Text = ""
 	box.TextColor3 = COLOR_TEXT
 	box.TextSize = 13
 	box.Font = FONT_MAIN
 	box.ClearTextOnFocus = false
-	box.ZIndex = 61
+	box.ZIndex = 62
 	
-	local stroke = apply8BitStroke(box, Color3.fromRGB(45, 50, 68), 1)
+	local stroke = apply8BitStroke(box, COLOR_BORDER, 1)
 	box.Focused:Connect(function() stroke.Color = COLOR_ACCENT end)
-	box.FocusLost:Connect(function() stroke.Color = Color3.fromRGB(45, 50, 68) end)
+	box.FocusLost:Connect(function() stroke.Color = COLOR_BORDER end)
 	return box
 end
 
-local UserBox = createLoginInput(66, "Usuario: FREE")
-local PassBox = createLoginInput(110, "Senha: FREE")
+local UserBox = createLoginInput(98, "Usuario: FREE")
+local PassBox = createLoginInput(142, "Senha: FREE")
 
--- Opção Salvar Senha (8-Bit Checkbox)
+-- Opção Salvar Senha
 local savedCreds = loadSavedCredentials()
 local savePasswordEnabled = savedCreds.remember
 
 local SavePassBtn = Instance.new("TextButton", LoginFrame)
 SavePassBtn.Size = UDim2.new(0.88, 0, 0, 28)
-SavePassBtn.Position = UDim2.new(0.06, 0, 0, 154)
+SavePassBtn.Position = UDim2.new(0.06, 0, 0, 186)
 SavePassBtn.BackgroundColor3 = COLOR_ITEM
 SavePassBtn.BorderSizePixel = 0
 SavePassBtn.TextColor3 = COLOR_TEXT
 SavePassBtn.TextSize = 11
 SavePassBtn.Font = FONT_MAIN
 SavePassBtn.TextXAlignment = Enum.TextXAlignment.Left
-SavePassBtn.ZIndex = 61
-local SavePassStroke = apply8BitStroke(SavePassBtn, Color3.fromRGB(45, 50, 68), 1)
+SavePassBtn.ZIndex = 62
+local SavePassStroke = apply8BitStroke(SavePassBtn, COLOR_BORDER, 1)
 
 local function updateSavePassVisual()
 	if savePasswordEnabled then
@@ -318,7 +464,7 @@ local function updateSavePassVisual()
 	else
 		SavePassBtn.Text = "  [   ] Salvar Senha"
 		SavePassBtn.TextColor3 = COLOR_SUBTEXT
-		SavePassStroke.Color = Color3.fromRGB(45, 50, 68)
+		SavePassStroke.Color = COLOR_BORDER
 	end
 end
 
@@ -335,34 +481,34 @@ end)
 
 local LoginBtn = Instance.new("TextButton", LoginFrame)
 LoginBtn.Size = UDim2.new(0.88, 0, 0, 36)
-LoginBtn.Position = UDim2.new(0.06, 0, 0, 190)
-LoginBtn.BackgroundColor3 = COLOR_ACCENT
+LoginBtn.Position = UDim2.new(0.06, 0, 0, 222)
+LoginBtn.BackgroundColor3 = COLOR_DRAGON_RED
 LoginBtn.BorderSizePixel = 0
 LoginBtn.Text = "[ ENTRAR NO SISTEMA ]"
-LoginBtn.TextColor3 = COLOR_BG
+LoginBtn.TextColor3 = COLOR_TEXT
 LoginBtn.TextSize = 13
 LoginBtn.Font = FONT_MAIN
-LoginBtn.ZIndex = 61
-apply8BitStroke(LoginBtn, Color3.fromRGB(255, 180, 80), 1)
+LoginBtn.ZIndex = 62
+apply8BitStroke(LoginBtn, COLOR_ACCENT, 1.5)
 
 local ErrorLabel = Instance.new("TextLabel", LoginFrame)
 ErrorLabel.Size = UDim2.new(0.88, 0, 0, 18)
-ErrorLabel.Position = UDim2.new(0.06, 0, 0, 232)
+ErrorLabel.Position = UDim2.new(0.06, 0, 0, 266)
 ErrorLabel.BackgroundTransparency = 1
 ErrorLabel.Text = savePasswordEnabled and "Status: Senha salva carregada." or "Status: Aguardando login..."
 ErrorLabel.TextColor3 = savePasswordEnabled and COLOR_ON or COLOR_SUBTEXT
 ErrorLabel.TextSize = 11
 ErrorLabel.Font = FONT_MAIN
 ErrorLabel.TextXAlignment = Enum.TextXAlignment.Center
-ErrorLabel.ZIndex = 61
+ErrorLabel.ZIndex = 62
 
--- Caixa de Aviso Simples e com Letras Corrigidas (Fonte Code Nítida)
+-- Caixa Única de Aviso Simples e Nítida (Sem Negrito)
 local LoginDisclaimer = Instance.new("Frame", LoginFrame)
-LoginDisclaimer.Size = UDim2.new(0.88, 0, 0, 38)
-LoginDisclaimer.Position = UDim2.new(0.06, 0, 0, 256)
-LoginDisclaimer.BackgroundColor3 = Color3.fromRGB(22, 16, 16)
+LoginDisclaimer.Size = UDim2.new(0.88, 0, 0, 42)
+LoginDisclaimer.Position = UDim2.new(0.06, 0, 0, 292)
+LoginDisclaimer.BackgroundColor3 = Color3.fromRGB(22, 12, 12)
 LoginDisclaimer.BorderSizePixel = 0
-LoginDisclaimer.ZIndex = 61
+LoginDisclaimer.ZIndex = 62
 apply8BitStroke(LoginDisclaimer, COLOR_WARN, 1)
 
 local LoginDisclaimerTxt = Instance.new("TextLabel", LoginDisclaimer)
@@ -375,61 +521,104 @@ LoginDisclaimerTxt.TextColor3 = COLOR_WARN
 LoginDisclaimerTxt.TextSize = 11
 LoginDisclaimerTxt.Font = FONT_MAIN
 LoginDisclaimerTxt.TextXAlignment = Enum.TextXAlignment.Center
-LoginDisclaimerTxt.ZIndex = 62
+LoginDisclaimerTxt.ZIndex = 63
+
+-- Execução da Barra de Carregamento antes de exibir o Login
+task.spawn(function()
+	local stages = {
+		{pct = 0.25, txt = "Carregando tema Dragao... [25%]"},
+		{pct = 0.55, txt = "Sincronizando perfil Roblox... [55%]"},
+		{pct = 0.85, txt = "Preparando ESP & Aimbot... [85%]"},
+		{pct = 1.00, txt = "Sistema pronto! [100%]"}
+	}
+	for _, st in ipairs(stages) do
+		LoadStatusTxt.Text = st.txt
+		TweenService:Create(LoadBarFill, TweenInfo.new(0.28, Enum.EasingStyle.Linear), {
+			Size = UDim2.new(st.pct, 0, 1, 0)
+		}):Play()
+		task.wait(0.32)
+	end
+	task.wait(0.15)
+	LoadingFrame:Destroy()
+	LoginFrame.Visible = true
+	FloatContainer.Visible = true
+end)
 
 local loggedIn = false
 local statsLabelReference = nil
 
 -- ==========================================================================
--- PAINEL PRINCIPAL 8-BIT
+-- PAINEL PRINCIPAL ESTILO DRAGÃO (COM FUNDO E CABEÇALHO DE PERFIL)
 -- ==========================================================================
 local MainFrame = Instance.new("Frame", ScreenGui)
-MainFrame.Size = UDim2.new(0, 390, 0, 440)
-MainFrame.Position = UDim2.new(0, 130, 0.30, 0)
+MainFrame.Size = UDim2.new(0, 395, 0, 455)
+MainFrame.Position = UDim2.new(0, 135, 0.28, 0)
 MainFrame.BackgroundColor3 = COLOR_BG
 MainFrame.BorderSizePixel = 0
 MainFrame.Visible = false
 MainFrame.ZIndex = 30
 
 local MainStroke = apply8BitStroke(MainFrame, COLOR_ACCENT, 2)
+applyDragonBackground(MainFrame, 30)
 
 task.spawn(function()
 	while MainFrame and MainFrame.Parent do
-		for i = 0, 1, 0.008 do
+		for i = 0, 1, 0.01 do
 			if not MainStroke or not MainStroke.Parent then break end
-			MainStroke.Color = Color3.fromHSV(i * 0.12 + 0.04, 0.85, 1)
+			-- Oscila suavemente entre Vermelho Dragão e Ouro Fogo
+			MainStroke.Color = Color3.fromHSV(i * 0.09, 0.9, 1)
 			task.wait(0.05)
 		end
 	end
 end)
 
 local TopBar = Instance.new("Frame", MainFrame)
-TopBar.Size = UDim2.new(1, 0, 0, 36)
+TopBar.Size = UDim2.new(1, 0, 0, 42)
 TopBar.BackgroundColor3 = COLOR_PANEL
 TopBar.BorderSizePixel = 0
-TopBar.ZIndex = 31
-apply8BitStroke(TopBar, Color3.fromRGB(40, 45, 60), 1)
+TopBar.ZIndex = 32
+apply8BitStroke(TopBar, COLOR_BORDER, 1)
 makeDraggable(TopBar, MainFrame)
 
+local TopAvatar = Instance.new("ImageLabel", TopBar)
+TopAvatar.Size = UDim2.fromOffset(30, 30)
+TopAvatar.Position = UDim2.new(0, 8, 0.5, -15)
+TopAvatar.BackgroundColor3 = COLOR_BG
+TopAvatar.BorderSizePixel = 0
+TopAvatar.Image = avatarThumbUrl
+TopAvatar.ZIndex = 33
+apply8BitStroke(TopAvatar, COLOR_ACCENT, 1)
+
 local TitleLabel = Instance.new("TextLabel", TopBar)
-TitleLabel.Size = UDim2.new(1, -24, 1, 0)
-TitleLabel.Position = UDim2.new(0, 10, 0, 0)
+TitleLabel.Size = UDim2.new(1, -50, 0, 20)
+TitleLabel.Position = UDim2.new(0, 46, 0, 4)
 TitleLabel.BackgroundTransparency = 1
-TitleLabel.Text = ":: DARK HACKER // " .. SCRIPT_VERSION
-TitleLabel.TextColor3 = COLOR_TEXT
+TitleLabel.Text = "🐉 DARK HACKER // " .. SCRIPT_VERSION
+TitleLabel.TextColor3 = COLOR_ACCENT
 TitleLabel.TextSize = 12
 TitleLabel.Font = FONT_MAIN
 TitleLabel.TextXAlignment = Enum.TextXAlignment.Left
-TitleLabel.ZIndex = 32
+TitleLabel.ZIndex = 33
+
+local SubUserLabel = Instance.new("TextLabel", TopBar)
+SubUserLabel.Size = UDim2.new(1, -50, 0, 16)
+SubUserLabel.Position = UDim2.new(0, 46, 0, 22)
+SubUserLabel.BackgroundTransparency = 1
+SubUserLabel.Text = "Jogador: " .. userName .. " | ID: " .. tostring(userId)
+SubUserLabel.TextColor3 = COLOR_SUBTEXT
+SubUserLabel.TextSize = 10
+SubUserLabel.Font = FONT_MAIN
+SubUserLabel.TextXAlignment = Enum.TextXAlignment.Left
+SubUserLabel.ZIndex = 33
 
 FloatBtn.MouseButton1Click:Connect(function()
 	if not loggedIn then return end
 	MainFrame.Visible = not MainFrame.Visible
 	if MainFrame.Visible then
-		FloatBtn.Text = "[8B] ABERTO"
+		FloatBtn.Text = "🐉 ABERTO"
 		FloatBtn.TextColor3 = COLOR_ON
 	else
-		FloatBtn.Text = "[8B] MENU"
+		FloatBtn.Text = "🐉 MENU"
 		FloatBtn.TextColor3 = COLOR_ACCENT
 	end
 end)
@@ -528,24 +717,24 @@ LoginBtn.MouseButton1Click:Connect(function()
 		loggedIn = true
 		saveCredentials(savePasswordEnabled, "FREE", "FREE")
 		ErrorLabel.TextColor3 = COLOR_ON
-		ErrorLabel.Text = "Acesso liberado! Abrindo painel..."
+		ErrorLabel.Text = "Acesso liberado! Despertando Dragao..."
 		
 		iniciarSistemaPresenca()
 		
 		task.spawn(function()
 			while FloatContainer and FloatContainer.Parent and loggedIn do
-				for i = 0, 1, 0.008 do
+				for i = 0, 1, 0.01 do
 					if not FloatStroke or not FloatStroke.Parent then break end
-					FloatStroke.Color = Color3.fromHSV(i * 0.12 + 0.04, 0.85, 1)
+					FloatStroke.Color = Color3.fromHSV(i * 0.09, 0.9, 1)
 					task.wait(0.05)
 				end
 			end
 		end)
 		
-		task.wait(0.4)
+		task.wait(0.35)
 		LoginFrame:Destroy()
 		MainFrame.Visible = true
-		FloatBtn.Text = "[8B] ABERTO"
+		FloatBtn.Text = "🐉 ABERTO"
 		FloatBtn.TextColor3 = COLOR_ON
 	else
 		ErrorLabel.TextColor3 = COLOR_OFF
@@ -554,41 +743,41 @@ LoginBtn.MouseButton1Click:Connect(function()
 end)
 
 -- ==========================================================================
--- SISTEMA DE ABAS 8-BIT (4 ABAS)
+-- SISTEMA DE ABAS DRAGÃO (4 ABAS)
 -- ==========================================================================
 local TabHeader = Instance.new("Frame", MainFrame)
 TabHeader.Size = UDim2.new(1, -20, 0, 34)
-TabHeader.Position = UDim2.new(0, 10, 0, 44)
+TabHeader.Position = UDim2.new(0, 10, 0, 50)
 TabHeader.BackgroundColor3 = COLOR_PANEL
 TabHeader.BorderSizePixel = 0
-TabHeader.ZIndex = 31
-apply8BitStroke(TabHeader, Color3.fromRGB(40, 45, 60), 1)
+TabHeader.ZIndex = 32
+apply8BitStroke(TabHeader, COLOR_BORDER, 1)
 
 local function createTabBtn(name, posX, active)
 	local btn = Instance.new("TextButton", TabHeader)
 	btn.Size = UDim2.new(0.24, 0, 0.78, 0)
 	btn.Position = UDim2.new(posX, 0, 0.11, 0)
-	btn.BackgroundColor3 = active and COLOR_ACCENT or COLOR_ITEM
+	btn.BackgroundColor3 = active and COLOR_DRAGON_RED or COLOR_ITEM
 	btn.BorderSizePixel = 0
-	btn.TextColor3 = active and COLOR_BG or COLOR_SUBTEXT
+	btn.TextColor3 = active and COLOR_TEXT or COLOR_SUBTEXT
 	btn.TextSize = 12
 	btn.Font = FONT_MAIN
 	btn.Text = name
-	btn.ZIndex = 32
-	apply8BitStroke(btn, Color3.fromRGB(55, 60, 80), 1)
+	btn.ZIndex = 33
+	apply8BitStroke(btn, active and COLOR_ACCENT or COLOR_BORDER, 1)
 	return btn
 end
 
 local btnVisual = createTabBtn("VISUAL", 0.01, true)
 local btnMove = createTabBtn("MOVIM", 0.26, false)
 local btnBoss = createTabBtn("COMBATE", 0.51, false)
-local btnChannel = createTabBtn("CANAL", 0.75, false)
+local btnChannel = createTabBtn("PERFIL", 0.75, false)
 
 local ContentContainer = Instance.new("Frame", MainFrame)
-ContentContainer.Size = UDim2.new(1, -20, 1, -94)
-ContentContainer.Position = UDim2.new(0, 10, 0, 84)
+ContentContainer.Size = UDim2.new(1, -20, 1, -100)
+ContentContainer.Position = UDim2.new(0, 10, 0, 92)
 ContentContainer.BackgroundTransparency = 1
-ContentContainer.ZIndex = 31
+ContentContainer.ZIndex = 32
 
 local function createScroll()
 	local scroll = Instance.new("ScrollingFrame", ContentContainer)
@@ -598,7 +787,7 @@ local function createScroll()
 	scroll.ScrollBarThickness = 3
 	scroll.ScrollBarImageColor3 = COLOR_ACCENT
 	scroll.Visible = false
-	scroll.ZIndex = 31
+	scroll.ZIndex = 32
 	scroll.AutomaticCanvasSize = Enum.AutomaticSize.Y
 	scroll.CanvasSize = UDim2.new(0, 0, 0, 0)
 	
@@ -634,8 +823,12 @@ local function selectTab(selected)
 	}
 	for _, t in ipairs(tabs) do
 		local isSel = (t.panel == selected)
-		t.btn.BackgroundColor3 = isSel and COLOR_ACCENT or COLOR_ITEM
-		t.btn.TextColor3 = isSel and COLOR_BG or COLOR_SUBTEXT
+		t.btn.BackgroundColor3 = isSel and COLOR_DRAGON_RED or COLOR_ITEM
+		t.btn.TextColor3 = isSel and COLOR_TEXT or COLOR_SUBTEXT
+		local st = t.btn:FindFirstChildOfClass("UIStroke")
+		if st then
+			st.Color = isSel and COLOR_ACCENT or COLOR_BORDER
+		end
 	end
 end
 
@@ -645,16 +838,17 @@ btnBoss.MouseButton1Click:Connect(function() selectTab(panelBoss) end)
 btnChannel.MouseButton1Click:Connect(function() selectTab(panelChannel) end)
 
 -- ==========================================================================
--- COMPONENTES 8-BIT (FONTE CODE NÍTIDA SEM ERRO DE ESPAÇAMENTO)
+-- COMPONENTES COM ANÁLISE DE RISCO DE BAN INDIVIDUAL
 -- ==========================================================================
-local function createToggle(parent, name, callback, banWarningText)
+local function createToggle(parent, name, callback, banWarningText, riskColor)
 	local hasWarning = (banWarningText ~= nil and banWarningText ~= "")
 	local row = Instance.new("Frame", parent)
 	row.Size = UDim2.new(1, 0, 0, hasWarning and 52 or 40)
 	row.BackgroundColor3 = COLOR_PANEL
+	row.BackgroundTransparency = 0.08
 	row.BorderSizePixel = 0
-	row.ZIndex = 31
-	local rowStroke = apply8BitStroke(row, Color3.fromRGB(40, 45, 60), 1)
+	row.ZIndex = 33
+	local rowStroke = apply8BitStroke(row, COLOR_BORDER, 1)
 	
 	local label = Instance.new("TextLabel", row)
 	label.Size = UDim2.new(0.68, 0, 0, 20)
@@ -665,7 +859,7 @@ local function createToggle(parent, name, callback, banWarningText)
 	label.TextSize = 12
 	label.Font = FONT_MAIN
 	label.TextXAlignment = Enum.TextXAlignment.Left
-	label.ZIndex = 32
+	label.ZIndex = 34
 
 	if hasWarning then
 		local warnLbl = Instance.new("TextLabel", row)
@@ -673,11 +867,11 @@ local function createToggle(parent, name, callback, banWarningText)
 		warnLbl.Position = UDim2.new(0, 10, 0, 28)
 		warnLbl.BackgroundTransparency = 1
 		warnLbl.Text = banWarningText
-		warnLbl.TextColor3 = COLOR_WARN
+		warnLbl.TextColor3 = riskColor or COLOR_WARN
 		warnLbl.TextSize = 11
 		warnLbl.Font = FONT_MAIN
 		warnLbl.TextXAlignment = Enum.TextXAlignment.Left
-		warnLbl.ZIndex = 32
+		warnLbl.ZIndex = 34
 	end
 	
 	local statusBtn = Instance.new("TextButton", row)
@@ -689,7 +883,7 @@ local function createToggle(parent, name, callback, banWarningText)
 	statusBtn.TextColor3 = COLOR_OFF
 	statusBtn.TextSize = 11
 	statusBtn.Font = FONT_MAIN
-	statusBtn.ZIndex = 32
+	statusBtn.ZIndex = 34
 	local btnStroke = apply8BitStroke(statusBtn, COLOR_OFF, 1)
 	
 	local state = false
@@ -706,7 +900,7 @@ local function createToggle(parent, name, callback, banWarningText)
 			statusBtn.TextColor3 = COLOR_OFF
 			statusBtn.Text = "[ OFF ]"
 			btnStroke.Color = COLOR_OFF
-			rowStroke.Color = Color3.fromRGB(40, 45, 60)
+			rowStroke.Color = COLOR_BORDER
 		end
 		callback(state)
 	end)
@@ -716,9 +910,10 @@ local function createSlider(parent, name, min, max, default, callback)
 	local row = Instance.new("Frame", parent)
 	row.Size = UDim2.new(1, 0, 0, 56)
 	row.BackgroundColor3 = COLOR_PANEL
+	row.BackgroundTransparency = 0.08
 	row.BorderSizePixel = 0
-	row.ZIndex = 31
-	apply8BitStroke(row, Color3.fromRGB(40, 45, 60), 1)
+	row.ZIndex = 33
+	apply8BitStroke(row, COLOR_BORDER, 1)
 
 	local label = Instance.new("TextLabel", row)
 	label.Size = UDim2.new(0.7, 0, 0, 22)
@@ -729,7 +924,7 @@ local function createSlider(parent, name, min, max, default, callback)
 	label.TextSize = 12
 	label.Font = FONT_MAIN
 	label.TextXAlignment = Enum.TextXAlignment.Left
-	label.ZIndex = 32
+	label.ZIndex = 34
 
 	local valLabel = Instance.new("TextLabel", row)
 	valLabel.Size = UDim2.new(0.25, 0, 0, 22)
@@ -740,21 +935,21 @@ local function createSlider(parent, name, min, max, default, callback)
 	valLabel.TextSize = 12
 	valLabel.Font = FONT_MAIN
 	valLabel.TextXAlignment = Enum.TextXAlignment.Right
-	valLabel.ZIndex = 32
+	valLabel.ZIndex = 34
 
 	local sliderBg = Instance.new("Frame", row)
 	sliderBg.Size = UDim2.new(1, -20, 0, 10)
 	sliderBg.Position = UDim2.new(0, 10, 0, 36)
 	sliderBg.BackgroundColor3 = COLOR_BG
 	sliderBg.BorderSizePixel = 0
-	sliderBg.ZIndex = 32
-	apply8BitStroke(sliderBg, Color3.fromRGB(55, 60, 80), 1)
+	sliderBg.ZIndex = 34
+	apply8BitStroke(sliderBg, COLOR_BORDER, 1)
 
 	local sliderFill = Instance.new("Frame", sliderBg)
 	sliderFill.Size = UDim2.new((default - min) / (max - min), 0, 1, 0)
-	sliderFill.BackgroundColor3 = COLOR_ACCENT
+	sliderFill.BackgroundColor3 = COLOR_DRAGON_RED
 	sliderFill.BorderSizePixel = 0
-	sliderFill.ZIndex = 33
+	sliderFill.ZIndex = 35
 
 	local dragging = false
 	local function update(input)
@@ -786,55 +981,65 @@ local function createSlider(parent, name, min, max, default, callback)
 end
 
 -- ==========================================================================
--- ABA CANAL & PERFIL (LIMPA, SEM OPÇÕES DE FIREBASE EXPOSTAS)
+-- ABA PERFIL ROBLOX & CANAL (COM AVATAR REAL E ESTATÍSTICAS)
 -- ==========================================================================
 local ChannelCard = Instance.new("Frame", panelChannel)
-ChannelCard.Size = UDim2.new(1, 0, 0, 268)
+ChannelCard.Size = UDim2.new(1, 0, 0, 290)
 ChannelCard.BackgroundColor3 = COLOR_PANEL
+ChannelCard.BackgroundTransparency = 0.06
 ChannelCard.BorderSizePixel = 0
-ChannelCard.ZIndex = 31
+ChannelCard.ZIndex = 33
 apply8BitStroke(ChannelCard, COLOR_ACCENT, 1)
 
 local CardTitle = Instance.new("TextLabel", ChannelCard)
 CardTitle.Size = UDim2.new(1, 0, 0, 28)
 CardTitle.Position = UDim2.new(0, 0, 0, 8)
 CardTitle.BackgroundTransparency = 1
-CardTitle.Text = ":: PERFIL & ESTATISTICAS ::"
+CardTitle.Text = "🐉 PERFIL ROBLOX & CANAL 🐉"
 CardTitle.TextColor3 = COLOR_ACCENT
 CardTitle.TextSize = 13
 CardTitle.Font = FONT_MAIN
-CardTitle.ZIndex = 32
+CardTitle.ZIndex = 34
 
 local ProfileBox = Instance.new("Frame", ChannelCard)
-ProfileBox.Size = UDim2.new(0.92, 0, 0, 72)
+ProfileBox.Size = UDim2.new(0.92, 0, 0, 86)
 ProfileBox.Position = UDim2.new(0.04, 0, 0, 40)
 ProfileBox.BackgroundColor3 = COLOR_BG
 ProfileBox.BorderSizePixel = 0
-ProfileBox.ZIndex = 32
-apply8BitStroke(ProfileBox, Color3.fromRGB(45, 50, 68), 1)
+ProfileBox.ZIndex = 34
+apply8BitStroke(ProfileBox, COLOR_BORDER, 1)
+
+local AvatarImg = Instance.new("ImageLabel", ProfileBox)
+AvatarImg.Size = UDim2.fromOffset(66, 66)
+AvatarImg.Position = UDim2.new(0, 10, 0.5, -33)
+AvatarImg.BackgroundColor3 = COLOR_PANEL
+AvatarImg.BorderSizePixel = 0
+AvatarImg.Image = avatarThumbUrl
+AvatarImg.ZIndex = 35
+apply8BitStroke(AvatarImg, COLOR_ACCENT, 1.5)
 
 local ProfileLabel = Instance.new("TextLabel", ProfileBox)
-ProfileLabel.Size = UDim2.new(1, -16, 1, 0)
-ProfileLabel.Position = UDim2.new(0, 8, 0, 0)
+ProfileLabel.Size = UDim2.new(1, -90, 1, 0)
+ProfileLabel.Position = UDim2.new(0, 84, 0, 0)
 ProfileLabel.BackgroundTransparency = 1
-ProfileLabel.Text = string.format("Usuario : %s\nUser ID : %d\nConta   : %d dias", userName, userId, LocalPlayer.AccountAge)
+ProfileLabel.Text = string.format("Nick  : %s\nUser  : @%s\nID    : %d\nConta : %d dias", displayName, userName, userId, LocalPlayer.AccountAge)
 ProfileLabel.TextColor3 = COLOR_TEXT
 ProfileLabel.TextSize = 11
 ProfileLabel.Font = FONT_MAIN
 ProfileLabel.TextXAlignment = Enum.TextXAlignment.Left
-ProfileLabel.ZIndex = 33
+ProfileLabel.ZIndex = 35
 
 local CopyChannelBtn = Instance.new("TextButton", ChannelCard)
 CopyChannelBtn.Size = UDim2.new(0.92, 0, 0, 34)
-CopyChannelBtn.Position = UDim2.new(0.04, 0, 0, 124)
-CopyChannelBtn.BackgroundColor3 = COLOR_ACCENT
+CopyChannelBtn.Position = UDim2.new(0.04, 0, 0, 138)
+CopyChannelBtn.BackgroundColor3 = COLOR_DRAGON_RED
 CopyChannelBtn.BorderSizePixel = 0
 CopyChannelBtn.Text = "[ COPIAR LINK DO CANAL ]"
-CopyChannelBtn.TextColor3 = COLOR_BG
+CopyChannelBtn.TextColor3 = COLOR_TEXT
 CopyChannelBtn.TextSize = 12
 CopyChannelBtn.Font = FONT_MAIN
-CopyChannelBtn.ZIndex = 32
-apply8BitStroke(CopyChannelBtn, Color3.fromRGB(255, 180, 80), 1)
+CopyChannelBtn.ZIndex = 34
+apply8BitStroke(CopyChannelBtn, COLOR_ACCENT, 1)
 
 CopyChannelBtn.MouseButton1Click:Connect(function()
 	pcall(function()
@@ -847,11 +1052,11 @@ end)
 
 local StatsBox = Instance.new("Frame", ChannelCard)
 StatsBox.Size = UDim2.new(0.92, 0, 0, 34)
-StatsBox.Position = UDim2.new(0.04, 0, 0, 168)
+StatsBox.Position = UDim2.new(0.04, 0, 0, 184)
 StatsBox.BackgroundColor3 = COLOR_BG
 StatsBox.BorderSizePixel = 0
-StatsBox.ZIndex = 32
-apply8BitStroke(StatsBox, Color3.fromRGB(45, 50, 68), 1)
+StatsBox.ZIndex = 34
+apply8BitStroke(StatsBox, COLOR_BORDER, 1)
 
 local StatsLabel = Instance.new("TextLabel", StatsBox)
 StatsLabel.Size = UDim2.new(1, 0, 1, 0)
@@ -860,23 +1065,23 @@ StatsLabel.Text = "Online Agora: Conectando..."
 StatsLabel.TextColor3 = COLOR_ON
 StatsLabel.TextSize = 12
 StatsLabel.Font = FONT_MAIN
-StatsLabel.ZIndex = 33
+StatsLabel.ZIndex = 35
 statsLabelReference = StatsLabel
 
 local ClearCacheBtn = Instance.new("TextButton", ChannelCard)
 ClearCacheBtn.Size = UDim2.new(0.92, 0, 0, 34)
-ClearCacheBtn.Position = UDim2.new(0.04, 0, 0, 214)
+ClearCacheBtn.Position = UDim2.new(0.04, 0, 0, 230)
 ClearCacheBtn.BackgroundColor3 = COLOR_ITEM
 ClearCacheBtn.BorderSizePixel = 0
 ClearCacheBtn.Text = "[ LIMPAR CACHE & OTIMIZAR ]"
 ClearCacheBtn.TextColor3 = COLOR_TEXT
 ClearCacheBtn.TextSize = 11
 ClearCacheBtn.Font = FONT_MAIN
-ClearCacheBtn.ZIndex = 32
+ClearCacheBtn.ZIndex = 34
 apply8BitStroke(ClearCacheBtn, COLOR_ACCENT, 1)
 
 -- ==========================================================================
--- DETECÇÃO UNIVERSAL DE INIMIGOS / ZUMBIS
+-- DETECÇÃO UNIVERSAL DE INIMIGOS / ZUMBIS (INALTERADA)
 -- ==========================================================================
 local cachedZombies = {}
 
@@ -915,7 +1120,7 @@ local function getZombies()
 end
 
 -- ==========================================================================
--- ABA VISUAL: ESP BOX 2D, ESP LINE, ESP CHAMS, ESP NAME/HP & AURA 8-BIT
+-- ABA VISUAL: CÓDIGOS DE ESP INTACTOS + ANÁLISE DE RISCO SIMPLES
 -- ==========================================================================
 _G.Free_ESP_Box2D = false
 _G.Free_ESP_Line = false
@@ -977,7 +1182,7 @@ local function clearAll8BitBoxes()
 	end)
 end
 
-createToggle(panelVisual, "ESP Box 2D (Caixa 8-Bit)", function(enabled)
+createToggle(panelVisual, "ESP Box 2D (Caixa Dragao)", function(enabled)
 	_G.Free_ESP_Box2D = enabled
 	if enabled then
 		task.spawn(function()
@@ -994,7 +1199,7 @@ createToggle(panelVisual, "ESP Box 2D (Caixa 8-Bit)", function(enabled)
 	else
 		clearAll8BitBoxes()
 	end
-end)
+end, "[Risco: Nenhum - 100% Visual]", COLOR_ON)
 
 local linePool = {}
 
@@ -1025,7 +1230,7 @@ createToggle(panelVisual, "ESP Line (Linha Tracante)", function(enabled)
 	if not enabled then
 		hideAllLines(1)
 	end
-end)
+end, "[Risco: Nenhum - 100% Visual]", COLOR_ON)
 
 RunService.RenderStepped:Connect(function()
 	if not _G.Free_ESP_Line then
@@ -1090,8 +1295,8 @@ createToggle(panelVisual, "ESP Chams (Highlight)", function(enabled)
 							hl.Name = "FreeHighlight8Bit"
 							hl.Adornee = enemy
 							hl.DepthMode = Enum.HighlightDepthMode.AlwaysOnTop
-							hl.FillColor = COLOR_ACCENT
-							hl.OutlineColor = COLOR_TEXT
+							hl.FillColor = COLOR_DRAGON_RED
+							hl.OutlineColor = COLOR_ACCENT
 							hl.FillTransparency = 0.55
 							hl.OutlineTransparency = 0.1
 							hl.Parent = enemy
@@ -1103,7 +1308,7 @@ createToggle(panelVisual, "ESP Chams (Highlight)", function(enabled)
 							adorn.AlwaysOnTop = true
 							adorn.ZIndex = 5
 							adorn.Size = Vector3.new(3.2, 4.8, 1.8)
-							adorn.Color3 = COLOR_ACCENT
+							adorn.Color3 = COLOR_DRAGON_RED
 							adorn.Transparency = 0.65
 							adorn.Parent = root
 						end
@@ -1116,9 +1321,9 @@ createToggle(panelVisual, "ESP Chams (Highlight)", function(enabled)
 	else
 		clearAllChams()
 	end
-end)
+end, "[Risco: Nenhum - 100% Visual]", COLOR_ON)
 
-createToggle(panelVisual, "ESP Name & Barra HP (8-Bit)", function(enabled)
+createToggle(panelVisual, "ESP Name & Barra HP", function(enabled)
 	_G.Free_ESP_Name = enabled
 	task.spawn(function()
 		while _G.Free_ESP_Name do
@@ -1150,7 +1355,7 @@ createToggle(panelVisual, "ESP Name & Barra HP (8-Bit)", function(enabled)
 							barBg.Position = UDim2.new(0.075, 0, 0, 22)
 							barBg.BackgroundColor3 = COLOR_BG
 							barBg.BorderSizePixel = 0
-							apply8BitStroke(barBg, Color3.fromRGB(45, 50, 68), 1)
+							apply8BitStroke(barBg, COLOR_BORDER, 1)
 
 							local barFill = Instance.new("Frame", barBg)
 							barFill.Name = "Fill"
@@ -1180,9 +1385,9 @@ createToggle(panelVisual, "ESP Name & Barra HP (8-Bit)", function(enabled)
 			end
 		end)
 	end)
-end)
+end, "[Risco: Nenhum - 100% Visual]", COLOR_ON)
 
-createToggle(panelVisual, "Aura 8-Bit (Pixels nos Pes)", function(enabled)
+createToggle(panelVisual, "Aura do Dragao (Chamas nos Pes)", function(enabled)
 	_G.SurrealFloor_On = enabled
 	task.spawn(function()
 		while _G.SurrealFloor_On do
@@ -1202,7 +1407,7 @@ createToggle(panelVisual, "Aura 8-Bit (Pixels nos Pes)", function(enabled)
 						aura.EmissionDirection = Enum.NormalId.Bottom
 						aura.SpreadAngle = Vector2.new(25, 25)
 					end
-					aura.Color = ColorSequence.new(COLOR_ACCENT)
+					aura.Color = ColorSequence.new(COLOR_DRAGON_RED, COLOR_ACCENT)
 				end
 			end)
 			task.wait(0.1)
@@ -1215,7 +1420,7 @@ createToggle(panelVisual, "Aura 8-Bit (Pixels nos Pes)", function(enabled)
 			end
 		end)
 	end)
-end)
+end, "[Risco: Baixo - Efeito local]", COLOR_ON)
 
 ClearCacheBtn.MouseButton1Click:Connect(function()
 	pcall(function()
@@ -1235,7 +1440,7 @@ ClearCacheBtn.MouseButton1Click:Connect(function()
 end)
 
 -- ==========================================================================
--- ABA MOVIMENTO (COM AVISOS SIMPLES DE RISCO DE BAN)
+-- ABA MOVIMENTO (COM ANÁLISE DE RISCO DE BAN INDIVIDUAL)
 -- ==========================================================================
 _G.Free_Speed = false
 _G.Free_SpeedVal = 48
@@ -1250,7 +1455,7 @@ createToggle(panelMove, "Speed Hack (Velocidade)", function(enabled)
 			if hum then hum.WalkSpeed = 16 end
 		end)
 	end
-end, "[! Risco de ban: Use com moderacao]")
+end, "[Risco: Medio - Evite passar de 65]", COLOR_WARN)
 
 createSlider(panelMove, "Nivel de Velocidade", 16, 120, 48, function(val)
 	_G.Free_SpeedVal = val
@@ -1280,7 +1485,7 @@ createToggle(panelMove, "Wall Hack (Atravessar Paredes)", function(enabled)
 			end
 		end)
 	end
-end, "[! Risco de ban: Evite ficar nas paredes]")
+end, "[Risco: Medio - Evite ficar nas paredes]", COLOR_WARN)
 
 RunService.Stepped:Connect(function()
 	if _G.Free_Noclip then
@@ -1297,7 +1502,7 @@ end)
 local flyConn, bv, bg
 _G.Free_FlySpeed = 55
 
-createToggle(panelMove, "Fly 8-Bit (Voo PC & Mobile)", function(enabled)
+createToggle(panelMove, "Fly Dragao (Voo PC & Mobile)", function(enabled)
 	_G.Free_FlyActive = enabled
 	local char = LocalPlayer.Character
 	if not char or not char:FindFirstChild("HumanoidRootPart") then return end
@@ -1347,14 +1552,14 @@ createToggle(panelMove, "Fly 8-Bit (Voo PC & Mobile)", function(enabled)
 			if hum then hum.PlatformStand = false; hum.AutoRotate = true end
 		end)
 	end
-end, "[! Risco de ban: Alto - Use pouco tempo]")
+end, "[Risco: Alto - Use por poucos segundos]", COLOR_OFF)
 
 createSlider(panelMove, "Velocidade do Fly", 20, 140, 55, function(val)
 	_G.Free_FlySpeed = val
 end)
 
 -- ==========================================================================
--- ABA COMBATE: AIMBOT MULTI-ALVO + AVISO SIMPLES
+-- ABA COMBATE: AIMBOT MULTI-ALVO + ANÁLISE DE RISCO SIMPLES
 -- ==========================================================================
 _G.Free_AimLock = false
 _G.Free_AimSmooth = 6
@@ -1374,12 +1579,12 @@ apply8BitStroke(FovFrame, COLOR_ACCENT, 1.2)
 
 createToggle(panelBoss, "Aimbot Multi-Alvo (Ativo)", function(enabled)
 	_G.Free_AimLock = enabled
-end, "[! Risco de ban: Moderado]")
+end, "[Risco: Baixo/Medio - Use suavidade <= 7]", COLOR_WARN)
 
-createToggle(panelBoss, "Mostrar Area FOV (Mira 8-Bit)", function(enabled)
+createToggle(panelBoss, "Mostrar Area FOV (Mira)", function(enabled)
 	_G.Free_ShowFOV = enabled
 	FovFrame.Visible = enabled
-end)
+end, "[Risco: Nenhum - Apenas visual na tela]", COLOR_ON)
 
 createSlider(panelBoss, "Suavidade do Aimbot", 1, 10, 6, function(val)
 	_G.Free_AimSmooth = val
@@ -1424,9 +1629,10 @@ end)
 local AimPartRow = Instance.new("Frame", panelBoss)
 AimPartRow.Size = UDim2.new(1, 0, 0, 42)
 AimPartRow.BackgroundColor3 = COLOR_PANEL
+AimPartRow.BackgroundTransparency = 0.08
 AimPartRow.BorderSizePixel = 0
-AimPartRow.ZIndex = 31
-apply8BitStroke(AimPartRow, Color3.fromRGB(40, 45, 60), 1)
+AimPartRow.ZIndex = 33
+apply8BitStroke(AimPartRow, COLOR_BORDER, 1)
 
 local AimPartLabel = Instance.new("TextLabel", AimPartRow)
 AimPartLabel.Size = UDim2.new(0.55, 0, 1, 0)
@@ -1437,7 +1643,7 @@ AimPartLabel.TextColor3 = COLOR_TEXT
 AimPartLabel.TextSize = 12
 AimPartLabel.Font = FONT_MAIN
 AimPartLabel.TextXAlignment = Enum.TextXAlignment.Left
-AimPartLabel.ZIndex = 32
+AimPartLabel.ZIndex = 34
 
 local partsList = {"Head", "UpperTorso", "HumanoidRootPart", "RightFoot"}
 local partsNames = {"Cabeca", "Quadril", "Barra", "Pe"}
@@ -1446,14 +1652,14 @@ local currentPartIndex = 1
 local ChangePartBtn = Instance.new("TextButton", AimPartRow)
 ChangePartBtn.Size = UDim2.new(0, 110, 0, 26)
 ChangePartBtn.Position = UDim2.new(1, -118, 0.5, -13)
-ChangePartBtn.BackgroundColor3 = COLOR_ACCENT
+ChangePartBtn.BackgroundColor3 = COLOR_DRAGON_RED
 ChangePartBtn.BorderSizePixel = 0
 ChangePartBtn.Text = "[ MUDAR ALVO ]"
-ChangePartBtn.TextColor3 = COLOR_BG
+ChangePartBtn.TextColor3 = COLOR_TEXT
 ChangePartBtn.TextSize = 11
 ChangePartBtn.Font = FONT_MAIN
-ChangePartBtn.ZIndex = 32
-apply8BitStroke(ChangePartBtn, Color3.fromRGB(255, 180, 80), 1)
+ChangePartBtn.ZIndex = 34
+apply8BitStroke(ChangePartBtn, COLOR_ACCENT, 1)
 
 ChangePartBtn.MouseButton1Click:Connect(function()
 	currentPartIndex = currentPartIndex + 1
