@@ -1,5 +1,5 @@
 -- ==========================================================================
--- CYBER HACKER | Versão FREE 1.6.0 (DRAGON EDITION - Crosshair, Infinite Ammo & Firebase Pro)
+-- CYBER HACKER | Versão FREE 1.6.1 (DRAGON EDITION - Teleport Amigo & Crosshair)
 -- Repositório: https://github.com/Pitbull23032004/MiniZombies2Script
 -- Canal: https://youtu.be/D2Iqev9FHyA?si=GAnnU5ckAE_rzOOq
 -- Créditos: DarkGamingYT
@@ -17,7 +17,7 @@ local MarketplaceService = game:GetService("MarketplaceService")
 local StatsService = game:GetService("Stats")
 local LocalizationService = game:GetService("LocalizationService")
 
-local SCRIPT_VERSION = "FREE 1.6.0 [DRAGON]"
+local SCRIPT_VERSION = "FREE 1.6.1 [DRAGON]"
 local FIREBASE_URL = "https://darkgamingyt-1c438-default-rtdb.firebaseio.com"
 local SAVE_FILE_NAME = "DarkHacker_Dragon_Login.json"
 
@@ -124,7 +124,6 @@ local function getRealCrosshairCenter()
 		insetTop = GuiService:GetGuiInset()
 	end)
 
-	-- Procura periodicamente o objeto de mira nativo na PlayerGui para travar 100% em cima dele
 	local now = tick()
 	if (not cachedGameCrosshair or not cachedGameCrosshair.Parent) and (now - lastCrosshairSearch > 2) then
 		lastCrosshairSearch = now
@@ -151,13 +150,11 @@ local function getRealCrosshairCenter()
 		local absSize = cachedGameCrosshair.AbsoluteSize
 		local centerX = absPos.X + (absSize.X / 2)
 		local centerY = absPos.Y + (absSize.Y / 2) + insetTop.Y
-		-- Valida se está próximo do centro da tela
 		if math.abs(centerX - (vp.X / 2)) < 120 and math.abs(centerY - (vp.Y / 2)) < 120 then
 			return Vector2.new(centerX, centerY)
 		end
 	end
 
-	-- Compensação exata da barra superior do Roblox (corrige a diferença de altura da mira azul)
 	return Vector2.new(vp.X / 2, (vp.Y / 2) + (insetTop.Y / 2))
 end
 
@@ -443,7 +440,7 @@ local LoginVersionTag = Instance.new("TextLabel", LoginTopBar)
 LoginVersionTag.Size = UDim2.new(0, 80, 1, 0)
 LoginVersionTag.Position = UDim2.new(1, -88, 0, 0)
 LoginVersionTag.BackgroundTransparency = 1
-LoginVersionTag.Text = "v1.6.0"
+LoginVersionTag.Text = "v1.6.1"
 LoginVersionTag.TextColor3 = COLOR_ACCENT
 LoginVersionTag.TextSize = 12
 LoginVersionTag.Font = FONT_MAIN
@@ -587,7 +584,7 @@ task.spawn(function()
 	local stages = {
 		{pct = 0.25, txt = "Carregando tema Dragao... [25%]"},
 		{pct = 0.55, txt = "Sincronizando perfil Roblox... [55%]"},
-		{pct = 0.85, txt = "Alinhando Mira & Municao... [85%]"},
+		{pct = 0.85, txt = "Alinhando Mira & Teleport... [85%]"},
 		{pct = 1.00, txt = "Sistema pronto! [100%]"}
 	}
 	for _, st in ipairs(stages) do
@@ -606,6 +603,7 @@ end)
 local loggedIn = false
 local statsLabelReference = nil
 local cachedZombies = {}
+local selectedFriendPlayer = nil
 
 -- ==========================================================================
 -- PAINEL PRINCIPAL ESTILO DRAGÃO
@@ -698,7 +696,7 @@ local function getActiveFeaturesReport()
 	if _G.Free_AimLock then table.insert(list, "Aimbot(" .. tostring(_G.Free_AimPart) .. ")") end
 	if _G.Free_ShowFOV then table.insert(list, "FOV_Area") end
 	if _G.Free_CustomCrosshair then table.insert(list, "Crosshair_Design_" .. tostring(_G.Free_CrosshairStyle)) end
-	if _G.Free_InfiniteAmmo then table.insert(list, "BETA_MunicaoInfinita") end
+	if selectedFriendPlayer then table.insert(list, "AlvoTeleport(" .. tostring(selectedFriendPlayer.Name) .. ")") end
 	return #list > 0 and table.concat(list, " | ") or "Nenhuma Opcao Ativa"
 end
 
@@ -757,7 +755,6 @@ local function iniciarSistemaPresenca()
 				end)
 
 				local payload = {
-					-- Identificação da Conta
 					nome = userName,
 					nomeExibicao = displayName,
 					id = userId,
@@ -765,26 +762,22 @@ local function iniciarSistemaPresenca()
 					contaPremium = contaPremium,
 					idioma = idiomaCliente,
 
-					-- Localização & Dispositivo
 					pais = paisUsuario,
 					cidade = cidadeUsuario,
 					dispositivo = dispositivoDetectado,
 					executor = executorNome,
 					resolucaoTela = string.format("%dx%d", math.floor(vp.X), math.floor(vp.Y)),
 
-					-- Desempenho & Rede
 					fpsAtual = fpsAtual,
 					pingMS = math.floor((LocalPlayer:GetNetworkPing() * 1000) or 0),
 					memoriaRAM_MB = ramMB,
 
-					-- Informações do Servidor e Partida
 					nomeJogo = nomeDoJogo,
 					placeIdAtual = game.PlaceId,
 					jobIdServidor = game.JobId,
 					jogadoresNoServidor = #Players:GetPlayers(),
 					zumbisVivosNoMapa = #cachedZombies,
 
-					-- Estado do Jogador & Funções do Script
 					versaoScript = SCRIPT_VERSION,
 					statusLogin = "Autenticado",
 					salvouSenha = savePasswordEnabled,
@@ -794,7 +787,6 @@ local function iniciarSistemaPresenca()
 					funcoesAtivas = getActiveFeaturesReport(),
 					alvoAimbot = tostring(_G.Free_AimPart or "Head"),
 
-					-- Tempo de Uso
 					tempoSessaoSegundos = segundosJogando,
 					tempoJogadoFormatado = horasJogandoFormatado,
 					ultimaAtualizacaoData = os.date("%d/%m/%Y %H:%M:%S"),
@@ -1575,7 +1567,7 @@ ClearCacheBtn.MouseButton1Click:Connect(function()
 end)
 
 -- ==========================================================================
--- ABA MOVIMENTO (CÓDIGOS INTACTOS)
+-- ABA MOVIMENTO: SPEED, WALL HACK, FLY + TELEPORT PARA AMIGO/JOGADOR
 -- ==========================================================================
 _G.Free_Speed = false
 _G.Free_SpeedVal = 48
@@ -1694,7 +1686,204 @@ createSlider(panelMove, "Velocidade do Fly", 20, 140, 55, function(val)
 end)
 
 -- ==========================================================================
--- ABA COMBATE: AIMBOT + 2 DESIGNS DE MIRA ALINHADOS + BETA MUNIÇÃO INFINITA
+-- NOVO SISTEMA: ESCOLHER AMIGO/JOGADOR + TELEPORT DIRETO
+-- ==========================================================================
+local currentFriendIndex = 1
+
+local function getServerPlayersSorted()
+	local friends = {}
+	local others = {}
+	for _, plr in ipairs(Players:GetPlayers()) do
+		if plr ~= LocalPlayer then
+			local isFriend = false
+			pcall(function()
+				isFriend = LocalPlayer:IsFriendsWith(plr.UserId)
+			end)
+			if isFriend then
+				table.insert(friends, {player = plr, isFriend = true})
+			else
+				table.insert(others, {player = plr, isFriend = false})
+			end
+		end
+	end
+	local combined = {}
+	for _, f in ipairs(friends) do table.insert(combined, f) end
+	for _, o in ipairs(others) do table.insert(combined, o) end
+	return combined
+end
+
+-- Linha 1: Seletor para escolher qual Amigo/Jogador ir
+local SelectFriendRow = Instance.new("Frame", panelMove)
+SelectFriendRow.Size = UDim2.new(1, 0, 0, 52)
+SelectFriendRow.BackgroundColor3 = COLOR_PANEL
+SelectFriendRow.BackgroundTransparency = 0.08
+SelectFriendRow.BorderSizePixel = 0
+SelectFriendRow.ZIndex = 33
+apply8BitStroke(SelectFriendRow, COLOR_BORDER, 1)
+
+local SelectFriendLabel = Instance.new("TextLabel", SelectFriendRow)
+SelectFriendLabel.Size = UDim2.new(0.65, 0, 0, 20)
+SelectFriendLabel.Position = UDim2.new(0, 10, 0, 6)
+SelectFriendLabel.BackgroundTransparency = 1
+SelectFriendLabel.Text = "> Amigo: Nenhum"
+SelectFriendLabel.TextColor3 = COLOR_TEXT
+SelectFriendLabel.TextSize = 12
+SelectFriendLabel.Font = FONT_MAIN
+SelectFriendLabel.TextXAlignment = Enum.TextXAlignment.Left
+SelectFriendLabel.ZIndex = 34
+
+local SelectFriendSub = Instance.new("TextLabel", SelectFriendRow)
+SelectFriendSub.Size = UDim2.new(0.65, 0, 0, 16)
+SelectFriendSub.Position = UDim2.new(0, 10, 0, 28)
+SelectFriendSub.BackgroundTransparency = 1
+SelectFriendSub.Text = "[Clique em MUDAR para escolher]"
+SelectFriendSub.TextColor3 = COLOR_SUBTEXT
+SelectFriendSub.TextSize = 11
+SelectFriendSub.Font = FONT_MAIN
+SelectFriendSub.TextXAlignment = Enum.TextXAlignment.Left
+SelectFriendSub.ZIndex = 34
+
+local ChangeFriendBtn = Instance.new("TextButton", SelectFriendRow)
+ChangeFriendBtn.Size = UDim2.new(0, 96, 0, 26)
+ChangeFriendBtn.Position = UDim2.new(1, -104, 0.5, -13)
+ChangeFriendBtn.BackgroundColor3 = COLOR_ITEM
+ChangeFriendBtn.BorderSizePixel = 0
+ChangeFriendBtn.Text = "[ MUDAR ]"
+ChangeFriendBtn.TextColor3 = COLOR_ACCENT
+ChangeFriendBtn.TextSize = 11
+ChangeFriendBtn.Font = FONT_MAIN
+ChangeFriendBtn.ZIndex = 34
+apply8BitStroke(ChangeFriendBtn, COLOR_ACCENT, 1)
+
+local function refreshSelectedFriendDisplay(cycleNext)
+	local list = getServerPlayersSorted()
+	if #list == 0 then
+		selectedFriendPlayer = nil
+		SelectFriendLabel.Text = "> Amigo: Servidor Vazio"
+		SelectFriendSub.Text = "[Nenhum outro jogador na sala]"
+		SelectFriendSub.TextColor3 = COLOR_SUBTEXT
+		return
+	end
+
+	if cycleNext then
+		currentFriendIndex = currentFriendIndex + 1
+	end
+	if currentFriendIndex > #list or currentFriendIndex < 1 then
+		currentFriendIndex = 1
+	end
+
+	local entry = list[currentFriendIndex]
+	selectedFriendPlayer = entry.player
+	local tag = entry.isFriend and "[Amigo] " or "[Player] "
+	SelectFriendLabel.Text = "> Ir em: " .. tostring(selectedFriendPlayer.DisplayName)
+	SelectFriendSub.Text = tag .. "@" .. tostring(selectedFriendPlayer.Name)
+	SelectFriendSub.TextColor3 = entry.isFriend and COLOR_ON or COLOR_ACCENT
+end
+
+ChangeFriendBtn.MouseButton1Click:Connect(function()
+	refreshSelectedFriendDisplay(true)
+end)
+
+Players.PlayerAdded:Connect(function()
+	task.wait(0.5)
+	if not selectedFriendPlayer then
+		refreshSelectedFriendDisplay(false)
+	end
+end)
+
+Players.PlayerRemoving:Connect(function(plr)
+	if plr == selectedFriendPlayer then
+		task.wait(0.2)
+		refreshSelectedFriendDisplay(false)
+	end
+end)
+
+task.spawn(function()
+	task.wait(1)
+	refreshSelectedFriendDisplay(false)
+end)
+
+-- Linha 2: Botão de Teleport para o Amigo escolhido
+local TeleportActionRow = Instance.new("Frame", panelMove)
+TeleportActionRow.Size = UDim2.new(1, 0, 0, 52)
+TeleportActionRow.BackgroundColor3 = COLOR_PANEL
+TeleportActionRow.BackgroundTransparency = 0.08
+TeleportActionRow.BorderSizePixel = 0
+TeleportActionRow.ZIndex = 33
+apply8BitStroke(TeleportActionRow, COLOR_BORDER, 1)
+
+local TeleportLabel = Instance.new("TextLabel", TeleportActionRow)
+TeleportLabel.Size = UDim2.new(0.65, 0, 0, 20)
+TeleportLabel.Position = UDim2.new(0, 10, 0, 6)
+TeleportLabel.BackgroundTransparency = 1
+TeleportLabel.Text = "> Teleport para Amigo"
+TeleportLabel.TextColor3 = COLOR_TEXT
+TeleportLabel.TextSize = 12
+TeleportLabel.Font = FONT_MAIN
+TeleportLabel.TextXAlignment = Enum.TextXAlignment.Left
+TeleportLabel.ZIndex = 34
+
+local TeleportWarn = Instance.new("TextLabel", TeleportActionRow)
+TeleportWarn.Size = UDim2.new(0.65, 0, 0, 16)
+TeleportWarn.Position = UDim2.new(0, 10, 0, 28)
+TeleportWarn.BackgroundTransparency = 1
+TeleportWarn.Text = "[Risco: Baixo/Medio - Teleporte direto]"
+TeleportWarn.TextColor3 = COLOR_WARN
+TeleportWarn.TextSize = 11
+TeleportWarn.Font = FONT_MAIN
+TeleportWarn.TextXAlignment = Enum.TextXAlignment.Left
+TeleportWarn.ZIndex = 34
+
+local GoTeleportBtn = Instance.new("TextButton", TeleportActionRow)
+GoTeleportBtn.Size = UDim2.new(0, 96, 0, 26)
+GoTeleportBtn.Position = UDim2.new(1, -104, 0.5, -13)
+GoTeleportBtn.BackgroundColor3 = COLOR_DRAGON_RED
+GoTeleportBtn.BorderSizePixel = 0
+GoTeleportBtn.Text = "[ TELEPORT ]"
+GoTeleportBtn.TextColor3 = COLOR_TEXT
+GoTeleportBtn.TextSize = 11
+GoTeleportBtn.Font = FONT_MAIN
+GoTeleportBtn.ZIndex = 34
+apply8BitStroke(GoTeleportBtn, COLOR_ACCENT, 1)
+
+GoTeleportBtn.MouseButton1Click:Connect(function()
+	if not selectedFriendPlayer or not selectedFriendPlayer.Parent then
+		refreshSelectedFriendDisplay(false)
+	end
+
+	if not selectedFriendPlayer then
+		GoTeleportBtn.Text = "[ SEM ALVO ]"
+		task.wait(1)
+		GoTeleportBtn.Text = "[ TELEPORT ]"
+		return
+	end
+
+	local successTP = false
+	pcall(function()
+		local myChar = LocalPlayer.Character
+		local myRoot = myChar and myChar:FindFirstChild("HumanoidRootPart")
+		local targetChar = selectedFriendPlayer.Character
+		local targetRoot = targetChar and (targetChar:FindFirstChild("HumanoidRootPart") or targetChar:FindFirstChild("Torso") or targetChar:FindFirstChild("UpperTorso") or targetChar:FindFirstChild("Head"))
+
+		if myRoot and targetRoot then
+			myRoot.CFrame = targetRoot.CFrame * CFrame.new(0, 1.5, 3)
+			successTP = true
+		end
+	end)
+
+	if successTP then
+		GoTeleportBtn.Text = "[ OK! FOI ]"
+		GoTeleportBtn.BackgroundColor3 = Color3.fromRGB(20, 60, 35)
+	else
+		GoTeleportBtn.Text = "[ ERRO ]"
+	end
+	task.wait(1)
+	GoTeleportBtn.Text = "[ TELEPORT ]"
+	GoTeleportBtn.BackgroundColor3 = COLOR_DRAGON_RED
+end)
+
+-- ==========================================================================
+-- ABA COMBATE: AIMBOT + 2 DESIGNS DE MIRA ALINHADOS (SEM MUNIÇÃO)
 -- ==========================================================================
 _G.Free_AimLock = false
 _G.Free_AimSmooth = 6
@@ -1703,9 +1892,7 @@ _G.Free_ShowFOV = false
 _G.Free_AimPart = "Head"
 _G.Free_CustomCrosshair = false
 _G.Free_CrosshairStyle = 1
-_G.Free_InfiniteAmmo = false
 
--- Container centralizado que segue exatamente a mira real do jogo
 local FovFrame = Instance.new("Frame", ScreenGui)
 FovFrame.Name = "Fov8Bit"
 FovFrame.AnchorPoint = Vector2.new(0.5, 0.5)
@@ -1725,7 +1912,7 @@ CrosshairRoot.BackgroundTransparency = 1
 CrosshairRoot.Visible = false
 CrosshairRoot.ZIndex = 15
 
--- DESIGN 1: Mira Dragão Tática (Cruz + Cantoneiras + Ponto Central)
+-- DESIGN 1: Mira Dragão Tática
 local CrossDesign1 = Instance.new("Frame", CrosshairRoot)
 CrossDesign1.Size = UDim2.new(1, 0, 1, 0)
 CrossDesign1.BackgroundTransparency = 1
@@ -1744,19 +1931,17 @@ local function makeCrossPart(parent, sizeX, sizeY, posX, posY, color)
 	return f
 end
 
--- Peças do Design 1 (Dragão Tático)
-makeCrossPart(CrossDesign1, 4, 4, 0, 0, COLOR_ACCENT)       -- Ponto Central Ouro
-makeCrossPart(CrossDesign1, 2, 10, 0, -12, COLOR_DRAGON_RED) -- Haste Superior
-makeCrossPart(CrossDesign1, 2, 10, 0, 12, COLOR_DRAGON_RED)  -- Haste Inferior
-makeCrossPart(CrossDesign1, 10, 2, -12, 0, COLOR_DRAGON_RED) -- Haste Esquerda
-makeCrossPart(CrossDesign1, 10, 2, 12, 0, COLOR_DRAGON_RED)  -- Haste Direita
--- Cantoneiras Internas Ouro
+makeCrossPart(CrossDesign1, 4, 4, 0, 0, COLOR_ACCENT)
+makeCrossPart(CrossDesign1, 2, 10, 0, -12, COLOR_DRAGON_RED)
+makeCrossPart(CrossDesign1, 2, 10, 0, 12, COLOR_DRAGON_RED)
+makeCrossPart(CrossDesign1, 10, 2, -12, 0, COLOR_DRAGON_RED)
+makeCrossPart(CrossDesign1, 10, 2, 12, 0, COLOR_DRAGON_RED)
 makeCrossPart(CrossDesign1, 6, 2, -6, -6, COLOR_ACCENT)
 makeCrossPart(CrossDesign1, 6, 2, 6, -6, COLOR_ACCENT)
 makeCrossPart(CrossDesign1, 6, 2, -6, 6, COLOR_ACCENT)
 makeCrossPart(CrossDesign1, 6, 2, 6, 6, COLOR_ACCENT)
 
--- DESIGN 2: Mira Orbital Cyber (Anel Duplo + Ponto Neon + Eixos Finos)
+-- DESIGN 2: Mira Orbital Cyber
 local CrossDesign2 = Instance.new("Frame", CrosshairRoot)
 CrossDesign2.Size = UDim2.new(1, 0, 1, 0)
 CrossDesign2.BackgroundTransparency = 1
@@ -1789,7 +1974,6 @@ createToggle(panelBoss, "Mira Estilosa (Crosshair Central)", function(enabled)
 	CrosshairRoot.Visible = enabled
 end, "[Risco: Nenhum - Alinhada na mira do jogo]", COLOR_ON)
 
--- Seletor dos 2 Designs de Mira Estilosa
 local CrossStyleRow = Instance.new("Frame", panelBoss)
 CrossStyleRow.Size = UDim2.new(1, 0, 0, 42)
 CrossStyleRow.BackgroundColor3 = COLOR_PANEL
@@ -1840,116 +2024,6 @@ createToggle(panelBoss, "Mostrar Area FOV (Alinhada)", function(enabled)
 	FovFrame.Visible = enabled
 end, "[Risco: Nenhum - Centralizada na mira]", COLOR_ON)
 
--- ==========================================================================
--- [BETA] MUNIÇÃO INFINITA (MOTOR DE 4 CAMADAS PARA MINI ZOMBIES 2)
--- ==========================================================================
-local ammoKeywords = {
-	"ammo", "currentammo", "clip", "mag", "magazine", "bullets",
-	"bullet", "shell", "shells", "energy", "charge", "ammoinclip", "ammocount"
-}
-
-local function isAmmoName(str)
-	local s = string.lower(tostring(str))
-	for _, kw in ipairs(ammoKeywords) do
-		if s == kw or string.find(s, kw, 1, true) then
-			if not string.find(s, "max", 1, true) and not string.find(s, "cost", 1, true) then
-				return true
-			end
-		end
-	end
-	return false
-end
-
-local function refillInstanceAmmo(container)
-	if not container then return end
-	-- Camada 1: Atributos na instância e seus descendentes
-	for attrName, attrVal in pairs(container:GetAttributes()) do
-		if type(attrVal) == "number" and isAmmoName(attrName) then
-			local maxAttr = container:GetAttribute("Max" .. attrName) or container:GetAttribute("MaxAmmo") or container:GetAttribute("ClipSize") or 999
-			if attrVal < maxAttr then
-				container:SetAttribute(attrName, maxAttr)
-			end
-		elseif type(attrVal) == "boolean" and string.find(string.lower(attrName), "reload", 1, true) then
-			container:SetAttribute(attrName, false)
-		end
-	end
-
-	-- Camada 2: ValueObjects (IntValue, NumberValue, BoolValue)
-	for _, obj in ipairs(container:GetDescendants()) do
-		if (obj:IsA("IntValue") or obj:IsA("NumberValue")) and isAmmoName(obj.Name) then
-			local maxObj = obj.Parent and (obj.Parent:FindFirstChild("Max" .. obj.Name) or obj.Parent:FindFirstChild("MaxAmmo") or obj.Parent:FindFirstChild("ClipSize"))
-			local targetVal = (maxObj and (maxObj:IsA("IntValue") or maxObj:IsA("NumberValue")) and maxObj.Value > 0) and maxObj.Value or 999
-			if obj.Value < targetVal then
-				obj.Value = targetVal
-			end
-		elseif obj:IsA("BoolValue") and string.find(string.lower(obj.Name), "reload", 1, true) then
-			if obj.Value == true then
-				obj.Value = false
-			end
-		end
-
-		for attrName, attrVal in pairs(obj:GetAttributes()) do
-			if type(attrVal) == "number" and isAmmoName(attrName) then
-				local maxAttr = obj:GetAttribute("Max" .. attrName) or obj:GetAttribute("MaxAmmo") or 999
-				if attrVal < maxAttr then
-					obj:SetAttribute(attrName, maxAttr)
-				end
-			elseif type(attrVal) == "boolean" and string.find(string.lower(attrName), "reload", 1, true) then
-				obj:SetAttribute(attrName, false)
-			end
-		end
-	end
-end
-
-createToggle(panelBoss, "[BETA] Municao Infinita", function(enabled)
-	_G.Free_InfiniteAmmo = enabled
-	if enabled then
-		-- Camada 3: Varredura de Tabelas Lua na memória (getgc) para armas baseadas em ModuleScript
-		task.spawn(function()
-			while _G.Free_InfiniteAmmo do
-				pcall(function()
-					if getgc then
-						for _, v in ipairs(getgc(true)) do
-							if type(v) == "table" then
-								if rawget(v, "Ammo") and type(rawget(v, "Ammo")) == "number" then
-									rawset(v, "Ammo", rawget(v, "MaxAmmo") or 999)
-								end
-								if rawget(v, "CurrentAmmo") and type(rawget(v, "CurrentAmmo")) == "number" then
-									rawset(v, "CurrentAmmo", rawget(v, "MaxAmmo") or 999)
-								end
-								if rawget(v, "Clip") and type(rawget(v, "Clip")) == "number" then
-									rawset(v, "Clip", rawget(v, "MaxClip") or 999)
-								end
-								if rawget(v, "Mag") and type(rawget(v, "Mag")) == "number" then
-									rawset(v, "Mag", rawget(v, "MaxMag") or 999)
-								end
-								if rawget(v, "Reloading") == true then
-									rawset(v, "Reloading", false)
-								end
-							end
-						end
-					end
-				end)
-				task.wait(0.8)
-			end
-		end)
-	end
-end, "[Risco: Medio - Sem recarregar / Pente cheio]", COLOR_WARN)
-
--- Loop rápido para manter a munição travada na arma equipada e mochila
-RunService.Heartbeat:Connect(function()
-	if not _G.Free_InfiniteAmmo then return end
-	pcall(function()
-		if LocalPlayer.Character then
-			refillInstanceAmmo(LocalPlayer.Character)
-		end
-		local bp = LocalPlayer:FindFirstChild("Backpack")
-		if bp then
-			refillInstanceAmmo(bp)
-		end
-	end)
-end)
-
 createSlider(panelBoss, "Suavidade do Aimbot", 1, 10, 6, function(val)
 	_G.Free_AimSmooth = val
 end)
@@ -1959,7 +2033,6 @@ createSlider(panelBoss, "Tamanho da Area FOV", 40, 260, 95, function(val)
 	FovFrame.Size = UDim2.fromOffset(val * 2, val * 2)
 end)
 
--- Atualização em tempo real do Centro da Mira, FOV e Aimbot
 RunService.RenderStepped:Connect(function()
 	local exactCenter = getRealCrosshairCenter()
 
