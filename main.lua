@@ -1,5 +1,5 @@
 -- ==========================================================================
--- CYBER HACKER | Versão FREE 1.4.0 (8-Bit Edition - ESP Box & Line)
+-- CYBER HACKER | Versão FREE 1.4.2 (8-Bit Edition - Fix ESPs, Login & Firebase)
 -- Repositório: https://github.com/Pitbull23032004/MiniZombies2Script
 -- Canal: https://youtu.be/D2Iqev9FHyA?si=GAnnU5ckAE_rzOOq
 -- Créditos: DarkGamingYT
@@ -12,32 +12,36 @@ local RunService = game:GetService("RunService")
 local CoreGui = game:GetService("CoreGui")
 local TweenService = game:GetService("TweenService")
 local HttpService = game:GetService("HttpService")
-local GuiService = game:GetService("GuiService")
-local Camera = workspace.CurrentCamera
 
-local SCRIPT_VERSION = "FREE 1.4.0 [8-BIT]"
+local SCRIPT_VERSION = "FREE 1.4.2 [8-BIT]"
 local FIREBASE_URL = "https://darkgamingyt-1c438-default-rtdb.firebaseio.com"
+local SAVE_FILE_NAME = "DarkHacker_8Bit_Login.json"
+
+-- Compatibilidade universal de requisição HTTP para o Firebase
+local httpRequest = (syn and syn.request) or (http and http.request) or http_request or (fluxus and fluxus.request) or request
 
 local userId = LocalPlayer.UserId
 local userName = LocalPlayer.Name
 local displayName = LocalPlayer.DisplayName
 local playerSessionId = "user_" .. tostring(userId)
 local tempoInicioSessao = tick()
+local fpsAtual = 60
 
 local paisUsuario = "Desconhecido"
 local cidadeUsuario = "Desconhecida"
 
--- Fonte limpa, nítida e estritamente sem negrito
+-- Fontes limpas e estritamente SEM NEGRITO
 local FONT_MAIN = Enum.Font.Code
 local FONT_CLEAN = Enum.Font.Gotham
 
--- Paleta de Cores 8-Bit Profissional
+-- Paleta de Cores 8-Bit
 local COLOR_BG = Color3.fromRGB(12, 13, 18)
 local COLOR_PANEL = Color3.fromRGB(18, 20, 28)
 local COLOR_ITEM = Color3.fromRGB(24, 27, 38)
 local COLOR_ACCENT = Color3.fromRGB(255, 140, 0)
 local COLOR_TEXT = Color3.fromRGB(235, 240, 245)
 local COLOR_SUBTEXT = Color3.fromRGB(145, 155, 170)
+local COLOR_WARN = Color3.fromRGB(255, 195, 70)
 local COLOR_OFF = Color3.fromRGB(235, 75, 75)
 local COLOR_ON = Color3.fromRGB(60, 230, 130)
 
@@ -54,12 +58,16 @@ task.spawn(function()
 	end)
 end)
 
+-- Limpeza de versão anterior
 pcall(function()
 	if CoreGui:FindFirstChild("CyberHacker_FREE_1_3_6") then
 		CoreGui.CyberHacker_FREE_1_3_6:Destroy()
 	end
 	if LocalPlayer.PlayerGui:FindFirstChild("CyberHacker_FREE_1_3_6") then
 		LocalPlayer.PlayerGui.CyberHacker_FREE_1_3_6:Destroy()
+	end
+	if gethui and gethui():FindFirstChild("CyberHacker_FREE_1_3_6") then
+		gethui().CyberHacker_FREE_1_3_6:Destroy()
 	end
 end)
 
@@ -71,18 +79,14 @@ ScreenGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
 
 local successParent = pcall(function() ScreenGui.Parent = CoreGui end)
 if not successParent then ScreenGui.Parent = LocalPlayer:WaitForChild("PlayerGui") end
-
 pcall(function()
-	if gethui then
-		ScreenGui.Parent = gethui()
-	end
+	if gethui then ScreenGui.Parent = gethui() end
 end)
 
--- Pasta dedicada para renderizar ESP Box 2D e ESP Line sem lag
-local EspCanvas = Instance.new("Folder", ScreenGui)
-EspCanvas.Name = "EspCanvas8Bit"
+-- Pasta dedicada para o Pool de Linhas 2D (ESP Line)
+local EspLineFolder = Instance.new("Folder", ScreenGui)
+EspLineFolder.Name = "EspLinesPool8Bit"
 
--- Função auxiliar para criar bordas 8-Bit (cantos retos de 90 graus)
 local function apply8BitStroke(parent, color, thickness)
 	local stroke = Instance.new("UIStroke", parent)
 	stroke.Color = color or COLOR_ACCENT
@@ -92,36 +96,139 @@ local function apply8BitStroke(parent, color, thickness)
 	return stroke
 end
 
+-- Sistema de arrastar universal (PC & Mobile) sem travar botões
+local function makeDraggable(dragHandle, targetFrame)
+	local dragging = false
+	local dragInput, dragStart, startPos
+
+	dragHandle.InputBegan:Connect(function(input)
+		if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+			dragging = true
+			dragStart = input.Position
+			startPos = targetFrame.Position
+
+			input.Changed:Connect(function()
+				if input.UserInputState == Enum.UserInputState.End then
+					dragging = false
+				end
+			end)
+		end
+	end)
+
+	dragHandle.InputChanged:Connect(function(input)
+		if input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch then
+			dragInput = input
+		end
+	end)
+
+	UserInputService.InputChanged:Connect(function(input)
+		if input == dragInput and dragging then
+			local delta = input.Position - dragStart
+			targetFrame.Position = UDim2.new(
+				startPos.X.Scale,
+				startPos.X.Offset + delta.X,
+				startPos.Y.Scale,
+				startPos.Y.Offset + delta.Y
+			)
+		end
+	end)
+end
+
 -- ==========================================================================
--- BOTÃO FLUTUANTE 8-BIT
+-- SISTEMA DE SALVAR SENHA (ARQUIVO LOCAL + MEMÓRIA)
 -- ==========================================================================
-local FloatBtn = Instance.new("TextButton", ScreenGui)
-FloatBtn.Size = UDim2.fromOffset(52, 52)
-FloatBtn.Position = UDim2.new(0, 35, 0.35, 0)
-FloatBtn.BackgroundColor3 = COLOR_BG
+local function loadSavedCredentials()
+	local saved = {remember = false, user = "", pass = ""}
+	pcall(function()
+		if isfile and readfile and isfile(SAVE_FILE_NAME) then
+			local decoded = HttpService:JSONDecode(readfile(SAVE_FILE_NAME))
+			if type(decoded) == "table" then
+				saved.remember = decoded.remember == true
+				saved.user = tostring(decoded.user or "")
+				saved.pass = tostring(decoded.pass or "")
+			end
+		elseif _G.DarkHacker_SavedLogin then
+			saved = _G.DarkHacker_SavedLogin
+		end
+	end)
+	return saved
+end
+
+local function saveCredentials(remember, user, pass)
+	local data = {remember = remember, user = remember and user or "", pass = remember and pass or ""}
+	_G.DarkHacker_SavedLogin = data
+	pcall(function()
+		if remember and writefile then
+			writefile(SAVE_FILE_NAME, HttpService:JSONEncode(data))
+		elseif not remember and isfile and delfile and isfile(SAVE_FILE_NAME) then
+			delfile(SAVE_FILE_NAME)
+		end
+	end)
+end
+
+-- ==========================================================================
+-- NOVO BOTÃO FLUTUANTE 8-BIT (HUD COM FPS, PING E STATUS)
+-- ==========================================================================
+local FloatContainer = Instance.new("Frame", ScreenGui)
+FloatContainer.Size = UDim2.fromOffset(92, 54)
+FloatContainer.Position = UDim2.new(0, 28, 0.35, 0)
+FloatContainer.BackgroundColor3 = COLOR_BG
+FloatContainer.BorderSizePixel = 0
+FloatContainer.ZIndex = 50
+local FloatStroke = apply8BitStroke(FloatContainer, COLOR_ACCENT, 2)
+
+local FloatBtn = Instance.new("TextButton", FloatContainer)
+FloatBtn.Size = UDim2.new(1, -6, 0, 30)
+FloatBtn.Position = UDim2.new(0, 3, 0, 3)
+FloatBtn.BackgroundColor3 = COLOR_PANEL
 FloatBtn.BorderSizePixel = 0
-FloatBtn.Text = "[8B]"
+FloatBtn.Text = "[8B] MENU"
 FloatBtn.TextColor3 = COLOR_ACCENT
-FloatBtn.TextSize = 16
+FloatBtn.TextSize = 12
 FloatBtn.Font = FONT_MAIN
-FloatBtn.Active = true
-FloatBtn.Draggable = true
-FloatBtn.Visible = true
-FloatBtn.ZIndex = 50
+FloatBtn.ZIndex = 51
+apply8BitStroke(FloatBtn, Color3.fromRGB(45, 50, 68), 1)
 
-local FloatStroke = apply8BitStroke(FloatBtn, COLOR_ACCENT, 2)
+local FpsPingLabel = Instance.new("TextLabel", FloatContainer)
+FpsPingLabel.Size = UDim2.new(1, -6, 0, 16)
+FpsPingLabel.Position = UDim2.new(0, 3, 0, 35)
+FpsPingLabel.BackgroundTransparency = 1
+FpsPingLabel.Text = "60FPS | 0ms"
+FpsPingLabel.TextColor3 = COLOR_TEXT
+FpsPingLabel.TextSize = 10
+FpsPingLabel.Font = FONT_MAIN
+FpsPingLabel.TextXAlignment = Enum.TextXAlignment.Center
+FpsPingLabel.ZIndex = 51
+
+makeDraggable(FloatBtn, FloatContainer)
+
+local fpsLastTick = tick()
+local fpsFrames = 0
+RunService.RenderStepped:Connect(function()
+	fpsFrames = fpsFrames + 1
+	local now = tick()
+	if now - fpsLastTick >= 1 then
+		fpsAtual = math.floor(fpsFrames / (now - fpsLastTick))
+		local ping = 0
+		pcall(function()
+			ping = math.floor((LocalPlayer:GetNetworkPing() * 1000) or 0)
+		end)
+		FpsPingLabel.Text = string.format("%dFPS|%dms", fpsAtual, ping)
+		fpsFrames = 0
+		fpsLastTick = now
+	end
+end)
 
 -- ==========================================================================
--- PAINEL DE LOGIN SIMPLES, PROFISSIONAL E SEM NEGRITO
+-- PAINEL DE LOGIN SIMPLES, PROFISSIONAL + SALVAR SENHA
 -- ==========================================================================
 local LoginFrame = Instance.new("Frame", ScreenGui)
-LoginFrame.Size = UDim2.new(0, 320, 0, 260)
-LoginFrame.Position = UDim2.new(0.5, -160, 0.5, -130)
+LoginFrame.Size = UDim2.new(0, 330, 0, 315)
+LoginFrame.Position = UDim2.new(0.5, -165, 0.5, -157)
 LoginFrame.BackgroundColor3 = COLOR_BG
 LoginFrame.BorderSizePixel = 0
 LoginFrame.ZIndex = 60
-
-local LoginStroke = apply8BitStroke(LoginFrame, COLOR_ACCENT, 2)
+apply8BitStroke(LoginFrame, COLOR_ACCENT, 2)
 
 local LoginTopBar = Instance.new("Frame", LoginFrame)
 LoginTopBar.Size = UDim2.new(1, 0, 0, 34)
@@ -129,12 +236,13 @@ LoginTopBar.BackgroundColor3 = COLOR_PANEL
 LoginTopBar.BorderSizePixel = 0
 LoginTopBar.ZIndex = 61
 apply8BitStroke(LoginTopBar, Color3.fromRGB(40, 45, 60), 1)
+makeDraggable(LoginTopBar, LoginFrame)
 
 local LoginHeader = Instance.new("TextLabel", LoginTopBar)
 LoginHeader.Size = UDim2.new(1, -20, 1, 0)
 LoginHeader.Position = UDim2.new(0, 10, 0, 0)
 LoginHeader.BackgroundTransparency = 1
-LoginHeader.Text = "DARKGAMINGYT // ACESSO"
+LoginHeader.Text = "DARKGAMINGYT // LOGIN"
 LoginHeader.TextColor3 = COLOR_TEXT
 LoginHeader.TextSize = 13
 LoginHeader.Font = FONT_MAIN
@@ -142,10 +250,10 @@ LoginHeader.TextXAlignment = Enum.TextXAlignment.Left
 LoginHeader.ZIndex = 62
 
 local LoginVersionTag = Instance.new("TextLabel", LoginTopBar)
-LoginVersionTag.Size = UDim2.new(0, 100, 1, 0)
-LoginVersionTag.Position = UDim2.new(1, -110, 0, 0)
+LoginVersionTag.Size = UDim2.new(0, 90, 1, 0)
+LoginVersionTag.Position = UDim2.new(1, -100, 0, 0)
 LoginVersionTag.BackgroundTransparency = 1
-LoginVersionTag.Text = "v1.4.0"
+LoginVersionTag.Text = "v1.4.2"
 LoginVersionTag.TextColor3 = COLOR_ACCENT
 LoginVersionTag.TextSize = 12
 LoginVersionTag.Font = FONT_MAIN
@@ -153,10 +261,10 @@ LoginVersionTag.TextXAlignment = Enum.TextXAlignment.Right
 LoginVersionTag.ZIndex = 62
 
 local LoginSubHeader = Instance.new("TextLabel", LoginFrame)
-LoginSubHeader.Size = UDim2.new(0.88, 0, 0, 20)
-LoginSubHeader.Position = UDim2.new(0.06, 0, 0, 44)
+LoginSubHeader.Size = UDim2.new(0.88, 0, 0, 18)
+LoginSubHeader.Position = UDim2.new(0.06, 0, 0, 42)
 LoginSubHeader.BackgroundTransparency = 1
-LoginSubHeader.Text = "Insira as credenciais para liberar o painel"
+LoginSubHeader.Text = "Acesso padrao: Usuario FREE | Senha FREE"
 LoginSubHeader.TextColor3 = COLOR_SUBTEXT
 LoginSubHeader.TextSize = 11
 LoginSubHeader.Font = FONT_CLEAN
@@ -165,7 +273,7 @@ LoginSubHeader.ZIndex = 61
 
 local function createLoginInput(posY, placeholder)
 	local box = Instance.new("TextBox", LoginFrame)
-	box.Size = UDim2.new(0.88, 0, 0, 38)
+	box.Size = UDim2.new(0.88, 0, 0, 36)
 	box.Position = UDim2.new(0.06, 0, 0, posY)
 	box.BackgroundColor3 = COLOR_PANEL
 	box.BorderSizePixel = 0
@@ -179,23 +287,56 @@ local function createLoginInput(posY, placeholder)
 	box.ZIndex = 61
 	
 	local stroke = apply8BitStroke(box, Color3.fromRGB(45, 50, 68), 1)
-	
-	box.Focused:Connect(function()
-		stroke.Color = COLOR_ACCENT
-	end)
-	box.FocusLost:Connect(function()
-		stroke.Color = Color3.fromRGB(45, 50, 68)
-	end)
-	
+	box.Focused:Connect(function() stroke.Color = COLOR_ACCENT end)
+	box.FocusLost:Connect(function() stroke.Color = Color3.fromRGB(45, 50, 68) end)
 	return box
 end
 
-local UserBox = createLoginInput(72, "Usuario: FREE")
-local PassBox = createLoginInput(120, "Senha: FREE")
+local UserBox = createLoginInput(66, "Usuario (FREE)")
+local PassBox = createLoginInput(110, "Senha (FREE)")
+
+-- Opção Salvar Senha (8-Bit Checkbox)
+local savedCreds = loadSavedCredentials()
+local savePasswordEnabled = savedCreds.remember
+
+local SavePassBtn = Instance.new("TextButton", LoginFrame)
+SavePassBtn.Size = UDim2.new(0.88, 0, 0, 28)
+SavePassBtn.Position = UDim2.new(0.06, 0, 0, 154)
+SavePassBtn.BackgroundColor3 = COLOR_ITEM
+SavePassBtn.BorderSizePixel = 0
+SavePassBtn.TextColor3 = COLOR_TEXT
+SavePassBtn.TextSize = 11
+SavePassBtn.Font = FONT_MAIN
+SavePassBtn.TextXAlignment = Enum.TextXAlignment.Left
+SavePassBtn.ZIndex = 61
+local SavePassStroke = apply8BitStroke(SavePassBtn, Color3.fromRGB(45, 50, 68), 1)
+
+local function updateSavePassVisual()
+	if savePasswordEnabled then
+		SavePassBtn.Text = "  [ X ] Salvar Senha Automaticamente"
+		SavePassBtn.TextColor3 = COLOR_ON
+		SavePassStroke.Color = COLOR_ON
+	else
+		SavePassBtn.Text = "  [   ] Salvar Senha Automaticamente"
+		SavePassBtn.TextColor3 = COLOR_SUBTEXT
+		SavePassStroke.Color = Color3.fromRGB(45, 50, 68)
+	end
+end
+
+if savedCreds.remember then
+	UserBox.Text = savedCreds.user ~= "" and savedCreds.user or "FREE"
+	PassBox.Text = savedCreds.pass ~= "" and savedCreds.pass or "FREE"
+end
+updateSavePassVisual()
+
+SavePassBtn.MouseButton1Click:Connect(function()
+	savePasswordEnabled = not savePasswordEnabled
+	updateSavePassVisual()
+end)
 
 local LoginBtn = Instance.new("TextButton", LoginFrame)
-LoginBtn.Size = UDim2.new(0.88, 0, 0, 38)
-LoginBtn.Position = UDim2.new(0.06, 0, 0, 172)
+LoginBtn.Size = UDim2.new(0.88, 0, 0, 36)
+LoginBtn.Position = UDim2.new(0.06, 0, 0, 192)
 LoginBtn.BackgroundColor3 = COLOR_ACCENT
 LoginBtn.BorderSizePixel = 0
 LoginBtn.Text = "[ ENTRAR NO SISTEMA ]"
@@ -206,30 +347,48 @@ LoginBtn.ZIndex = 61
 apply8BitStroke(LoginBtn, Color3.fromRGB(255, 180, 80), 1)
 
 local ErrorLabel = Instance.new("TextLabel", LoginFrame)
-ErrorLabel.Size = UDim2.new(0.88, 0, 0, 20)
-ErrorLabel.Position = UDim2.new(0.06, 0, 0, 222)
+ErrorLabel.Size = UDim2.new(0.88, 0, 0, 18)
+ErrorLabel.Position = UDim2.new(0.06, 0, 0, 234)
 ErrorLabel.BackgroundTransparency = 1
-ErrorLabel.Text = "Status: Aguardando login..."
-ErrorLabel.TextColor3 = COLOR_SUBTEXT
+ErrorLabel.Text = savePasswordEnabled and "Status: Senha salva carregada." or "Status: Aguardando login..."
+ErrorLabel.TextColor3 = savePasswordEnabled and COLOR_ON or COLOR_SUBTEXT
 ErrorLabel.TextSize = 11
 ErrorLabel.Font = FONT_MAIN
 ErrorLabel.TextXAlignment = Enum.TextXAlignment.Center
 ErrorLabel.ZIndex = 61
 
+local LoginDisclaimer = Instance.new("Frame", LoginFrame)
+LoginDisclaimer.Size = UDim2.new(0.88, 0, 0, 42)
+LoginDisclaimer.Position = UDim2.new(0.06, 0, 0, 258)
+LoginDisclaimer.BackgroundColor3 = Color3.fromRGB(22, 16, 16)
+LoginDisclaimer.BorderSizePixel = 0
+LoginDisclaimer.ZIndex = 61
+apply8BitStroke(LoginDisclaimer, COLOR_WARN, 1)
+
+local LoginDisclaimerTxt = Instance.new("TextLabel", LoginDisclaimer)
+LoginDisclaimerTxt.Size = UDim2.new(1, -12, 1, 0)
+LoginDisclaimerTxt.Position = UDim2.new(0, 6, 0, 0)
+LoginDisclaimerTxt.BackgroundTransparency = 1
+LoginDisclaimerTxt.TextWrapped = true
+LoginDisclaimerTxt.Text = "[!] AVISO: Nao nos responsabilizamos pelo uso desta script ou possiveis banimentos na conta."
+LoginDisclaimerTxt.TextColor3 = COLOR_WARN
+LoginDisclaimerTxt.TextSize = 10
+LoginDisclaimerTxt.Font = FONT_CLEAN
+LoginDisclaimerTxt.ZIndex = 62
+
 local loggedIn = false
 local statsLabelReference = nil
+local firebaseStatusLabelRef = nil
 
 -- ==========================================================================
--- PAINEL PRINCIPAL 8-BIT
+-- PAINEL PRINCIPAL 8-BIT COM AVISO DE ISENÇÃO DE RESPONSABILIDADE
 -- ==========================================================================
 local MainFrame = Instance.new("Frame", ScreenGui)
-MainFrame.Size = UDim2.new(0, 380, 0, 440)
-MainFrame.Position = UDim2.new(0, 105, 0.35, 0)
+MainFrame.Size = UDim2.new(0, 390, 0, 470)
+MainFrame.Position = UDim2.new(0, 130, 0.30, 0)
 MainFrame.BackgroundColor3 = COLOR_BG
 MainFrame.BorderSizePixel = 0
 MainFrame.Visible = false
-MainFrame.Draggable = true
-MainFrame.Active = true
 MainFrame.ZIndex = 30
 
 local MainStroke = apply8BitStroke(MainFrame, COLOR_ACCENT, 2)
@@ -244,75 +403,160 @@ task.spawn(function()
 	end
 end)
 
-local function iniciarSistemaPresenca()
-	task.spawn(function()
-		local dispositivoDetectado = UserInputService.TouchEnabled and "Mobile / Celular" or "PC / Computador"
-		local executorNome = "Desconhecido"
-		pcall(function()
-			if identifyexecutor then
-				executorNome = select(1, identifyexecutor())
-			elseif getexecutorname then
-				executorNome = getexecutorname()
-			end
-		end)
-		
-		while loggedIn do
-			pcall(function()
-				local segundosJogando = math.floor(tick() - tempoInicioSessao)
-				local horasJogandoFormatado = string.format("%d:%02d:%02d", math.floor(segundosJogando / 3600), math.floor((segundosJogando % 3600) / 60), segundosJogando % 60)
+local TopBar = Instance.new("Frame", MainFrame)
+TopBar.Size = UDim2.new(1, 0, 0, 36)
+TopBar.BackgroundColor3 = COLOR_PANEL
+TopBar.BorderSizePixel = 0
+TopBar.ZIndex = 31
+apply8BitStroke(TopBar, Color3.fromRGB(40, 45, 60), 1)
+makeDraggable(TopBar, MainFrame)
 
-				request({
-					Url = FIREBASE_URL .. "/usuarios_online/" .. playerSessionId .. ".json",
-					Method = "PUT",
-					Headers = {["Content-Type"] = "application/json"},
-					Body = HttpService:JSONEncode({
-						nome = userName,
-						nomeExibicao = displayName,
-						id = userId,
-						versaoScript = SCRIPT_VERSION,
-						statusLogin = "Autenticado",
-						dispositivo = dispositivoDetectado,
-						pais = paisUsuario,
-						cidade = cidadeUsuario,
-						idadeContaDias = LocalPlayer.AccountAge,
-						tempoSessaoSegundos = segundosJogando,
-						tempoJogadoFormatado = horasJogandoFormatado,
-						placeIdAtual = game.PlaceId,
-						jobIdServidor = game.JobId,
-						jogadoresNoServidor = #Players:GetPlayers(),
-						executor = executorNome,
-						pingMS = math.floor((LocalPlayer:GetNetworkPing() * 1000) or 0),
-						tempo = tick()
-					})
-				})
+local TitleLabel = Instance.new("TextLabel", TopBar)
+TitleLabel.Size = UDim2.new(1, -24, 1, 0)
+TitleLabel.Position = UDim2.new(0, 10, 0, 0)
+TitleLabel.BackgroundTransparency = 1
+TitleLabel.Text = ":: DARK HACKER // " .. SCRIPT_VERSION
+TitleLabel.TextColor3 = COLOR_TEXT
+TitleLabel.TextSize = 12
+TitleLabel.Font = FONT_MAIN
+TitleLabel.TextXAlignment = Enum.TextXAlignment.Left
+TitleLabel.ZIndex = 32
 
-				local response = game:HttpGet(FIREBASE_URL .. "/usuarios_online.json")
-				if response and response ~= "null" then
-					local data = HttpService:JSONDecode(response)
-					local ativos = 0
-					local agora = tick()
+-- Barra fixa de Isenção de Responsabilidade no Painel Principal
+local PanelDisclaimer = Instance.new("Frame", MainFrame)
+PanelDisclaimer.Size = UDim2.new(1, -20, 0, 26)
+PanelDisclaimer.Position = UDim2.new(0, 10, 0, 42)
+PanelDisclaimer.BackgroundColor3 = Color3.fromRGB(24, 18, 16)
+PanelDisclaimer.BorderSizePixel = 0
+PanelDisclaimer.ZIndex = 31
+apply8BitStroke(PanelDisclaimer, COLOR_WARN, 1)
 
-					for id, info in pairs(data) do
-						if type(info) == "table" and info.tempo and (agora - info.tempo < 15) then
-							ativos = ativos + 1
-						end
-					end
+local PanelDisclaimerTxt = Instance.new("TextLabel", PanelDisclaimer)
+PanelDisclaimerTxt.Size = UDim2.new(1, -10, 1, 0)
+PanelDisclaimerTxt.Position = UDim2.new(0, 5, 0, 0)
+PanelDisclaimerTxt.BackgroundTransparency = 1
+PanelDisclaimerTxt.Text = "[!] Nao nos responsabilizamos pelo uso da script. Use com moderacao."
+PanelDisclaimerTxt.TextColor3 = COLOR_WARN
+PanelDisclaimerTxt.TextSize = 10
+PanelDisclaimerTxt.Font = FONT_CLEAN
+PanelDisclaimerTxt.TextXAlignment = Enum.TextXAlignment.Center
+PanelDisclaimerTxt.ZIndex = 32
 
-					if ativos < 1 then ativos = 1 end
-					if statsLabelReference then
-						statsLabelReference.Text = "Online Agora: " .. tostring(ativos) .. " usuario(s)"
+FloatBtn.MouseButton1Click:Connect(function()
+	if not loggedIn then return end
+	MainFrame.Visible = not MainFrame.Visible
+	if MainFrame.Visible then
+		FloatBtn.Text = "[8B] ABERTO"
+		FloatBtn.TextColor3 = COLOR_ON
+	else
+		FloatBtn.Text = "[8B] MENU"
+		FloatBtn.TextColor3 = COLOR_ACCENT
+	end
+end)
+
+-- ==========================================================================
+-- UPDATE FIREBASE (MULTIPROTOCOLO + MONITORAMENTO DE FUNÇÕES ATIVAS)
+-- ==========================================================================
+local function getActiveFeaturesList()
+	local active = {}
+	if _G.Free_ESP_Box2D then table.insert(active, "ESP_Box2D") end
+	if _G.Free_ESP_Line then table.insert(active, "ESP_Line") end
+	if _G.Free_ESP_Highlight then table.insert(active, "ESP_Chams") end
+	if _G.Free_ESP_Name then table.insert(active, "ESP_Name") end
+	if _G.Free_Speed then table.insert(active, "Speed") end
+	if _G.Free_Noclip then table.insert(active, "WallHack") end
+	if _G.Free_FlyActive then table.insert(active, "Fly") end
+	if _G.Free_AimLock then table.insert(active, "Aimbot") end
+	return #active > 0 and table.concat(active, ", ") or "Nenhuma"
+end
+
+local function sincronizarFirebaseAgora()
+	local dispositivoDetectado = UserInputService.TouchEnabled and "Mobile / Celular" or "PC / Computador"
+	local executorNome = "Desconhecido"
+	pcall(function()
+		if identifyexecutor then
+			executorNome = select(1, identifyexecutor())
+		elseif getexecutorname then
+			executorNome = getexecutorname()
+		end
+	end)
+
+	local segundosJogando = math.floor(tick() - tempoInicioSessao)
+	local horasJogandoFormatado = string.format("%d:%02d:%02d", math.floor(segundosJogando / 3600), math.floor((segundosJogando % 3600) / 60), segundosJogando % 60)
+
+	local payload = {
+		nome = userName,
+		nomeExibicao = displayName,
+		id = userId,
+		versaoScript = SCRIPT_VERSION,
+		statusLogin = "Autenticado",
+		senhaSalva = savePasswordEnabled,
+		funcoesAtivas = getActiveFeaturesList(),
+		dispositivo = dispositivoDetectado,
+		pais = paisUsuario,
+		cidade = cidadeUsuario,
+		idadeContaDias = LocalPlayer.AccountAge,
+		tempoSessaoSegundos = segundosJogando,
+		tempoJogadoFormatado = horasJogandoFormatado,
+		placeIdAtual = game.PlaceId,
+		jobIdServidor = game.JobId,
+		jogadoresNoServidor = #Players:GetPlayers(),
+		executor = executorNome,
+		fpsAtual = fpsAtual,
+		pingMS = math.floor((LocalPlayer:GetNetworkPing() * 1000) or 0),
+		tempo = os.time()
+	}
+
+	pcall(function()
+		if httpRequest then
+			httpRequest({
+				Url = FIREBASE_URL .. "/usuarios_online/" .. playerSessionId .. ".json",
+				Method = "PUT",
+				Headers = {["Content-Type"] = "application/json"},
+				Body = HttpService:JSONEncode(payload)
+			})
+		end
+
+		local response = game:HttpGet(FIREBASE_URL .. "/usuarios_online.json")
+		if response and response ~= "null" then
+			local data = HttpService:JSONDecode(response)
+			local ativos = 0
+			local agoraOS = os.time()
+			local agoraTick = tick()
+
+			for _, info in pairs(data) do
+				if type(info) == "table" and info.tempo then
+					if math.abs(agoraOS - info.tempo) < 25 or math.abs(agoraTick - info.tempo) < 25 then
+						ativos = ativos + 1
 					end
 				end
-			end)
+			end
+
+			if ativos < 1 then ativos = 1 end
+			if statsLabelReference then
+				statsLabelReference.Text = "Online Agora: " .. tostring(ativos) .. " usuario(s)"
+			end
+			if firebaseStatusLabelRef then
+				firebaseStatusLabelRef.Text = "Firebase DB : Conectado [OK]"
+				firebaseStatusLabelRef.TextColor3 = COLOR_ON
+			end
+		end
+	end)
+end
+
+local function iniciarSistemaPresenca()
+	task.spawn(function()
+		while loggedIn do
+			sincronizarFirebaseAgora()
 			task.wait(5)
 		end
 	end)
 end
 
 Players.PlayerRemoving:Connect(function(plr)
-	if plr == LocalPlayer then
+	if plr == LocalPlayer and httpRequest then
 		pcall(function()
-			request({
+			httpRequest({
 				Url = FIREBASE_URL .. "/usuarios_online/" .. playerSessionId .. ".json",
 				Method = "DELETE"
 			})
@@ -325,13 +569,14 @@ LoginBtn.MouseButton1Click:Connect(function()
 	local p = string.upper(string.gsub(PassBox.Text, "%s+", ""))
 	if u == "FREE" and p == "FREE" then
 		loggedIn = true
+		saveCredentials(savePasswordEnabled, "FREE", "FREE")
 		ErrorLabel.TextColor3 = COLOR_ON
-		ErrorLabel.Text = "Acesso liberado. Inicializando..."
+		ErrorLabel.Text = "Acesso liberado! Abrindo painel..."
 		
 		iniciarSistemaPresenca()
 		
 		task.spawn(function()
-			while FloatBtn and FloatBtn.Parent and loggedIn do
+			while FloatContainer and FloatContainer.Parent and loggedIn do
 				for i = 0, 1, 0.008 do
 					if not FloatStroke or not FloatStroke.Parent then break end
 					FloatStroke.Color = Color3.fromHSV(i * 0.12 + 0.04, 0.85, 1)
@@ -340,71 +585,14 @@ LoginBtn.MouseButton1Click:Connect(function()
 			end
 		end)
 		
-		task.wait(0.5)
+		task.wait(0.4)
 		LoginFrame:Destroy()
 		MainFrame.Visible = true
+		FloatBtn.Text = "[8B] ABERTO"
+		FloatBtn.TextColor3 = COLOR_ON
 	else
 		ErrorLabel.TextColor3 = COLOR_OFF
-		ErrorLabel.Text = "Credenciais invalidas (Use: FREE)"
-	end
-end)
-
--- ==========================================================================
--- CONTADOR DE FPS 8-BIT
--- ==========================================================================
-local FpsLabel = Instance.new("TextLabel", ScreenGui)
-FpsLabel.Size = UDim2.fromOffset(52, 18)
-FpsLabel.Position = UDim2.new(0, 35, 0.35, -22)
-FpsLabel.BackgroundColor3 = COLOR_BG
-FpsLabel.BorderSizePixel = 0
-FpsLabel.Text = "FPS:00"
-FpsLabel.TextColor3 = COLOR_ACCENT
-FpsLabel.TextSize = 11
-FpsLabel.Font = FONT_MAIN
-FpsLabel.TextXAlignment = Enum.TextXAlignment.Center
-FpsLabel.ZIndex = 50
-apply8BitStroke(FpsLabel, COLOR_ACCENT, 1)
-
-local fpsLastTick = tick()
-local fpsFrames = 0
-RunService.RenderStepped:Connect(function()
-	fpsFrames = fpsFrames + 1
-	local now = tick()
-	if now - fpsLastTick >= 1 then
-		local fps = math.floor(fpsFrames / (now - fpsLastTick))
-		FpsLabel.Text = "FPS:" .. tostring(fps)
-		fpsFrames = 0
-		fpsLastTick = now
-	end
-end)
-
-FloatBtn:GetPropertyChangedSignal("Position"):Connect(function()
-	FpsLabel.Position = UDim2.new(FloatBtn.Position.X.Scale, FloatBtn.Position.X.Offset, FloatBtn.Position.Y.Scale, FloatBtn.Position.Y.Offset - 22)
-end)
-
-local TopBar = Instance.new("Frame", MainFrame)
-TopBar.Size = UDim2.new(1, 0, 0, 38)
-TopBar.BackgroundColor3 = COLOR_PANEL
-TopBar.BorderSizePixel = 0
-TopBar.ZIndex = 31
-apply8BitStroke(TopBar, Color3.fromRGB(40, 45, 60), 1)
-
-local TitleLabel = Instance.new("TextLabel", TopBar)
-TitleLabel.Size = UDim2.new(1, -24, 1, 0)
-TitleLabel.Position = UDim2.new(0, 12, 0, 0)
-TitleLabel.BackgroundTransparency = 1
-TitleLabel.Text = ":: DARK HACKER // " .. SCRIPT_VERSION
-TitleLabel.TextColor3 = COLOR_TEXT
-TitleLabel.TextSize = 13
-TitleLabel.Font = FONT_MAIN
-TitleLabel.TextXAlignment = Enum.TextXAlignment.Left
-TitleLabel.ZIndex = 32
-
-FloatBtn.MouseButton1Click:Connect(function()
-	if not loggedIn then return end
-	MainFrame.Visible = not MainFrame.Visible
-	if MainFrame.Visible then
-		MainFrame.Position = UDim2.new(0, FloatBtn.AbsolutePosition.X + 64, 0, FloatBtn.AbsolutePosition.Y)
+		ErrorLabel.Text = "Credenciais invalidas! Use: FREE"
 	end
 end)
 
@@ -412,8 +600,8 @@ end)
 -- SISTEMA DE ABAS 8-BIT (4 ABAS)
 -- ==========================================================================
 local TabHeader = Instance.new("Frame", MainFrame)
-TabHeader.Size = UDim2.new(1, -20, 0, 36)
-TabHeader.Position = UDim2.new(0, 10, 0, 48)
+TabHeader.Size = UDim2.new(1, -20, 0, 34)
+TabHeader.Position = UDim2.new(0, 10, 0, 74)
 TabHeader.BackgroundColor3 = COLOR_PANEL
 TabHeader.BorderSizePixel = 0
 TabHeader.ZIndex = 31
@@ -440,8 +628,8 @@ local btnBoss = createTabBtn("COMBATE", 0.51, false)
 local btnChannel = createTabBtn("CANAL", 0.75, false)
 
 local ContentContainer = Instance.new("Frame", MainFrame)
-ContentContainer.Size = UDim2.new(1, -20, 1, -102)
-ContentContainer.Position = UDim2.new(0, 10, 0, 94)
+ContentContainer.Size = UDim2.new(1, -20, 1, -124)
+ContentContainer.Position = UDim2.new(0, 10, 0, 114)
 ContentContainer.BackgroundTransparency = 1
 ContentContainer.ZIndex = 31
 
@@ -500,19 +688,20 @@ btnBoss.MouseButton1Click:Connect(function() selectTab(panelBoss) end)
 btnChannel.MouseButton1Click:Connect(function() selectTab(panelChannel) end)
 
 -- ==========================================================================
--- COMPONENTES 8-BIT (TOGGLE E SLIDER SEM NEGRITO)
+-- COMPONENTES 8-BIT (COM AVISO SIMPLES DE RISCO DE BAN)
 -- ==========================================================================
-local function createToggle(parent, name, callback)
+local function createToggle(parent, name, callback, banWarningText)
+	local hasWarning = (banWarningText ~= nil and banWarningText ~= "")
 	local row = Instance.new("Frame", parent)
-	row.Size = UDim2.new(1, 0, 0, 40)
+	row.Size = UDim2.new(1, 0, 0, hasWarning and 52 or 40)
 	row.BackgroundColor3 = COLOR_PANEL
 	row.BorderSizePixel = 0
 	row.ZIndex = 31
 	local rowStroke = apply8BitStroke(row, Color3.fromRGB(40, 45, 60), 1)
 	
 	local label = Instance.new("TextLabel", row)
-	label.Size = UDim2.new(0.68, 0, 1, 0)
-	label.Position = UDim2.new(0, 10, 0, 0)
+	label.Size = UDim2.new(0.68, 0, 0, 22)
+	label.Position = UDim2.new(0, 10, 0, hasWarning and 6 or 9)
 	label.BackgroundTransparency = 1
 	label.Text = "> " .. name
 	label.TextColor3 = COLOR_TEXT
@@ -520,6 +709,19 @@ local function createToggle(parent, name, callback)
 	label.Font = FONT_MAIN
 	label.TextXAlignment = Enum.TextXAlignment.Left
 	label.ZIndex = 32
+
+	if hasWarning then
+		local warnLbl = Instance.new("TextLabel", row)
+		warnLbl.Size = UDim2.new(0.68, 0, 0, 16)
+		warnLbl.Position = UDim2.new(0, 10, 0, 28)
+		warnLbl.BackgroundTransparency = 1
+		warnLbl.Text = banWarningText
+		warnLbl.TextColor3 = COLOR_WARN
+		warnLbl.TextSize = 10
+		warnLbl.Font = FONT_CLEAN
+		warnLbl.TextXAlignment = Enum.TextXAlignment.Left
+		warnLbl.ZIndex = 32
+	end
 	
 	local statusBtn = Instance.new("TextButton", row)
 	statusBtn.Size = UDim2.new(0, 72, 0, 26)
@@ -627,47 +829,59 @@ local function createSlider(parent, name, min, max, default, callback)
 end
 
 -- ==========================================================================
--- ABA CANAL, PERFIL & ESTATÍSTICAS (VISUAL 8-BIT)
+-- ABA CANAL, PERFIL & FIREBASE
 -- ==========================================================================
 local ChannelCard = Instance.new("Frame", panelChannel)
-ChannelCard.Size = UDim2.new(1, 0, 0, 290)
+ChannelCard.Size = UDim2.new(1, 0, 0, 325)
 ChannelCard.BackgroundColor3 = COLOR_PANEL
 ChannelCard.BorderSizePixel = 0
 ChannelCard.ZIndex = 31
 apply8BitStroke(ChannelCard, COLOR_ACCENT, 1)
 
 local CardTitle = Instance.new("TextLabel", ChannelCard)
-CardTitle.Size = UDim2.new(1, 0, 0, 30)
+CardTitle.Size = UDim2.new(1, 0, 0, 28)
 CardTitle.Position = UDim2.new(0, 0, 0, 8)
 CardTitle.BackgroundTransparency = 1
-CardTitle.Text = ":: PERFIL & SISTEMA ::"
+CardTitle.Text = ":: PERFIL & FIREBASE CLOUD ::"
 CardTitle.TextColor3 = COLOR_ACCENT
 CardTitle.TextSize = 13
 CardTitle.Font = FONT_MAIN
 CardTitle.ZIndex = 32
 
 local ProfileBox = Instance.new("Frame", ChannelCard)
-ProfileBox.Size = UDim2.new(0.92, 0, 0, 74)
-ProfileBox.Position = UDim2.new(0.04, 0, 0, 42)
+ProfileBox.Size = UDim2.new(0.92, 0, 0, 92)
+ProfileBox.Position = UDim2.new(0.04, 0, 0, 40)
 ProfileBox.BackgroundColor3 = COLOR_BG
 ProfileBox.BorderSizePixel = 0
 ProfileBox.ZIndex = 32
 apply8BitStroke(ProfileBox, Color3.fromRGB(45, 50, 68), 1)
 
 local ProfileLabel = Instance.new("TextLabel", ProfileBox)
-ProfileLabel.Size = UDim2.new(1, -16, 1, 0)
-ProfileLabel.Position = UDim2.new(0, 8, 0, 0)
+ProfileLabel.Size = UDim2.new(1, -16, 0, 66)
+ProfileLabel.Position = UDim2.new(0, 8, 0, 4)
 ProfileLabel.BackgroundTransparency = 1
-ProfileLabel.Text = string.format("Usuario : %s\nUser ID : %d\nConta   : %d dias", userName, userId, LocalPlayer.AccountAge)
+ProfileLabel.Text = string.format("Usuario     : %s\nUser ID     : %d\nIdade Conta : %d dias", userName, userId, LocalPlayer.AccountAge)
 ProfileLabel.TextColor3 = COLOR_TEXT
-ProfileLabel.TextSize = 12
+ProfileLabel.TextSize = 11
 ProfileLabel.Font = FONT_MAIN
 ProfileLabel.TextXAlignment = Enum.TextXAlignment.Left
 ProfileLabel.ZIndex = 33
 
+local FirebaseStatusLabel = Instance.new("TextLabel", ProfileBox)
+FirebaseStatusLabel.Size = UDim2.new(1, -16, 0, 18)
+FirebaseStatusLabel.Position = UDim2.new(0, 8, 0, 70)
+FirebaseStatusLabel.BackgroundTransparency = 1
+FirebaseStatusLabel.Text = "Firebase DB : Sincronizando..."
+FirebaseStatusLabel.TextColor3 = COLOR_WARN
+FirebaseStatusLabel.TextSize = 11
+FirebaseStatusLabel.Font = FONT_MAIN
+FirebaseStatusLabel.TextXAlignment = Enum.TextXAlignment.Left
+FirebaseStatusLabel.ZIndex = 33
+firebaseStatusLabelRef = FirebaseStatusLabel
+
 local CopyChannelBtn = Instance.new("TextButton", ChannelCard)
-CopyChannelBtn.Size = UDim2.new(0.92, 0, 0, 36)
-CopyChannelBtn.Position = UDim2.new(0.04, 0, 0, 128)
+CopyChannelBtn.Size = UDim2.new(0.92, 0, 0, 34)
+CopyChannelBtn.Position = UDim2.new(0.04, 0, 0, 142)
 CopyChannelBtn.BackgroundColor3 = COLOR_ACCENT
 CopyChannelBtn.BorderSizePixel = 0
 CopyChannelBtn.Text = "[ COPIAR LINK DO CANAL ]"
@@ -688,7 +902,7 @@ end)
 
 local StatsBox = Instance.new("Frame", ChannelCard)
 StatsBox.Size = UDim2.new(0.92, 0, 0, 34)
-StatsBox.Position = UDim2.new(0.04, 0, 0, 176)
+StatsBox.Position = UDim2.new(0.04, 0, 0, 186)
 StatsBox.BackgroundColor3 = COLOR_BG
 StatsBox.BorderSizePixel = 0
 StatsBox.ZIndex = 32
@@ -702,51 +916,70 @@ StatsLabel.TextColor3 = COLOR_ON
 StatsLabel.TextSize = 12
 StatsLabel.Font = FONT_MAIN
 StatsLabel.ZIndex = 33
-
 statsLabelReference = StatsLabel
 
+local SyncFirebaseBtn = Instance.new("TextButton", ChannelCard)
+SyncFirebaseBtn.Size = UDim2.new(0.92, 0, 0, 34)
+SyncFirebaseBtn.Position = UDim2.new(0.04, 0, 0, 230)
+SyncFirebaseBtn.BackgroundColor3 = COLOR_ITEM
+SyncFirebaseBtn.BorderSizePixel = 0
+SyncFirebaseBtn.Text = "[ ATUALIZAR DADOS FIREBASE ]"
+SyncFirebaseBtn.TextColor3 = COLOR_ACCENT
+SyncFirebaseBtn.TextSize = 11
+SyncFirebaseBtn.Font = FONT_MAIN
+SyncFirebaseBtn.ZIndex = 32
+apply8BitStroke(SyncFirebaseBtn, Color3.fromRGB(55, 60, 80), 1)
+
+SyncFirebaseBtn.MouseButton1Click:Connect(function()
+	SyncFirebaseBtn.Text = "[ SINCRONIZANDO... ]"
+	task.spawn(function()
+		sincronizarFirebaseAgora()
+		task.wait(0.8)
+		SyncFirebaseBtn.Text = "[ FIREBASE ATUALIZADO! ]"
+		task.wait(1.5)
+		SyncFirebaseBtn.Text = "[ ATUALIZAR DADOS FIREBASE ]"
+	end)
+end)
+
 local ClearCacheBtn = Instance.new("TextButton", ChannelCard)
-ClearCacheBtn.Size = UDim2.new(0.92, 0, 0, 36)
-ClearCacheBtn.Position = UDim2.new(0.04, 0, 0, 222)
+ClearCacheBtn.Size = UDim2.new(0.92, 0, 0, 34)
+ClearCacheBtn.Position = UDim2.new(0.04, 0, 0, 274)
 ClearCacheBtn.BackgroundColor3 = COLOR_ITEM
 ClearCacheBtn.BorderSizePixel = 0
 ClearCacheBtn.Text = "[ LIMPAR CACHE & OTIMIZAR ]"
 ClearCacheBtn.TextColor3 = COLOR_TEXT
-ClearCacheBtn.TextSize = 12
+ClearCacheBtn.TextSize = 11
 ClearCacheBtn.Font = FONT_MAIN
 ClearCacheBtn.ZIndex = 32
 apply8BitStroke(ClearCacheBtn, COLOR_ACCENT, 1)
 
-ClearCacheBtn.MouseButton1Click:Connect(function()
-	pcall(function()
-		EspCanvas:ClearAllChildren()
-		for _, v in ipairs(workspace:GetDescendants()) do
-			if v.Name == "FreeHighlight" or v.Name == "FreeNameTag" or v.Name == "SurrealAuraParticles" then
-				v:Destroy()
-			end
-		end
-		collectgarbage("collect")
-	end)
-	ClearCacheBtn.Text = "[ CACHE LIMPO & OTIMIZADO ]"
-	task.wait(2)
-	ClearCacheBtn.Text = "[ LIMPAR CACHE & OTIMIZAR ]"
-end)
-
 -- ==========================================================================
--- DETECÇÃO OTIMIZADA DE ZUMBIS / INIMIGOS
+-- DETECÇÃO UNIVERSAL DE INIMIGOS / ZUMBIS
 -- ==========================================================================
 local cachedZombies = {}
 
+local function getEnemyRoot(model)
+	if not model then return nil end
+	return model:FindFirstChild("HumanoidRootPart")
+		or model:FindFirstChild("Torso")
+		or model:FindFirstChild("UpperTorso")
+		or model:FindFirstChild("Head")
+		or model.PrimaryPart
+		or model:FindFirstChildWhichIsA("BasePart")
+end
+
 task.spawn(function()
-	while task.wait(0.4) do
+	while task.wait(0.35) do
 		local list = {}
 		pcall(function()
 			for _, obj in ipairs(workspace:GetDescendants()) do
 				if obj:IsA("Model") and obj ~= LocalPlayer.Character then
 					local hum = obj:FindFirstChildOfClass("Humanoid")
-					local root = obj:FindFirstChild("HumanoidRootPart") or obj:FindFirstChild("Head")
-					if root and hum and hum.Health > 0 and not Players:GetPlayerFromCharacter(obj) then
-						table.insert(list, obj)
+					if hum and hum.Health > 0 and not Players:GetPlayerFromCharacter(obj) then
+						local root = getEnemyRoot(obj)
+						if root then
+							table.insert(list, obj)
+						end
 					end
 				end
 			end
@@ -760,7 +993,7 @@ local function getZombies()
 end
 
 -- ==========================================================================
--- ABA VISUAL: ESP BOX 2D, ESP LINE, ESP CHAMS, ESP NAME/HP & AURA 8-BIT
+-- CORREÇÃO DEFINITIVA DOS 3 ESPS: BOX 2D, LINE E CHAMS (HIGHLIGHT)
 -- ==========================================================================
 _G.Free_ESP_Box2D = false
 _G.Free_ESP_Line = false
@@ -768,110 +1001,206 @@ _G.Free_ESP_Highlight = false
 _G.Free_ESP_Name = false
 _G.SurrealFloor_On = false
 
+-- 1. ESP BOX 2D (CAIXA 8-BIT): Criado com BillboardGui 2D AlwaysOnTop (Zero falha de UIStroke)
+local function apply8BitBoxToEnemy(enemy)
+	local root = getEnemyRoot(enemy)
+	if not root then return end
+	if root:FindFirstChild("ESPBox8BitGui") then return end
+
+	local bb = Instance.new("BillboardGui")
+	bb.Name = "ESPBox8BitGui"
+	bb.Adornee = root
+	bb.Size = UDim2.new(4.2, 0, 5.6, 0)
+	bb.AlwaysOnTop = true
+	bb.ResetOnSpawn = false
+	bb.Parent = root
+
+	local container = Instance.new("Frame", bb)
+	container.Size = UDim2.new(1, 0, 1, 0)
+	container.BackgroundTransparency = 0.92
+	container.BackgroundColor3 = COLOR_ACCENT
+	container.BorderSizePixel = 0
+
+	-- 4 Bordas Físicas 8-Bit (Funciona 100% em todos os celulares e PCs)
+	local topB = Instance.new("Frame", container)
+	topB.Size = UDim2.new(1, 0, 0, 2)
+	topB.Position = UDim2.new(0, 0, 0, 0)
+	topB.BackgroundColor3 = COLOR_ACCENT
+	topB.BorderSizePixel = 0
+
+	local botB = Instance.new("Frame", container)
+	botB.Size = UDim2.new(1, 0, 0, 2)
+	botB.Position = UDim2.new(0, 0, 1, -2)
+	botB.BackgroundColor3 = COLOR_ACCENT
+	botB.BorderSizePixel = 0
+
+	local leftB = Instance.new("Frame", container)
+	leftB.Size = UDim2.new(0, 2, 1, 0)
+	leftB.Position = UDim2.new(0, 0, 0, 0)
+	leftB.BackgroundColor3 = COLOR_ACCENT
+	leftB.BorderSizePixel = 0
+
+	local rightB = Instance.new("Frame", container)
+	rightB.Size = UDim2.new(0, 2, 1, 0)
+	rightB.Position = UDim2.new(1, -2, 0, 0)
+	rightB.BackgroundColor3 = COLOR_ACCENT
+	rightB.BorderSizePixel = 0
+end
+
+local function clearAll8BitBoxes()
+	pcall(function()
+		for _, v in ipairs(workspace:GetDescendants()) do
+			if v.Name == "ESPBox8BitGui" then
+				v:Destroy()
+			end
+		end
+	end)
+end
+
 createToggle(panelVisual, "ESP Box 2D (Caixa 8-Bit)", function(enabled)
 	_G.Free_ESP_Box2D = enabled
-	if not enabled then
-		for _, child in ipairs(EspCanvas:GetChildren()) do
-			if string.sub(child.Name, 1, 4) == "Box_" then child:Destroy() end
+	if enabled then
+		task.spawn(function()
+			while _G.Free_ESP_Box2D do
+				pcall(function()
+					for _, enemy in ipairs(getZombies()) do
+						apply8BitBoxToEnemy(enemy)
+					end
+				end)
+				task.wait(0.25)
+			end
+			clearAll8BitBoxes()
+		end)
+	else
+		clearAll8BitBoxes()
+	end
+end, "[! Seguro - Visualizador de Caixa 2D]")
+
+-- 2. ESP LINE (LINHA TRAÇANTE): Pool de Frames 2D Reutilizáveis (Zero Flicker)
+local linePool = {}
+
+local function getOrCreateLine(index)
+	if not linePool[index] or not linePool[index].Parent then
+		local line = Instance.new("Frame", EspLineFolder)
+		line.Name = "TracerLine_" .. tostring(index)
+		line.AnchorPoint = Vector2.new(0.5, 0.5)
+		line.BackgroundColor3 = COLOR_ACCENT
+		line.BorderSizePixel = 0
+		line.Visible = false
+		line.ZIndex = 8
+		linePool[index] = line
+	end
+	return linePool[index]
+end
+
+local function hideAllLines(fromIndex)
+	for i = fromIndex, #linePool do
+		if linePool[i] then
+			linePool[i].Visible = false
 		end
 	end
-end)
+end
 
 createToggle(panelVisual, "ESP Line (Linha Tracante)", function(enabled)
 	_G.Free_ESP_Line = enabled
 	if not enabled then
-		for _, child in ipairs(EspCanvas:GetChildren()) do
-			if string.sub(child.Name, 1, 5) == "Line_" then child:Destroy() end
-		end
+		hideAllLines(1)
 	end
-end)
+end, "[! Seguro - Linha ate os inimigos]")
 
--- Renderizador em Tempo Real (60+ FPS) para ESP Box 2D e ESP Line
 RunService.RenderStepped:Connect(function()
-	if not _G.Free_ESP_Box2D and not _G.Free_ESP_Line then
-		if #EspCanvas:GetChildren() > 0 then
-			EspCanvas:ClearAllChildren()
-		end
+	if not _G.Free_ESP_Line then
 		return
 	end
 
-	EspCanvas:ClearAllChildren()
 	local cam = workspace.CurrentCamera
-	if not cam then return end
-	local viewportSize = cam.ViewportSize
-	local originBottom = Vector2.new(viewportSize.X / 2, viewportSize.Y - 10)
+	if not cam then
+		hideAllLines(1)
+		return
+	end
 
-	for idx, enemy in ipairs(getZombies()) do
-		local root = enemy:FindFirstChild("HumanoidRootPart") or enemy:FindFirstChild("Head")
+	local viewportSize = cam.ViewportSize
+	local originBottom = Vector2.new(viewportSize.X / 2, viewportSize.Y - 8)
+	local activeCount = 0
+
+	for _, enemy in ipairs(getZombies()) do
+		local root = getEnemyRoot(enemy)
 		local hum = enemy:FindFirstChildOfClass("Humanoid")
 		if root and hum and hum.Health > 0 then
-			local rootPos, onScreen = cam:WorldToViewportPoint(root.Position)
-			if onScreen and rootPos.Z > 0 then
-				-- Renderização ESP BOX 2D (8-Bit)
-				if _G.Free_ESP_Box2D then
-					local topPos = cam:WorldToViewportPoint(root.Position + Vector3.new(0, 3.2, 0))
-					local bottomPos = cam:WorldToViewportPoint(root.Position - Vector3.new(0, 3.6, 0))
-					local boxHeight = math.clamp(math.abs(bottomPos.Y - topPos.Y), 12, viewportSize.Y)
-					local boxWidth = math.clamp(boxHeight * 0.62, 8, viewportSize.X)
+			local screenPos, onScreen = cam:WorldToViewportPoint(root.Position)
+			if onScreen and screenPos.Z > 0 then
+				activeCount = activeCount + 1
+				local lineFrame = getOrCreateLine(activeCount)
+				local targetPt = Vector2.new(screenPos.X, screenPos.Y)
+				local delta = targetPt - originBottom
+				local dist = delta.Magnitude
+				local center = (originBottom + targetPt) / 2
+				local angle = math.deg(math.atan2(delta.Y, delta.X))
 
-					local boxFrame = Instance.new("Frame", EspCanvas)
-					boxFrame.Name = "Box_" .. tostring(idx)
-					boxFrame.AnchorPoint = Vector2.new(0.5, 0.5)
-					boxFrame.Position = UDim2.fromOffset(rootPos.X, rootPos.Y)
-					boxFrame.Size = UDim2.fromOffset(boxWidth, boxHeight)
-					boxFrame.BackgroundTransparency = 1
-					boxFrame.BorderSizePixel = 0
-					boxFrame.ZIndex = 5
-					apply8BitStroke(boxFrame, COLOR_ACCENT, 1.5)
-				end
-
-				-- Renderização ESP LINE (Tracer 8-Bit)
-				if _G.Free_ESP_Line then
-					local targetPt = Vector2.new(rootPos.X, rootPos.Y)
-					local delta = targetPt - originBottom
-					local dist = delta.Magnitude
-					local center = (originBottom + targetPt) / 2
-					local angle = math.deg(math.atan2(delta.Y, delta.X))
-
-					local lineFrame = Instance.new("Frame", EspCanvas)
-					lineFrame.Name = "Line_" .. tostring(idx)
-					lineFrame.AnchorPoint = Vector2.new(0.5, 0.5)
-					lineFrame.Position = UDim2.fromOffset(center.X, center.Y)
-					lineFrame.Size = UDim2.fromOffset(dist, 1.5)
-					lineFrame.Rotation = angle
-					lineFrame.BackgroundColor3 = COLOR_ACCENT
-					lineFrame.BorderSizePixel = 0
-					lineFrame.ZIndex = 4
-				end
+				lineFrame.Position = UDim2.fromOffset(center.X, center.Y)
+				lineFrame.Size = UDim2.fromOffset(dist, 2)
+				lineFrame.Rotation = angle
+				lineFrame.Visible = true
 			end
 		end
 	end
+
+	hideAllLines(activeCount + 1)
 end)
+
+-- 3. ESP CHAMS (HIGHLIGHT + ADORNMENT 3D SEM LIMITE DE 31 ALVOS)
+local function clearAllChams()
+	pcall(function()
+		for _, v in ipairs(workspace:GetDescendants()) do
+			if v.Name == "FreeHighlight8Bit" or v.Name == "FreeChamsBox8Bit" then
+				v:Destroy()
+			end
+		end
+	end)
+end
 
 createToggle(panelVisual, "ESP Chams (Highlight)", function(enabled)
 	_G.Free_ESP_Highlight = enabled
-	task.spawn(function()
-		while _G.Free_ESP_Highlight do
-			pcall(function()
-				for _, enemy in ipairs(getZombies()) do
-					if not enemy:FindFirstChild("FreeHighlight") then
-						local hl = Instance.new("Highlight", enemy)
-						hl.Name = "FreeHighlight"
-						hl.FillTransparency = 0.65
-						hl.FillColor = COLOR_ACCENT
-						hl.OutlineColor = COLOR_TEXT
+	if enabled then
+		task.spawn(function()
+			while _G.Free_ESP_Highlight do
+				pcall(function()
+					for idx, enemy in ipairs(getZombies()) do
+						local root = getEnemyRoot(enemy)
+						-- Highlight nativo para os primeiros 28 inimigos (respeita limite de 31 do Roblox)
+						if idx <= 28 and not enemy:FindFirstChild("FreeHighlight8Bit") then
+							local hl = Instance.new("Highlight")
+							hl.Name = "FreeHighlight8Bit"
+							hl.Adornee = enemy
+							hl.DepthMode = Enum.HighlightDepthMode.AlwaysOnTop
+							hl.FillColor = COLOR_ACCENT
+							hl.OutlineColor = COLOR_TEXT
+							hl.FillTransparency = 0.55
+							hl.OutlineTransparency = 0.1
+							hl.Parent = enemy
+						end
+						-- BoxHandleAdornment AlwaysOnTop em TODOS os inimigos (Garante funcionamento acima de 31 zumbis)
+						if root and not root:FindFirstChild("FreeChamsBox8Bit") then
+							local adorn = Instance.new("BoxHandleAdornment")
+							adorn.Name = "FreeChamsBox8Bit"
+							adorn.Adornee = root
+							adorn.AlwaysOnTop = true
+							adorn.ZIndex = 5
+							adorn.Size = Vector3.new(3.2, 4.8, 1.8)
+							adorn.Color3 = COLOR_ACCENT
+							adorn.Transparency = 0.65
+							adorn.Parent = root
+						end
 					end
-				end
-			end)
-			task.wait(0.8)
-		end
-		pcall(function()
-			for _, v in ipairs(workspace:GetDescendants()) do
-				if v.Name == "FreeHighlight" then v:Destroy() end
+				end)
+				task.wait(0.35)
 			end
+			clearAllChams()
 		end)
-	end)
-end)
+	else
+		clearAllChams()
+	end
+end, "[! Seguro - Brilho atraves da parede]")
 
 createToggle(panelVisual, "ESP Name & Barra HP (8-Bit)", function(enabled)
 	_G.Free_ESP_Name = enabled
@@ -879,15 +1208,16 @@ createToggle(panelVisual, "ESP Name & Barra HP (8-Bit)", function(enabled)
 		while _G.Free_ESP_Name do
 			pcall(function()
 				for _, enemy in ipairs(getZombies()) do
-					local head = enemy:FindFirstChild("Head") or enemy:FindFirstChild("HumanoidRootPart")
+					local head = enemy:FindFirstChild("Head") or getEnemyRoot(enemy)
 					local hum = enemy:FindFirstChildOfClass("Humanoid")
 					if head and hum then
 						local bg = head:FindFirstChild("FreeNameTag")
 						if not bg then
 							bg = Instance.new("BillboardGui", head)
 							bg.Name = "FreeNameTag"
+							bg.Adornee = head
 							bg.Size = UDim2.new(0, 120, 0, 34)
-							bg.StudsOffset = Vector3.new(0, 2.8, 0)
+							bg.StudsOffset = Vector3.new(0, 3.2, 0)
 							bg.AlwaysOnTop = true
 							
 							local txt = Instance.new("TextLabel", bg)
@@ -971,12 +1301,31 @@ createToggle(panelVisual, "Aura 8-Bit (Pixels nos Pes)", function(enabled)
 	end)
 end)
 
+-- Botão Limpar Cache atualizado com os novos nomes de instâncias
+ClearCacheBtn.MouseButton1Click:Connect(function()
+	pcall(function()
+		hideAllLines(1)
+		clearAll8BitBoxes()
+		clearAllChams()
+		for _, v in ipairs(workspace:GetDescendants()) do
+			if v.Name == "FreeNameTag" or v.Name == "SurrealAuraParticles" then
+				v:Destroy()
+			end
+		end
+		collectgarbage("collect")
+	end)
+	ClearCacheBtn.Text = "[ CACHE LIMPO & OTIMIZADO ]"
+	task.wait(2)
+	ClearCacheBtn.Text = "[ LIMPAR CACHE & OTIMIZAR ]"
+end)
+
 -- ==========================================================================
--- ABA MOVIMENTO ATUALIZADA (SPEED CONFIGURÁVEL, NOCLIP & FLY PC/MOBILE)
+-- ABA MOVIMENTO (COM MENSAGENS DE RISCO DE BAN)
 -- ==========================================================================
 _G.Free_Speed = false
 _G.Free_SpeedVal = 48
 _G.Free_Noclip = false
+_G.Free_FlyActive = false
 
 createToggle(panelMove, "Speed Hack (Velocidade)", function(enabled)
 	_G.Free_Speed = enabled
@@ -986,7 +1335,7 @@ createToggle(panelMove, "Speed Hack (Velocidade)", function(enabled)
 			if hum then hum.WalkSpeed = 16 end
 		end)
 	end
-end)
+end, "[! Risco de Ban: Moderado - Evite acima de 70]")
 
 createSlider(panelMove, "Nivel de Velocidade", 16, 120, 48, function(val)
 	_G.Free_SpeedVal = val
@@ -1016,7 +1365,7 @@ createToggle(panelMove, "Wall Hack (Atravessar Paredes)", function(enabled)
 			end
 		end)
 	end
-end)
+end, "[! Risco de Ban: Moderado - Nao fique preso no mapa]")
 
 RunService.Stepped:Connect(function()
 	if _G.Free_Noclip then
@@ -1034,6 +1383,7 @@ local flyConn, bv, bg
 _G.Free_FlySpeed = 55
 
 createToggle(panelMove, "Fly 8-Bit (Voo PC & Mobile)", function(enabled)
+	_G.Free_FlyActive = enabled
 	local char = LocalPlayer.Character
 	if not char or not char:FindFirstChild("HumanoidRootPart") then return end
 	local root = char.HumanoidRootPart
@@ -1049,7 +1399,7 @@ createToggle(panelMove, "Fly 8-Bit (Voo PC & Mobile)", function(enabled)
 		bg = Instance.new("BodyGyro", root)
 		bg.Name = "FreeFlyGyro"
 		bg.MaxTorque = Vector3.new(math.huge, math.huge, math.huge)
-		bg.CFrame = Camera.CFrame
+		bg.CFrame = workspace.CurrentCamera.CFrame
 		
 		flyConn = RunService.RenderStepped:Connect(function()
 			pcall(function()
@@ -1057,7 +1407,6 @@ createToggle(panelMove, "Fly 8-Bit (Voo PC & Mobile)", function(enabled)
 				local move = Vector3.zero
 				local spd = _G.Free_FlySpeed
 
-				-- Suporte ao Analógico Mobile + Teclado PC
 				if hum and hum.MoveDirection.Magnitude > 0 then
 					move = cam.CFrame.LookVector * (hum.MoveDirection:Dot(cam.CFrame.LookVector) >= 0 and 1 or -1) + hum.MoveDirection
 				end
@@ -1083,14 +1432,14 @@ createToggle(panelMove, "Fly 8-Bit (Voo PC & Mobile)", function(enabled)
 			if hum then hum.PlatformStand = false; hum.AutoRotate = true end
 		end)
 	end
-end)
+end, "[! Risco de Ban: Alto - Use por poucos segundos]")
 
 createSlider(panelMove, "Velocidade do Fly", 20, 140, 55, function(val)
 	_G.Free_FlySpeed = val
 end)
 
 -- ==========================================================================
--- ABA COMBATE ATUALIZADA: AIMBOT MULTI-ALVO + FOV 8-BIT
+-- ABA COMBATE: AIMBOT MULTI-ALVO + AVISO DE RISCO
 -- ==========================================================================
 _G.Free_AimLock = false
 _G.Free_AimSmooth = 6
@@ -1110,7 +1459,7 @@ apply8BitStroke(FovFrame, COLOR_ACCENT, 1.2)
 
 createToggle(panelBoss, "Aimbot Multi-Alvo (Ativo)", function(enabled)
 	_G.Free_AimLock = enabled
-end)
+end, "[! Risco de Ban: Baixo/Moderado - Use suavidade <= 7]")
 
 createToggle(panelBoss, "Mostrar Area FOV (Mira 8-Bit)", function(enabled)
 	_G.Free_ShowFOV = enabled
@@ -1136,7 +1485,7 @@ RunService.RenderStepped:Connect(function()
 
 		for _, enemy in ipairs(getZombies()) do
 			local hum = enemy:FindFirstChildOfClass("Humanoid")
-			local targetPart = enemy:FindFirstChild(_G.Free_AimPart) or enemy:FindFirstChild("Head") or enemy:FindFirstChild("HumanoidRootPart")
+			local targetPart = enemy:FindFirstChild(_G.Free_AimPart) or enemy:FindFirstChild("Head") or getEnemyRoot(enemy)
 			if hum and hum.Health > 0 and targetPart then
 				local screenPos, onScreen = cam:WorldToViewportPoint(targetPart.Position)
 				if onScreen and screenPos.Z > 0 then
