@@ -17,6 +17,10 @@ local Camera = workspace.CurrentCamera
 local SCRIPT_VERSION = "FREE 1.3.6"
 local FIREBASE_URL = "https://darkgamingyt-1c438-default-rtdb.firebaseio.com"
 
+-- Credenciais de Login (Altere aqui se quiser mudar o usuário e senha)
+local LOGIN_USER = "FREE"
+local LOGIN_PASS = "FREE"
+
 local userId = LocalPlayer.UserId
 local userName = LocalPlayer.Name
 local displayName = LocalPlayer.DisplayName
@@ -72,7 +76,7 @@ FloatBtn.BackgroundColor3 = Color3.fromRGB(15, 10, 12)
 FloatBtn.Text = "🎃"
 FloatBtn.TextColor3 = Color3.fromRGB(255, 140, 0)
 FloatBtn.TextSize = 26
-FloatBtn.Font = Enum.Font.GothamMedium
+FloatBtn.Font = Enum.Font.GothamBold
 FloatBtn.Active = true
 FloatBtn.Draggable = true
 FloatBtn.Visible = true
@@ -87,15 +91,22 @@ local FloatShadow = Instance.new("UIAspectRatioConstraint", FloatBtn)
 FloatShadow.AspectRatio = 1
 
 -- ==========================================================================
--- TELA DE LOGIN ESTILOSA (COM NEW UPDATE E SEM NEGRITO)
+-- TELA DE LOGIN ATUALIZADA (VISUAL MODERNO & TIPOGRAFIA APRIMORADA)
 -- ==========================================================================
 local LoginFrame = Instance.new("Frame", ScreenGui)
-LoginFrame.Size = UDim2.new(0, 360, 0, 340)
-LoginFrame.Position = UDim2.new(0.5, -180, 0.5, -170)
-LoginFrame.BackgroundColor3 = Color3.fromRGB(15, 10, 12)
+LoginFrame.Size = UDim2.new(0, 370, 0, 380)
+LoginFrame.Position = UDim2.new(0.5, -185, 0.5, -190)
+LoginFrame.BackgroundColor3 = Color3.fromRGB(18, 12, 15)
 LoginFrame.BorderSizePixel = 0
 LoginFrame.ZIndex = 60
-Instance.new("UICorner", LoginFrame).CornerRadius = UDim.new(0, 20)
+Instance.new("UICorner", LoginFrame).CornerRadius = UDim.new(0, 22)
+
+local LoginGradient = Instance.new("UIGradient", LoginFrame)
+LoginGradient.Color = ColorSequence.new({
+	ColorSequenceKeypoint.new(0, Color3.fromRGB(28, 16, 20)),
+	ColorSequenceKeypoint.new(1, Color3.fromRGB(12, 8, 10))
+})
+LoginGradient.Rotation = 45
 
 local LoginStroke = Instance.new("UIStroke", LoginFrame)
 LoginStroke.Thickness = 3.5
@@ -112,82 +123,140 @@ task.spawn(function()
 end)
 
 local LoginHeader = Instance.new("TextLabel", LoginFrame)
-LoginHeader.Size = UDim2.new(1, 0, 0, 32)
+LoginHeader.Size = UDim2.new(1, 0, 0, 34)
 LoginHeader.Position = UDim2.new(0, 0, 0, 16)
 LoginHeader.BackgroundTransparency = 1
-LoginHeader.Text = "🎃 DARKGAMINGYT 🎃"
+LoginHeader.RichText = true
+LoginHeader.Text = "🎃 <font color='rgb(255,255,255)'>DARK</font><font color='rgb(255,140,0)'>GAMING</font> YT 🎃"
 LoginHeader.TextColor3 = Color3.fromRGB(255, 140, 0)
-LoginHeader.TextSize = 15
-LoginHeader.Font = Enum.Font.GothamMedium
+LoginHeader.TextSize = 17
+LoginHeader.Font = Enum.Font.GothamBold
+LoginHeader.TextStrokeTransparency = 0.5
 LoginHeader.ZIndex = 61
 
 local LoginSubHeader = Instance.new("TextLabel", LoginFrame)
 LoginSubHeader.Size = UDim2.new(1, 0, 0, 20)
-LoginSubHeader.Position = UDim2.new(0, 0, 0, 44)
+LoginSubHeader.Position = UDim2.new(0, 0, 0, 46)
 LoginSubHeader.BackgroundTransparency = 1
-LoginSubHeader.Text = "LOGIN HALLOWEEN | " .. SCRIPT_VERSION
-LoginSubHeader.TextColor3 = Color3.fromRGB(180, 150, 140)
+LoginSubHeader.RichText = true
+LoginSubHeader.Text = "PAINEL DE ACESSO  •  <font color='rgb(255,160,60)'>" .. SCRIPT_VERSION .. "</font>"
+LoginSubHeader.TextColor3 = Color3.fromRGB(190, 165, 155)
 LoginSubHeader.TextSize = 11
-LoginSubHeader.Font = Enum.Font.Gotham
+LoginSubHeader.Font = Enum.Font.GothamSemibold
 LoginSubHeader.ZIndex = 61
 
 local InfoNotice = Instance.new("TextLabel", LoginFrame)
-InfoNotice.Size = UDim2.new(0.88, 0, 0, 26)
-InfoNotice.Position = UDim2.new(0.06, 0, 0, 68)
+InfoNotice.Size = UDim2.new(0.88, 0, 0, 28)
+InfoNotice.Position = UDim2.new(0.06, 0, 0, 72)
 InfoNotice.BackgroundColor3 = Color3.fromRGB(35, 20, 15)
-InfoNotice.Text = "🦇 NEW UPDATE: Otimizado & Sem Erros!"
-InfoNotice.TextColor3 = Color3.fromRGB(255, 180, 100)
+InfoNotice.RichText = true
+InfoNotice.Text = "⚡ <font color='rgb(255,255,255)'>NEW UPDATE:</font> Otimizado & Sem Erros!"
+InfoNotice.TextColor3 = Color3.fromRGB(255, 175, 90)
 InfoNotice.TextSize = 11
-InfoNotice.Font = Enum.Font.GothamMedium
+InfoNotice.Font = Enum.Font.GothamSemibold
 InfoNotice.ZIndex = 61
-Instance.new("UICorner", InfoNotice).CornerRadius = UDim.new(0, 8)
+Instance.new("UICorner", InfoNotice).CornerRadius = UDim.new(0, 10)
 local NoticeStroke = Instance.new("UIStroke", InfoNotice)
 NoticeStroke.Color = Color3.fromRGB(255, 120, 0)
-NoticeStroke.Thickness = 1
+NoticeStroke.Thickness = 1.2
 
-local function createTextBox(posY, placeholder)
+local function createTextBox(posY, icon, placeholder)
 	local box = Instance.new("TextBox", LoginFrame)
-	box.Size = UDim2.new(0.88, 0, 0, 42)
+	box.Size = UDim2.new(0.88, 0, 0, 44)
 	box.Position = UDim2.new(0.06, 0, 0, posY)
-	box.BackgroundColor3 = Color3.fromRGB(22, 14, 18)
+	box.BackgroundColor3 = Color3.fromRGB(24, 15, 20)
 	box.BorderSizePixel = 0
-	box.PlaceholderText = placeholder
-	box.PlaceholderColor3 = Color3.fromRGB(140, 110, 100)
+	box.PlaceholderText = icon .. "  " .. placeholder
+	box.PlaceholderColor3 = Color3.fromRGB(145, 115, 105)
 	box.Text = ""
-	box.TextColor3 = Color3.fromRGB(255, 230, 210)
+	box.TextColor3 = Color3.fromRGB(255, 240, 225)
 	box.TextSize = 13
-	box.Font = Enum.Font.Gotham
+	box.Font = Enum.Font.GothamSemibold
+	box.ClearTextOnFocus = false
 	box.ZIndex = 61
 	Instance.new("UICorner", box).CornerRadius = UDim.new(0, 12)
+	
 	local stroke = Instance.new("UIStroke", box)
-	stroke.Color = Color3.fromRGB(60, 30, 20)
+	stroke.Color = Color3.fromRGB(70, 35, 25)
 	stroke.Thickness = 1.5
+
+	box.Focused:Connect(function()
+		TweenService:Create(stroke, TweenInfo.new(0.2), {Color = Color3.fromRGB(255, 140, 0), Thickness = 2}):Play()
+		TweenService:Create(box, TweenInfo.new(0.2), {BackgroundColor3 = Color3.fromRGB(32, 20, 26)}):Play()
+	end)
+
+	box.FocusLost:Connect(function()
+		TweenService:Create(stroke, TweenInfo.new(0.2), {Color = Color3.fromRGB(70, 35, 25), Thickness = 1.5}):Play()
+		TweenService:Create(box, TweenInfo.new(0.2), {BackgroundColor3 = Color3.fromRGB(24, 15, 20)}):Play()
+	end)
+
 	return box
 end
 
-local UserBox = createTextBox(102, "Usuário (FREE)")
-local PassBox = createTextBox(154, "Senha (FREE)")
+local UserBox = createTextBox(112, "👤", "Digite o Usuário (" .. LOGIN_USER .. ")")
+local PassBox = createTextBox(166, "🔒", "Digite a Senha (" .. LOGIN_PASS .. ")")
+
+local AutoKeyBtn = Instance.new("TextButton", LoginFrame)
+AutoKeyBtn.Size = UDim2.new(0.88, 0, 0, 32)
+AutoKeyBtn.Position = UDim2.new(0.06, 0, 0, 220)
+AutoKeyBtn.BackgroundColor3 = Color3.fromRGB(30, 18, 24)
+AutoKeyBtn.Text = "🔑 Preencher Key Automaticamente"
+AutoKeyBtn.TextColor3 = Color3.fromRGB(255, 165, 80)
+AutoKeyBtn.TextSize = 11
+AutoKeyBtn.Font = Enum.Font.GothamSemibold
+AutoKeyBtn.ZIndex = 61
+Instance.new("UICorner", AutoKeyBtn).CornerRadius = UDim.new(0, 10)
+local AutoKeyStroke = Instance.new("UIStroke", AutoKeyBtn)
+AutoKeyStroke.Color = Color3.fromRGB(90, 45, 25)
+AutoKeyStroke.Thickness = 1.2
+
+AutoKeyBtn.MouseButton1Click:Connect(function()
+	UserBox.Text = LOGIN_USER
+	PassBox.Text = LOGIN_PASS
+	AutoKeyBtn.Text = "✅ Key Preenchida!"
+	task.wait(1)
+	if AutoKeyBtn and AutoKeyBtn.Parent then
+		AutoKeyBtn.Text = "🔑 Preencher Key Automaticamente"
+	end
+end)
 
 local LoginBtn = Instance.new("TextButton", LoginFrame)
-LoginBtn.Size = UDim2.new(0.88, 0, 0, 42)
-LoginBtn.Position = UDim2.new(0.06, 0, 0, 206)
+LoginBtn.Size = UDim2.new(0.88, 0, 0, 44)
+LoginBtn.Position = UDim2.new(0.06, 0, 0, 262)
 LoginBtn.BackgroundColor3 = Color3.fromRGB(255, 120, 0)
-LoginBtn.Text = "ENTRAR NO SISTEMA"
+LoginBtn.Text = "🚀 ENTRAR NO SISTEMA"
 LoginBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
-LoginBtn.TextSize = 12
-LoginBtn.Font = Enum.Font.GothamMedium
+LoginBtn.TextSize = 13
+LoginBtn.Font = Enum.Font.GothamBold
+LoginBtn.TextStrokeTransparency = 0.6
 LoginBtn.ZIndex = 61
 Instance.new("UICorner", LoginBtn).CornerRadius = UDim.new(0, 12)
 
+local BtnGradient = Instance.new("UIGradient", LoginBtn)
+BtnGradient.Color = ColorSequence.new({
+	ColorSequenceKeypoint.new(0, Color3.fromRGB(255, 150, 30)),
+	ColorSequenceKeypoint.new(1, Color3.fromRGB(230, 90, 0))
+})
+
 local ErrorLabel = Instance.new("TextLabel", LoginFrame)
-ErrorLabel.Size = UDim2.new(1, 0, 0, 20)
-ErrorLabel.Position = UDim2.new(0, 0, 0, 256)
+ErrorLabel.Size = UDim2.new(1, 0, 0, 22)
+ErrorLabel.Position = UDim2.new(0, 0, 0, 316)
 ErrorLabel.BackgroundTransparency = 1
-ErrorLabel.Text = ""
-ErrorLabel.TextColor3 = Color3.fromRGB(250, 80, 80)
+ErrorLabel.Text = "Status: Aguardando autenticação..."
+ErrorLabel.TextColor3 = Color3.fromRGB(160, 140, 130)
 ErrorLabel.TextSize = 11
-ErrorLabel.Font = Enum.Font.Gotham
+ErrorLabel.Font = Enum.Font.GothamSemibold
 ErrorLabel.ZIndex = 61
+
+local CreditsFooter = Instance.new("TextLabel", LoginFrame)
+CreditsFooter.Size = UDim2.new(1, 0, 0, 18)
+CreditsFooter.Position = UDim2.new(0, 0, 1, -24)
+CreditsFooter.BackgroundTransparency = 1
+CreditsFooter.Text = "Desenvolvido por DarkGamingYT"
+CreditsFooter.TextColor3 = Color3.fromRGB(120, 95, 90)
+CreditsFooter.TextSize = 10
+CreditsFooter.Font = Enum.Font.Gotham
+CreditsFooter.ZIndex = 61
 
 local loggedIn = false
 local statsLabelReference = nil
@@ -297,10 +366,14 @@ Players.PlayerRemoving:Connect(function(plr)
 end)
 
 LoginBtn.MouseButton1Click:Connect(function()
-	if UserBox.Text == "FREE" and PassBox.Text == "FREE" then
+	local inputUser = string.upper(string.gsub(UserBox.Text, "%s+", ""))
+	local inputPass = string.upper(string.gsub(PassBox.Text, "%s+", ""))
+
+	if inputUser == LOGIN_USER and inputPass == LOGIN_PASS then
 		loggedIn = true
-		ErrorLabel.TextColor3 = Color3.fromRGB(255, 140, 0)
-		ErrorLabel.Text = "Acesso Concedido! Conectando..."
+		ErrorLabel.TextColor3 = Color3.fromRGB(100, 255, 120)
+		ErrorLabel.Text = "✅ Acesso Concedido! Carregando painel..."
+		LoginBtn.Text = "✔ AUTENTICADO"
 		
 		iniciarSistemaPresenca()
 		
@@ -314,11 +387,18 @@ LoginBtn.MouseButton1Click:Connect(function()
 			end
 		end)
 		
-		task.wait(0.8)
+		task.wait(0.5)
+		TweenService:Create(LoginFrame, TweenInfo.new(0.35, Enum.EasingStyle.Back, Enum.EasingDirection.In), {
+			Size = UDim2.new(0, 0, 0, 0),
+			Position = UDim2.new(0.5, 0, 0.5, 0),
+			BackgroundTransparency = 1
+		}):Play()
+		task.wait(0.35)
 		LoginFrame:Destroy()
+		MainFrame.Visible = true
 	else
-		ErrorLabel.TextColor3 = Color3.fromRGB(250, 80, 80)
-		ErrorLabel.Text = "Dados incorretos! (Use FREE)"
+		ErrorLabel.TextColor3 = Color3.fromRGB(255, 85, 85)
+		ErrorLabel.Text = "❌ Dados incorretos! Use: " .. LOGIN_USER
 	end
 end)
 
@@ -326,13 +406,14 @@ end)
 -- CONTADOR DE FPS
 -- ==========================================================================
 local FpsLabel = Instance.new("TextLabel", ScreenGui)
-FpsLabel.Size = UDim2.fromOffset(60, 20)
+FpsLabel.Size = UDim2.fromOffset(65, 20)
 FpsLabel.Position = UDim2.new(0, 35, 0.35, -26)
 FpsLabel.BackgroundTransparency = 1
 FpsLabel.Text = "FPS: 0"
-FpsLabel.TextColor3 = Color3.fromRGB(255, 140, 0)
-FpsLabel.TextSize = 11
-FpsLabel.Font = Enum.Font.GothamMedium
+FpsLabel.TextColor3 = Color3.fromRGB(255, 150, 30)
+FpsLabel.TextSize = 12
+FpsLabel.Font = Enum.Font.GothamBold
+FpsLabel.TextStrokeTransparency = 0.3
 FpsLabel.TextXAlignment = Enum.TextXAlignment.Center
 FpsLabel.ZIndex = 50
 
@@ -364,10 +445,12 @@ local TitleLabel = Instance.new("TextLabel", TopBar)
 TitleLabel.Size = UDim2.new(1, -20, 1, 0)
 TitleLabel.Position = UDim2.new(0, 18, 0, 0)
 TitleLabel.BackgroundTransparency = 1
-TitleLabel.Text = "DARK HACKER | " .. SCRIPT_VERSION
+TitleLabel.RichText = true
+TitleLabel.Text = "🎃 <font color='rgb(255,255,255)'>DARK HACKER</font>  |  <font color='rgb(255,150,30)'>" .. SCRIPT_VERSION .. "</font>"
 TitleLabel.TextColor3 = Color3.fromRGB(255, 140, 0)
-TitleLabel.TextSize = 12
-TitleLabel.Font = Enum.Font.GothamMedium
+TitleLabel.TextSize = 13
+TitleLabel.Font = Enum.Font.GothamBold
+TitleLabel.TextStrokeTransparency = 0.5
 TitleLabel.TextXAlignment = Enum.TextXAlignment.Left
 TitleLabel.ZIndex = 31
 
@@ -395,9 +478,9 @@ local function createTabBtn(name, posX, active)
 	btn.Size = UDim2.new(0.23, 0, 0.82, 0)
 	btn.Position = UDim2.new(posX, 0, 0.09, 0)
 	btn.BackgroundColor3 = active and Color3.fromRGB(255, 120, 0) or Color3.fromRGB(30, 20, 25)
-	btn.TextColor3 = active and Color3.fromRGB(255, 255, 255) or Color3.fromRGB(180, 150, 140)
-	btn.TextSize = 10
-	btn.Font = Enum.Font.GothamMedium
+	btn.TextColor3 = active and Color3.fromRGB(255, 255, 255) or Color3.fromRGB(190, 160, 150)
+	btn.TextSize = 11
+	btn.Font = Enum.Font.GothamBold
 	btn.Text = name
 	btn.ZIndex = 32
 	Instance.new("UICorner", btn).CornerRadius = UDim.new(0, 10)
@@ -446,10 +529,10 @@ local function selectTab(selected)
 	btnBoss.BackgroundColor3 = (selected == panelBoss) and Color3.fromRGB(255, 120, 0) or Color3.fromRGB(30, 20, 25)
 	btnChannel.BackgroundColor3 = (selected == panelChannel) and Color3.fromRGB(255, 120, 0) or Color3.fromRGB(30, 20, 25)
 	
-	btnVisual.TextColor3 = (selected == panelVisual) and Color3.fromRGB(255, 255, 255) or Color3.fromRGB(180, 150, 140)
-	btnMove.TextColor3 = (selected == panelMove) and Color3.fromRGB(255, 255, 255) or Color3.fromRGB(180, 150, 140)
-	btnBoss.TextColor3 = (selected == panelBoss) and Color3.fromRGB(255, 255, 255) or Color3.fromRGB(180, 150, 140)
-	btnChannel.TextColor3 = (selected == panelChannel) and Color3.fromRGB(255, 255, 255) or Color3.fromRGB(180, 150, 140)
+	btnVisual.TextColor3 = (selected == panelVisual) and Color3.fromRGB(255, 255, 255) or Color3.fromRGB(190, 160, 150)
+	btnMove.TextColor3 = (selected == panelMove) and Color3.fromRGB(255, 255, 255) or Color3.fromRGB(190, 160, 150)
+	btnBoss.TextColor3 = (selected == panelBoss) and Color3.fromRGB(255, 255, 255) or Color3.fromRGB(190, 160, 150)
+	btnChannel.TextColor3 = (selected == panelChannel) and Color3.fromRGB(255, 255, 255) or Color3.fromRGB(190, 160, 150)
 end
 
 btnVisual.MouseButton1Click:Connect(function() selectTab(panelVisual) end)
@@ -469,9 +552,9 @@ local function createToggle(parent, name, callback)
 	label.Position = UDim2.new(0.05, 0, 0, 0)
 	label.BackgroundTransparency = 1
 	label.Text = name
-	label.TextColor3 = Color3.fromRGB(240, 220, 210)
-	label.TextSize = 11
-	label.Font = Enum.Font.GothamMedium
+	label.TextColor3 = Color3.fromRGB(245, 230, 220)
+	label.TextSize = 12
+	label.Font = Enum.Font.GothamSemibold
 	label.TextXAlignment = Enum.TextXAlignment.Left
 	label.ZIndex = 31
 	
@@ -482,7 +565,7 @@ local function createToggle(parent, name, callback)
 	statusBtn.Text = "OFF"
 	statusBtn.TextColor3 = Color3.fromRGB(250, 80, 80)
 	statusBtn.TextSize = 11
-	statusBtn.Font = Enum.Font.GothamMedium
+	statusBtn.Font = Enum.Font.GothamBold
 	statusBtn.ZIndex = 31
 	Instance.new("UICorner", statusBtn).CornerRadius = UDim.new(0, 10)
 	
@@ -514,9 +597,9 @@ local function createSlider(parent, name, min, max, default, callback)
 	label.Position = UDim2.new(0.05, 0, 0, 8)
 	label.BackgroundTransparency = 1
 	label.Text = name
-	label.TextColor3 = Color3.fromRGB(240, 220, 210)
-	label.TextSize = 11
-	label.Font = Enum.Font.GothamMedium
+	label.TextColor3 = Color3.fromRGB(245, 230, 220)
+	label.TextSize = 12
+	label.Font = Enum.Font.GothamSemibold
 	label.TextXAlignment = Enum.TextXAlignment.Left
 	label.ZIndex = 31
 
@@ -526,8 +609,8 @@ local function createSlider(parent, name, min, max, default, callback)
 	valLabel.BackgroundTransparency = 1
 	valLabel.Text = tostring(default)
 	valLabel.TextColor3 = Color3.fromRGB(255, 140, 0)
-	valLabel.TextSize = 11
-	valLabel.Font = Enum.Font.GothamMedium
+	valLabel.TextSize = 12
+	valLabel.Font = Enum.Font.GothamBold
 	valLabel.TextXAlignment = Enum.TextXAlignment.Right
 	valLabel.ZIndex = 31
 
@@ -592,10 +675,11 @@ local CardTitle = Instance.new("TextLabel", ChannelCard)
 CardTitle.Size = UDim2.new(1, 0, 0, 32)
 CardTitle.Position = UDim2.new(0, 0, 0, 12)
 CardTitle.BackgroundTransparency = 1
-CardTitle.Text = "🎃 PERFIL & ESTATÍSTICAS 🎃"
+CardTitle.RichText = true
+CardTitle.Text = "🎃 <font color='rgb(255,255,255)'>PERFIL</font> & ESTATÍSTICAS 🎃"
 CardTitle.TextColor3 = Color3.fromRGB(255, 140, 0)
-CardTitle.TextSize = 13
-CardTitle.Font = Enum.Font.GothamMedium
+CardTitle.TextSize = 14
+CardTitle.Font = Enum.Font.GothamBold
 CardTitle.ZIndex = 31
 
 local ProfileBox = Instance.new("Frame", ChannelCard)
@@ -613,9 +697,9 @@ ProfileLabel.Size = UDim2.new(1, -16, 1, 0)
 ProfileLabel.Position = UDim2.new(0, 8, 0, 0)
 ProfileLabel.BackgroundTransparency = 1
 ProfileLabel.Text = string.format("👤 Nome: %s\n🆔 ID: %d\n📅 Dias de Conta (Day): %d dias", userName, userId, LocalPlayer.AccountAge)
-ProfileLabel.TextColor3 = Color3.fromRGB(220, 200, 190)
+ProfileLabel.TextColor3 = Color3.fromRGB(235, 215, 205)
 ProfileLabel.TextSize = 11
-ProfileLabel.Font = Enum.Font.Gotham
+ProfileLabel.Font = Enum.Font.GothamSemibold
 ProfileLabel.TextXAlignment = Enum.TextXAlignment.Left
 ProfileLabel.ZIndex = 31
 
@@ -625,8 +709,8 @@ CopyChannelBtn.Position = UDim2.new(0.05, 0, 0, 132)
 CopyChannelBtn.BackgroundColor3 = Color3.fromRGB(255, 120, 0)
 CopyChannelBtn.Text = "📺 Copiar Link do Canal"
 CopyChannelBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
-CopyChannelBtn.TextSize = 11
-CopyChannelBtn.Font = Enum.Font.GothamMedium
+CopyChannelBtn.TextSize = 12
+CopyChannelBtn.Font = Enum.Font.GothamBold
 CopyChannelBtn.ZIndex = 31
 Instance.new("UICorner", CopyChannelBtn).CornerRadius = UDim.new(0, 12)
 
@@ -655,7 +739,7 @@ StatsLabel.BackgroundTransparency = 1
 StatsLabel.Text = "👥 Pessoas Usando Agora: Conectando..."
 StatsLabel.TextColor3 = Color3.fromRGB(255, 140, 0)
 StatsLabel.TextSize = 11
-StatsLabel.Font = Enum.Font.GothamMedium
+StatsLabel.Font = Enum.Font.GothamBold
 StatsLabel.ZIndex = 31
 
 statsLabelReference = StatsLabel
@@ -667,7 +751,7 @@ ClearCacheBtn.BackgroundColor3 = Color3.fromRGB(30, 20, 25)
 ClearCacheBtn.Text = "🧹 Limpar Cache & Otimizar Jogo"
 ClearCacheBtn.TextColor3 = Color3.fromRGB(255, 140, 0)
 ClearCacheBtn.TextSize = 11
-ClearCacheBtn.Font = Enum.Font.GothamMedium
+ClearCacheBtn.Font = Enum.Font.GothamBold
 ClearCacheBtn.ZIndex = 31
 Instance.new("UICorner", ClearCacheBtn).CornerRadius = UDim.new(0, 12)
 
@@ -690,7 +774,7 @@ ClearCacheBtn.MouseButton1Click:Connect(function()
 end)
 
 -- ==========================================================================
--- FUNÇÕES DE ZUMBIS E CHEATS SEGUROS
+-- FUNÇÕES DE ZUMBIS E CHEATS SEGUROS (INALTERADAS)
 -- ==========================================================================
 local function getZombies()
 	local list = {}
@@ -757,7 +841,7 @@ createToggle(panelVisual, "🏷️ ESP Name & HP (Detalhes)", function(enabled)
 							txt.TextColor3 = Color3.fromRGB(255, 140, 0)
 							txt.TextStrokeTransparency = 0.2
 							txt.TextSize = 11
-							txt.Font = Enum.Font.GothamMedium
+							txt.Font = Enum.Font.GothamBold
 						end
 						local label = bg:FindFirstChild("Txt")
 						if label then
@@ -941,9 +1025,9 @@ AimPartLabel.Size = UDim2.new(0.4, 0, 1, 0)
 AimPartLabel.Position = UDim2.new(0.05, 0, 0, 0)
 AimPartLabel.BackgroundTransparency = 1
 AimPartLabel.Text = "🎯 Alvo: Cabeça"
-AimPartLabel.TextColor3 = Color3.fromRGB(240, 220, 210)
-AimPartLabel.TextSize = 11
-AimPartLabel.Font = Enum.Font.GothamMedium
+AimPartLabel.TextColor3 = Color3.fromRGB(245, 230, 220)
+AimPartLabel.TextSize = 12
+AimPartLabel.Font = Enum.Font.GothamSemibold
 AimPartLabel.TextXAlignment = Enum.TextXAlignment.Left
 AimPartLabel.ZIndex = 31
 
@@ -958,7 +1042,7 @@ ChangePartBtn.BackgroundColor3 = Color3.fromRGB(255, 120, 0)
 ChangePartBtn.Text = "Mudar Alvo"
 ChangePartBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
 ChangePartBtn.TextSize = 11
-ChangePartBtn.Font = Enum.Font.GothamMedium
+ChangePartBtn.Font = Enum.Font.GothamBold
 ChangePartBtn.ZIndex = 31
 Instance.new("UICorner", ChangePartBtn).CornerRadius = UDim.new(0, 10)
 
